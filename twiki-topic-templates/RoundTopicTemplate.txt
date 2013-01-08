@@ -1,0 +1,15 @@
+<!--
+   * Set PB_REL = /puzzlebitch
+-->
+
+---+ [[%URLPARAM{"roundgoogleurl"}%][%URLPARAM{"prname"}%]] 
+
+---++ List of Puzzles
+<noautolink><A HREF="%URLPARAM{"roundgoogleurl"}%" TARGET="google_%URLPARAM{"prname"}%">Google Docs folder for !%URLPARAM{"prname"}% round</A> </noautolink>
+
+<!-- BEGIN_PUZZLE_LIST -->
+<!-- END_PUZZLE_LIST -->
+
+---++ Description of Round
+
+

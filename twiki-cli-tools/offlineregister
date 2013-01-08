@@ -1,0 +1,233 @@
+#!/usr/bin/perl -w
+
+
+use strict;
+use warnings;
+
+my $DEBUG = 0;
+
+BEGIN {
+    $TWiki::cfg{Engine} = 'TWiki::Engine::CLI';
+    require Carp;
+    $SIG{__DIE__} = \&Carp::confess;
+    $ENV{TWIKI_ACTION} = 'offlineregister';
+    @INC = ('.', grep { $_ ne '.' } @INC);
+    require 'setlib.cfg';
+}
+
+use TWiki;
+use TWiki::UI;
+
+
+my $username =shift;
+my $firstname = shift;
+my $lastname = shift;
+my $email = shift;
+my $password = shift;
+
+
+my $agent = 'TWikiRegistrationAgent';
+
+# Keys from the user data that should *not* be included in
+# the user topic.
+my %SKIPKEYS = (
+    'Photo' => 1,
+    'WikiName' => 1,
+    'LoginName' => 1,
+    'Password' => 1,
+   );
+#    'Email' => 1
+
+my $b1 = "\t* ";
+my $b2 ="\t$b1";
+
+
+my $req = $TWiki::engine->prepare();
+
+my %context;
+$context{command_line} = 1;
+
+my $session = new TWiki( $req->remoteUser, $req, \%context );
+
+
+my $topic = $session->{topicName};
+my $web = $session->{webName};
+my $query = $session->{request};
+my $code = $query->param('code');
+
+#$query->param('LoginName', $username);
+$query->param('Twk1WikiName', $username);
+$query->param('Twk1FirstName', $firstname);
+$query->param('Twk1LastName', $lastname);
+$query->param('Twk1Email', $email);
+$query->param('Twk0Password', $password);
+$query->param('Twk0Confirm', $password);
+
+my $data = _getDataFromQuery( $query, $query->param() );
+
+#$data->{webName} = $web;
+$data->{LoginName} = $username;
+#$data->{WikiName} = $username;
+#$data->{Password} = $password;
+
+my $users = $session->{users};
+#try {
+my $cUID = $users->addUser( $data->{LoginName}, $data->{WikiName},
+			    $data->{Password}, $data->{Email} );
+my $log = _createUserTopic($session, $data);
+$users->setEmails($cUID, $data->{Email});
+print $log;
+exit(0);
+
+sub _getDataFromQuery {
+    my $query = shift;
+    # get all parameters from the form
+    my $data = {};
+
+    foreach( $query->param() ) {
+        if (/^(Twk)([0-9])(.*)/) {
+            my $form = {};
+            $form->{required} = $2;
+            my $name = $3;
+            my @values = $query->param($1.$2.$3);
+            my $value = join(',', @values); #deal with multivalue fields like checkboxen
+            $form->{name} = $name;
+            $form->{value} = $value;
+            if ( $name eq 'Password' ) {
+                #TODO: get rid of this; move to removals and generalise.
+                $data->{passwordA} = $value;
+            } elsif ( $name eq 'Confirm' ) {
+                $data->{passwordB} = $value;
+            }
+
+            # 'WikiName' omitted because they can't
+            # change it, and 'Confirm' is a duplicate
+            push( @{$data->{form}}, $form )
+              unless ($name eq 'WikiName' || $name eq 'Confirm');
+
+            #TODO: need to change this to be untainting the data correctly
+            #      for eg, for {Emails} only accept real email addresses.
+            $data->{$name} = TWiki::Sandbox::untaintUnchecked($value);
+        }
+    }
+    $data->{WikiName} = TWiki::Sandbox::untaintUnchecked($data->{WikiName});
+    if( !$data->{Name} &&
+          defined $data->{FirstName} && defined $data->{LastName}) {
+        $data->{Name} = $data->{FirstName}.' '.$data->{LastName};
+    }
+    return $data;
+}
+
+#Given a template and a hash, creates a new topic for a user
+#   1 reads the template topic
+#   2 calls RegistrationHandler::register with the row details, so that a plugin can augment/delete/change the entries
+#
+#I use RegistrationHandler::register to prevent certain fields (like password) 
+#appearing in the homepage and to fetch photos into the topic
+sub _createUserTopic {
+    my ($session, $row) = @_;
+    my $store = $session->{store};
+    my $template = 'NewUserTemplate';
+    my( $meta, $text );
+    if( $store->topicExists( $TWiki::cfg{UsersWebName}, $template )) {
+        # Use the local customised version
+        ( $meta, $text ) = $store->readTopic(
+            undef, $TWiki::cfg{UsersWebName}, $template );
+    } else {
+        # Use the default read-only version
+        ( $meta, $text ) = $store->readTopic(
+            undef, $TWiki::cfg{SystemWebName}, $template );
+    }
+
+    my $log = $b1 . ' Writing topic '.$TWiki::cfg{UsersWebName} . '.'
+      . $row->{WikiName}."\n"
+        . "$b1 !RegistrationHandler:\n"
+          . _writeRegistrationDetailsToTopic( $session, $row, $meta, $text );
+    return $log;
+}
+
+# Writes the registration details passed as a hash to either BulletFields
+# or FormFields on the user's topic.
+#
+sub _writeRegistrationDetailsToTopic {
+    my ($session, $data, $meta, $text) = @_;
+
+    ASSERT($data->{WikiName}) if $DEBUG;
+
+    # TODO - there should be some way of overwriting meta without
+    # blatting the content.
+
+    my( $before, $repeat, $after ) = split( /%SPLIT%/, $text, 3 );
+    $before = '' unless defined( $before );
+    $after = '' unless defined( $after );
+
+    my $log;
+    my $addText;
+    my $form = $meta->get( 'FORM' );
+    if( $form ) {
+        ( $meta, $addText ) =
+          _populateUserTopicForm( $session, $form->{name}, $meta, $data );
+        $log = "$b2 Using Form Fields\n";
+    } else {
+        $addText = _getRegFormAsTopicContent( $data );
+        $log = "$b2 Using Bullet Fields\n";
+    }
+    $text = $before . $addText . $after;
+
+    my $user = $data->{WikiName};
+    $text = $session->expandVariablesOnTopicCreation( $text, $user, $TWiki::cfg{UsersWebName}, $user );
+
+    $meta->put( 'TOPICPARENT', { 'name' => $TWiki::cfg{UsersTopicName}} );
+
+    $session->{store}->saveTopic($session->{users}->getCanonicalUserID($agent), $TWiki::cfg{UsersWebName},
+                                 $user, $text, $meta );
+    return $log;
+}
+
+# Puts form fields into the topic form
+sub _populateUserTopicForm {
+    my ( $session, $formName, $meta, $data ) = @_;
+
+    my %inform;
+    require TWiki::Form;
+
+    my $form =
+      new TWiki::Form( $session, $TWiki::cfg{UsersWebName}, $formName );
+
+    return ($meta, '' ) unless $form;
+
+    foreach my $field ( @{$form->getFields()} ) {
+        foreach my $fd (@{$data->{form}}) {
+            next unless $fd->{name} eq $field->{name};
+            next if $SKIPKEYS{$fd->{name}};
+            my $item = $meta->get( 'FIELD', $fd->{name} );
+            $item->{value} = $fd->{value};
+            $meta->putKeyed( 'FIELD', $item );
+            $inform{$fd->{name}} = 1;
+            last;
+        }
+    }
+    my $leftoverText = '';
+    foreach my $fd (@{$data->{form}}) {
+        unless( $inform{$fd->{name}} || $SKIPKEYS{$fd->{name}} ) {
+            $leftoverText .= "   * $fd->{name}: $fd->{value}\n";
+        }
+    }
+    return ( $meta, $leftoverText );
+}
+
+# Registers a user using the old bullet field code
+sub _getRegFormAsTopicContent {
+    my $data = shift;
+    my $text;
+    foreach my $fd ( @{ $data->{form} } ) {
+        next if $SKIPKEYS{$fd->{name}};
+        my $title = $fd->{name};
+        $title =~ s/([a-z0-9])([A-Z0-9])/$1 $2/go;    # Spaced
+        my $value = $fd->{value};
+        $value =~ s/[\n\r]//go;
+        $text .= "   * $title\: $value\n";
+    }
+    return $text;
+}
+

@@ -1,0 +1,20 @@
+%META:TOPICINFO{author="JoshuaRandall" date="1263058374" format="1.1" version="1.2"}%
+<!--
+   * Set COVER = puzzle
+   * Set PB_REL = /puzzlebitch
+-->
+
+---+ [[%URLPARAM{"puzurl"}%][%URLPARAM{"prname"}%]] 
+([[WebHome][MH2010]] > %META{"parent" nowebhome="on" suffix=")"}%
+
+
+---++ Identify Things
+
+
+---++ Do Something Else
+
+
+---++ Find the answer
+   * A [[%URLPARAM{"gssurl"}%][Google Spreadsheet]] is available for work on this puzzle (but please collect results here).  If possible, please log in to Google before editing the spreadsheet so that the revision history will let us know who worked on what, in case we're trying to make sense of it later on.  
+
+

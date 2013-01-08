@@ -1,0 +1,76 @@
+%TMPL:INCLUDE{"view"}%
+
+%TMPL:DEF{"bodystart"}%
+<body bgcolor="#ffffff" onload="el_onload();">
+#PageTop
+%TMPL:END%
+
+%TMPL:DEF{"roundinfoscripts"}%
+<!-- start defining roundinfoscripts -->
+<script SRC="%PB_REL%/js/pbrestclient.js" TYPE="text/javascript"></script>
+<script TYPE="text/javascript">
+function el_onload() {
+
+}
+<!-- end defining roundinfoscripts -->
+%TMPL:END%
+
+%TMPL:DEF{"roundinfoelements"}%
+<!-- start defining roundinfoelements -->
+<table cellspacing="0" id="roundinfotable" cellpadding="0" class="twikiTable" rules="rows" border="1">
+ <tr class="twikiTableEven twikiTableRowdataBgSorted1 twikiTableRowdataBg1">
+  <td bgcolor="#edf4f9" valign="top" class="twikiTableCol0 twikiFirstCol twikiLast">Round: <span id="puzzid">data not yet loaded</span></td>
+ <td bgcolor="#edf4f9" valign="top" class="twikiTableCol0 twikiFirstCol twikiLast">
+  <form method="get" action="%PB_REL%/bin/active.pl">
+  <input type="hidden" name="puzzid" id="activatepuzzid"/>
+  <input type="hidden" name="solver" value="%USERNAME%"/>
+  <input type="hidden" name="returnurl" value="%SCRIPTURL{view}%/%WEB%/%TOPIC%"/>
+  <input type="submit" name="%USERNAME%" value="%USERNAME% is working on this!" style="display: none" id="activatesolver"/>
+  </form>
+  <form method="get" action="%PB_REL%/bin/inactive.pl">
+  <input type="hidden" name="puzzid" id="inactivatepuzzid"/>
+  <input type="hidden" name="solver" value="%USERNAME%"/>
+  <input type="hidden" name="returnurl" value="%SCRIPTURL{view}%/%WEB%/%TOPIC%"/>
+   <input type="submit" name="%USERNAME%" value="%USERNAME% is no longer working on this!" style="display: none" id="inactivatesolver"/>
+  </form>
+ </td>
+  <td bgcolor="#edf4f9" valign="top" class="twikiTableCol1 twikiLastCol">Status: 
+  <form method="get" action="%PB_REL%/bin/status.pl">
+  <input type="hidden" name="puzzid" id="statuspuzzid"/>
+  <input type="hidden" name="solver" value="%USERNAME%"/>
+  <input type="hidden" name="returnurl" value="%SCRIPTURL{view}%/%WEB%/%TOPIC%"/>
+  <input type="text" name="statusline" id="statusline" size="40" onchange="submit();"/>
+  </form>
+  </td>
+ </tr>
+ <tr class="twikiTableOdd twikiTableRowdataBgSorted0 twikiTableRowdataBg0">
+  <td bgcolor="#ffffff" valign="top" class="twikiTableCol0 twikiFirstCol">Priority: <span id="priority"></span></td>
+  <td bgcolor="#ffffff" valign="top" class="twikiTableCol1 twikiLastCol">Locations: 
+  <form method="get" action="%PB_REL%/bin/xyzloc.pl">
+  <input type="hidden" name="puzzid" id="xyzlocpuzzid"/>
+  <input type="hidden" name="solver" value="%USERNAME%"/>
+  <input type="hidden" name="returnurl" value="%SCRIPTURL{view}%/%WEB%/%TOPIC%"/>
+  <input type="text" name="xyzloc" id="xyzloc" size="40" onchange="submit();"/>
+  </form>
+  </td>
+  <td bgcolor="#ffffff" valign="top" class="twikiTableCol1 twikiLastCol twikiLast"><div id="finalanswerdiv" style="display: none;">Confirmed answer: <span id="finalanswer"></span></div><div id="enteranswerdiv" style="display: none;">Report answer:   
+<form method="get" action="%PB_REL%/bin/solve.pl">
+  <input type="hidden" name="puzzid" id="answerpuzzid"/>
+  <input type="hidden" name="solver" value="%USERNAME%"/>
+  <input type="hidden" name="returnurl" value="%SCRIPTURL{view}%/%WEB%/%TOPIC%"/>
+  <input type="text" size="12" name="answer" id="answer"/><input type="submit" name="Answer Confirmed!" value="Answer Confirmed!"/>
+</form>
+</div></td>
+ </tr>
+ <tr class="twikiTableEven twikiTableRowdataBgSorted1 twikiTableRowdataBg1">
+  <td bgcolor="#edf4f9" valign="top" class="twikiTableCol0 twikiFirstCol twikiLast">Current solvers: <span id="cursolvers"></span></td>
+  <td colspan="2" bgcolor="#edf4f9" valign="top" class="twikiTableCol1 twikiLastCol twikiLast">All Solvers: <span id="solvers"></span></td>
+ </tr>
+</table>
+<!-- end defining roundinfoelements -->
+%TMPL:END%
+
+%TMPL:DEF{"script:skintemplate"}%%IF{"defined raw" then='%TMPL:P{"script:skintemplate:viewraw"}%'}%%TMPL:P{"roundinfoscripts"}%%TMPL:END%
+
+%TMPL:DEF{"content"}%%TMPL:P{"simpleheader"}%%TMPL:P{"roundinfoelements"}% %TEXT% %IF{"$raw='on'" then='%TMPL:P{"sig_textareabuttons"}%'}%%TMPL:END%
+
