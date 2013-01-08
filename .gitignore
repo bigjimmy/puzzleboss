@@ -1,0 +1,7 @@
+bin/junk/
+bin/pblib.cfg
+test-data
+.svn
+data
+#*#
+*~
