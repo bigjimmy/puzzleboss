@@ -5,3 +5,8 @@ test-data
 data
 #*#
 *~
+admin-tools/pw
+admin-tools/domain
+admin-tools/ldapdc
+lib/PB/Config.pm
+

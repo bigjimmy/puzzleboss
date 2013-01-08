@@ -1,0 +1,115 @@
+package PB::Config;
+
+use strict;
+
+# Automatic check for dev version
+our $PB_DEV_VERSION = "";
+if($0 =~ m/puzzlebitch(\-.+?)\// ||
+   (exists($ENV{'REQUEST_URI'}) && ($ENV{'REQUEST_URI'} =~ m/puzzlebitch(\-.+?)\//)) ||
+   (exists($ENV{'SCRIPT_NAME'}) && ($ENV{'SCRIPT_NAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
+   (exists($ENV{'SCRIPT_FILENAME'}) && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
+   (exists($ENV{'SCRIPT_URL'}) && ($ENV{'SCRIPT_URL'} =~ m/puzzlebitch(\-.+?)\//))
+    ) {
+    $PB_DEV_VERSION = $1;
+}
+
+# Default settings that can be overridden in LocalConfig.pl
+our $ANSWERSALLCAPS = 1;
+our $DEBUG = 1;
+our $TWIKI_DEBUG = 1;
+our $TWIKI_PROTOCOL = "https";
+
+# Call in LocalConfig.pl
+# require 'LocalConfig.pl';
+
+our $DOMAIN_NAME = "ourdomain";
+our $TWIKI_WEB = "MH2013";
+our $TWIKI_USER = "BigJimmy";
+our $TWIKI_USER_PASS = "password";
+our $TWIKI_HOST = "$DOMAIN_NAME";
+our $METEOR_HTTP_HOST = "series-of-tubes.$DOMAIN_NAME";
+our $TEAM_NAME = "Wind Up Birds";
+our $INSTALL_PATH = "/canadia";
+our $ROUNDLIST_TOPIC = "WebHome";
+our $METEOR_CONTROL_HOST = "series-of-tubes.$DOMAIN_NAME";
+our $METEOR_CONTROL_PORT = "4671";
+
+our $PB_DATA_WRITE_FILES = 0;
+our $PB_DATA_WRITE_DB = 1;
+our $PB_DATA_READ_DB_OR_FILES = "DB";
+our $PB_DATA_DB_HOST = "localhost";
+our $PB_DATA_DB_PORT = "3306";
+our $PB_DATA_DB_USER = "bigjimmy";
+our $PB_DATA_DB_PASS = "password";
+
+
+our $REGISTER_LDAP_HOST = 'ldap.$DOMAIN_NAME';
+our $REGISTER_LDAP_DC = insert dc record here;
+our $REGISTER_LDAP_DOMAIN = '$DOMAIN_NAME';
+our $REGISTER_LDAP_ADMIN_USER = 'admin';
+our $REGISTER_LDAP_ADMIN_PASS = 'password';
+our $REGISTER_LDAP_O = $TEAM_NAME;
+our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
+our $GOOGLE_DOMAIN = "$DOMAIN_NAME";
+
+# Derived settings (NB cannot be changed by LocalConfig.pl)
+our $METEOR_VERSION_CHANNEL = "version$PB_DEV_VERSION";
+our $METEOR_JS_URI = "https://$METEOR_HTTP_HOST/meteor.js";
+
+our $PB_DEV_VERSION_POSTPAREN = "";
+if($PB_DEV_VERSION ne "") {
+    $PB_DEV_VERSION_POSTPAREN = " ($PB_DEV_VERSION)";
+}
+
+our $REGISTER_PATH = $INSTALL_PATH . "/register";
+our $REGISTER_DATA_PATH = $REGISTER_PATH . "/data";
+
+our $TWIKI_URI = "$TWIKI_PROTOCOL://$TWIKI_HOST";
+our $TWIKI_BIN_URI = $TWIKI_URI . "/twiki/bin";
+our $REGISTER_URI = $TWIKI_URI . "/register/index.pl";
+
+our $TWIKI_PATH = $INSTALL_PATH . "/twiki";
+our $TWIKI_DATA_PATH = $TWIKI_PATH . "/data";
+our $TWIKI_BIN_PATH = $TWIKI_PATH . "/bin";
+
+our $PB_REL = "/puzzlebitch" . $PB_DEV_VERSION;
+our $PB_PATH = $INSTALL_PATH . $PB_REL;
+our $PB_URI = $TWIKI_URI . $PB_REL;
+
+our $PB_JS_URI = "$PB_URI/js";
+
+our $PB_DATA_REL = "$PB_REL/data";
+our $PB_DATA_PATH = "$PB_PATH/data";
+our $PB_DATA_URI = "$PB_URI/data";
+
+our $PB_BIN_REL = "$PB_REL/bin";
+our $PB_BIN_PATH = "$PB_PATH/bin";
+our $PB_BIN_URI = "$PB_URI/bin";
+
+our $PB_CSS_REL = "$PB_REL/css";
+our $PB_CSS_PATH = "$PB_PATH/css";
+our $PB_CSS_URI = "$PB_URI/css";
+
+our $PB_IMAGES_REL = "$PB_REL/images";
+our $PB_IMAGES_PATH = "$PB_PATH/images";
+our $PB_IMAGES_URI = "$PB_URI/images";
+
+our $PB_GOOGLE_PATH = "$PB_PATH/google";
+
+our $DOJO_ROOT = "$PB_REL/dojoroot";
+our $PBREST_ROOT = "$PB_BIN_REL/pbrest.pl";
+
+our $TWIKI_USERS_FILE = "$TWIKI_DATA_PATH/.htpasswd";
+our $ROUNDS_FILE = "$PB_DATA_PATH/rounds.list";
+our $TEMPLATES_FILE = "$PB_DATA_PATH/templates.list";
+our $PUZZLES_FILE = "$PB_DATA_PATH/puzzles.list";
+our $POOL_FILE = "$PB_DATA_PATH/solvers.pool";
+our $SOLV_MAP_FILE = "$PB_DATA_PATH/solvers-puzz.map";
+our $ANSWER_ATTEMPT_FILE = "$PB_DATA_PATH/answer_attempts.puzz-ans-user";
+our $LOG_FILE = "$PB_DATA_PATH/log.txt";
+our $LOG_INDEX = "$PB_DATA_PATH/logindex.txt";
+our $CLIENT_INDEX = "$PB_DATA_PATH/clientindex.txt";
+our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE = "$PB_PATH/google-doc-template.odt";
+
+1;
+
