@@ -1463,54 +1463,6 @@ sub _assign_solver_location_db {
     }
 }
 
-sub get_solver {
-    my $idin = shift;
-    chomp $idin;
-    
-    debug_log("get_puzzle: $idin\n",6);
-
-    if($PB::Config::PB_DATA_READ_DB_OR_FILES eq "FILES") {
-        return _get_solver_files($idin);
-    } else {
-        return _get_solver_db($idin);
-    }
-}
-
-sub _get_solver_files {
-    my $idin = shift;
-    # NOT IMPLEMENTED
-    return {};
-}
-
-sub _get_solver_db {
-    my $idin = shift;
-
-    my $res;
-    my $sql = 'SELECT * FROM `solver_view`';
-    my $sth;
-    if ($idin eq '*') {
-	$sth  = $dbh->prepare($sql);
-	$sth->execute() or die $dbh->errstr;;
-    } else {
-        $sql .= ' WHERE (`id` REGEXP ?)';
-	$sth = $dbh->prepare($sql);
-	$sth->execute('^'.$idin.'$');
-    }
-    my @rows;
-    while ( my $res = $sth->fetchrow_hashref() ) {
-	foreach my $key (keys %{$res}) {
-	    if(!defined($res->{$key})) {
-		$res->{$key} = "";
-	    }
-	}
-	push @rows, $res;
-    }
-    if(@rows > 1) {
-	return \@rows;
-    } else {
-	return \%{$rows[0]};
-    }
-}
 
 ####
 #LOG

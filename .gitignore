@@ -3,7 +3,7 @@ bin/pblib.cfg
 test-data
 .svn
 data
-#*#
+*#
 *~
 *.orig
 *.rej
