@@ -274,7 +274,7 @@ sub add_puzzle {
     # Figure out what names of TWiki topics should be
     my $puzzletopic = $id."Puzzle";
     my $roundtopic = $round."Round";
-    if($templatetopic eq "") {
+    if(!defined($templatetopic) || $templatetopic eq "") {
 	$templatetopic = "GenericPuzzleTopicTemplate";
     }
     
@@ -522,6 +522,7 @@ sub _get_puzzles_files {
 	    }
 	    my %puzzle = (
 		id => $id,
+		name => $id,
 		linkid => "<a href=\"$uri\" target=\"$id\">$id</a>",
 		round => $round,
 		uri => $uri,
@@ -573,7 +574,7 @@ sub _get_puzzle_db {
 	$sth  = $dbh->prepare($sql);
 	$sth->execute() or die $dbh->errstr;;
     } else {
-        $sql .= ' WHERE (`id` REGEXP ?)';
+        $sql .= ' WHERE (`name` REGEXP ?)';
 	$sth = $dbh->prepare($sql);
 	$sth->execute('^'.$idin.'$');
     }
@@ -1012,7 +1013,9 @@ sub add_round {
     
     _write_log_files("rounds:$remoteuser added round $new_round");
     # add round to roundlist
-    return(_twiki_update_roundlist($roundtopic));
+    #my $rval = _twiki_update_roundlist($roundtopic);
+    #return($rval);
+    return 0; # success
 }
 
 ##########
@@ -1040,6 +1043,110 @@ sub get_template_list {
 ##############
 #SOLVERS/USERS
 ##############
+
+sub get_solver_list {
+    if($PB::Config::PB_DATA_READ_DB_OR_FILES eq "FILES") {
+        return ldap_get_user_list();
+    } else {
+        return _get_solver_list_db();
+    }
+}
+
+sub _get_solver_list_db {
+    my $sql = 'SELECT `name` FROM `solver_view`';
+    my $res = $dbh->selectcol_arrayref($sql);
+    return $res;
+}
+
+sub get_solver {
+    my $idin = shift;
+    chomp $idin;
+    
+    debug_log("get_solver: $idin\n",6);
+
+    if($PB::Config::PB_DATA_READ_DB_OR_FILES eq "FILES") {
+        return _get_solver_files($idin);
+    } else {
+        return _get_solver_db($idin);
+    }
+}
+
+sub _get_solver_files {
+    my $idin = shift;
+    # TODO: actually use files
+    my @solvers;
+    if ($idin eq '*') {
+	foreach my $solver (@{ldap_get_user_list()}) {
+	    push @solvers, {id => $solver, name => $solver };
+	}
+    }
+    return \@solvers;
+}
+
+sub _get_solver_db {
+    my $idin = shift;
+
+    my $res;
+    my $sql = 'SELECT * FROM `solver_view`';
+    my $sth;
+    if ($idin eq '*') {
+	$sth  = $dbh->prepare($sql);
+	$sth->execute() or die $dbh->errstr;;
+    } else {
+        $sql .= ' WHERE (`name` REGEXP ?)';
+	$sth = $dbh->prepare($sql);
+	$sth->execute('^'.$idin.'$');
+    }
+    my @rows;
+    while ( my $res = $sth->fetchrow_hashref() ) {
+	foreach my $key (keys %{$res}) {
+	    if(!defined($res->{$key})) {
+		$res->{$key} = "";
+	    }
+	}
+	push @rows, $res;
+    }
+    if(@rows > 1) {
+	return \@rows;
+    } else {
+	return \%{$rows[0]};
+    }
+}
+
+sub add_solver {
+    my $idin = shift;
+    chomp $idin;
+    
+    debug_log("add_solver: $idin\n",6);
+
+    if($PB::Config::PB_DATA_READ_DB_OR_FILES eq "FILES") {
+        return _add_solver_files($idin);
+    } else {
+        return _add_solver_db($idin);
+    }
+}
+
+sub _add_solver_files {
+    my $idin = shift;
+    # NOT IMPLEMENTED
+    return 1;
+}
+
+sub _add_solver_db {
+    my $id = shift;
+
+    my $sql = "INSERT INTO `solver` (`name`) VALUES (?);";
+    my $c = $dbh->do($sql, undef, $id);
+    
+    if(defined($c)) {
+	debug_log("_add_solver_db: dbh->do returned $c\n",2);
+	_send_meteor_version();
+	return(1);
+    } else {
+	debug_log("_add_solver_db: dbh->do returned error: ".$dbh->errstr."\n",0);
+	return(-1);
+    }
+}
 
 sub ldap_add_user {
     my $username = shift;
@@ -1184,9 +1291,8 @@ sub twiki_add_user {
     }
 }
 
-
-sub get_solver_list {
-    debug_log("get_solver_list() using LDAP\n",2);
+sub ldap_get_user_list {
+    debug_log("ldap_get_user_list() using LDAP\n",2);
     
     my $ldap = Net::LDAP->new ("localhost") or die "$@";
     my $mesg = $ldap->search ( base => "ou=people,dc=wind-up-birds,dc=org",
@@ -1204,8 +1310,6 @@ sub get_solver_list {
     
     my @outdata;
     foreach my $d (@sortdata){
-	#my %solver = (id => $d);
-	#push @outdata, \%solver;
 	push @outdata, $d;
     }
     
@@ -1624,6 +1728,10 @@ sub attempt_answer {
 sub _write_log_files {
     my $logitem = shift;
     
+    if($PB::Config::PB_DATA_WRITE_FILES <= 0) {
+	return -1;
+    }
+
     open LOG, ">>$PB::Config::LOG_FILE";
     flock LOG, $EXCLUSIVE_LOCK;
     print LOG "$logitem\n";

@@ -11,9 +11,9 @@ define([
      "dijit/form/TextBox",
      "dojo/dom",
      "dojo/domReady!",
-	 "dojo/dnd/Source",
-     ], 
-    function(pbmrc, parser, connect, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, domready) {
+     "dojo/dnd/Source",
+       ], 
+    function(pbmrc, parser, connect, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, domready, dndsource) {
 
 	var puzzstore; // will be returned from pbmrc.pb_init()
 	var waitDiv;
@@ -317,11 +317,10 @@ define([
 	    dom.byId("statuscontainer").appendChild(status_button.domNode);
 	    
 	    pbmrc.pb_log("my_init: calling pbmrc.pb_init");
-		puzzstore = pbmrc.pb_init(init_complete_cb, roundlist_update_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, 
-			error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb)[0];
-			
-		create_new_round_ui("All");
-		
+	    var ret = pbmrc.pb_init(init_complete_cb, roundlist_update_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, 
+				    error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb);
+	    puzzstore = ret.puzzstore;
+	    create_new_round_ui("All");
 	},
 	};
 		

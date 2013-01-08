@@ -40,9 +40,9 @@ define([
 		solverstore.fetch({
 			onItem: function(item){
 				if (item.puzz == ""){
-					poolBox.insertNodes(false,item.id);
+					poolBox.insertNodes(false,item.name);
 				}else{
-					puzzBoxes[item.puzz].insertNodes(false,item.id);
+					puzzBoxes[item.puzz].insertNodes(false,item.name);
 				}
 		 	}
 		 });
@@ -69,10 +69,10 @@ define([
 		puzzstore.fetch({
 			onItem: function(item){
 				if (item.answer == ""){
-					puzzBoxDivs[item.id] = domConstruct.create("div", {class: "container", id: item.id});
-					puzzBoxDivs[item.id].appendChild(domConstruct.create("p",{innerHTML: item.id}));
-					puzzBoxes[item.id] = new Source(puzzBoxDivs[item.id]);					
-					dom.byId("puzzlecontainer").appendChild(puzzBoxDivs[item.id]);
+					puzzBoxDivs[item.name] = domConstruct.create("div", {class: "container", id: item.name});
+					puzzBoxDivs[item.name].appendChild(domConstruct.create("p",{innerHTML: item.name}));
+					puzzBoxes[item.name] = new Source(puzzBoxDivs[item.name]);					
+					dom.byId("puzzlecontainer").appendChild(puzzBoxDivs[item.name]);
 				}
 			}
 		});
@@ -228,7 +228,7 @@ define([
 			dom.byId("statuscontainer").appendChild(status_button.domNode);
 	    
 			pbmrc.pb_log("my_init: calling pbmrc.pb_init");
-		        var ret = pbmrc.pb_init(init_complete_cb, roundlist_update_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, error_cb, warning_cb, 
+		    var ret = pbmrc.pb_init(init_complete_cb, roundlist_update_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, error_cb, warning_cb, 
 				meteor_conn_status_cb, meteor_conn_mode_cb);
 		        puzzstore = ret.puzzstore;
 		        solverstore = ret.solverstore;

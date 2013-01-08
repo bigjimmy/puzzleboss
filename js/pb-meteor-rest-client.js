@@ -9,17 +9,17 @@ define([
     "dojo/_base/xhr",
     "dojo/_base/json",
     "dojo/data/ItemFileWriteStore",
-	 ], 
+       ], 
        function(parser, connect, array, xhr, dojo, ItemFileWriteStore) {
 	   
     /////////////////////////////////////////////////////////////////////////////////
     // Internal vars
     /////////////////////////////////////////////////////////////////////////////////
-    var _pb_puzzstore_structure = {identifier: 'id', label: 'id', items: []};
+    var _pb_puzzstore_structure = {identifier: 'name', label: 'name', items: []};
     var _pb_puzzstore = new ItemFileWriteStore({data: _pb_puzzstore_structure});
     var _pb_puzzstore_init_complete = 0;
 	
-    var _pb_solverstore_structure = {identifier: 'id', label: 'id', items: []};
+    var _pb_solverstore_structure = {identifier: 'name', label: 'name', items: []};
     var _pb_solverstore = new ItemFileWriteStore({data: _pb_solverstore_structure});
     var _pb_solverstore_init_complete = 0;
 
@@ -307,19 +307,19 @@ define([
 	function _pb_solverstore_client_update(solver, puzz){
 		_pb_log("_pb_solverstore_client_update(): solver "+solver+" is now in "+puzz);
 		// update client's changes in the store.
-		_pb_solverstore.fetchItemByIdentity({
-			identity: solver,
-			onItem: function(item) {
-				//_pb_solverstore_disable_handlers();
-				_pb_solverstore.setValue(item,"puzz",puzz);
-				_pb_solverstore.save({onComplete: _pb_save_complete_cb, onError: _pb_save_error_cb});
-				var wrapdata = new Object();
-				wrapdata.data = puzz;
-				_pbrest_post("solvers/"+solver+"/puzz",
-				wrapdata,_pb_post_puzzle_part_cb);
-				//_pb_solverstore_enable_handlers();
-			}
-		});
+//		_pb_solverstore.fetchItemByIdentity({
+//			identity: solver,
+//			onItem: function(item) {
+//				//_pb_solverstore_disable_handlers();
+//				_pb_solverstore.setValue(item,"puzz",puzz);
+///				_pb_solverstore.save({onComplete: _pb_save_complete_cb, onError: _pb_save_error_cb});
+//				var wrapdata = new Object();
+//				wrapdata.data = puzz;
+//				_pbrest_post("solvers/"+solver+"/puzz",
+//				wrapdata,_pb_post_puzzle_part_cb);
+//				//_pb_solverstore_enable_handlers();
+//			}
+//		});
 	}   
     
 	function _pb_save_complete_cb() {
@@ -425,9 +425,9 @@ define([
 
 	// 2.b.2.a have a puzzle, add to store, increment arrival counter, and save store once all are arrived
 	function _pb_get_puzzle_cb_init(puzzle, ioArgs) {
+	    _pb_log("_pb_get_puzzle_cb_init: puzzle["+puzzle.id+"] "+puzzle.name);
 	    _pb_puzzstore.newItem(puzzle);
 	    _pb_puzzArrivalCounter++;
-	    _pb_log("_pb_get_puzzle_cb_init: puzzle: "+puzzle.id);
 	    if (_pb_puzzArrivalCounter == _pb_totalPuzz){
 		// we have all the puzzles ? (TODO fix this to actually check if this is true!)
 		_pb_log("_pb_get_puzzle_cb_init: saving store");
@@ -439,10 +439,13 @@ define([
 	// 2.b.3.a. puzzstore has all puzzles, save successful
 	// proceed to phase 3 if 2.c is complete
 	function _pb_puzzstore_save_done_init() {
-	    _pb_log("_pb_puzzstore_save_done_init: going to _pb_init_phase3");
+	    _pb_log("_pb_puzzstore_save_done_init()");
 	    _pb_puzzstore_init_complete = 1;
-	    if(_pb_puzzstore_init_complete > 0 && _pb_solverstore_init_complete > 0) {
+	    if(_pb_solverstore_init_complete > 0) {
+		_pb_log("_pb_puzzstore_save_done_init: going to _pb_init_phase3()");
 		_pb_init_phase3();
+	    } else {
+		_pb_log("_pb_puzzstore_save_done_init: deferring phase3 to _pb_solverstore_save_done_init()");
 	    }
 	}
     
@@ -456,7 +459,7 @@ define([
     
 	// 2.c.1 have solvers (solverlist), request each solver
 	function _pb_get_solverlist_cb_init(solverlist, ioArgs){
-		_pb_log("_pb_get_solverlist_cb_init(): have ["+solverlist+"]");
+		_pb_log("_pb_get_solverlist_cb_init(): solverlist: "+solverlist);
 		_pb_totalSolvers = solverlist.length;
 		if(_pb_totalSolvers === 0) {
 			// have solverlist, but there are no solvers in the system
@@ -470,7 +473,7 @@ define([
 	// 2.c.2 the array of solvers we requested has arrived. process them one by one.
 	function _pb_get_solvers_cb_init(solvers, ioArgs) {
 	    _pb_log("_pb_get_solvers_cb_init: received "+solvers.length+" solvers");
-	    for (var i in solvers){
+	    for (var i in solvers) {
 		var solver = solvers[i];
 		_pb_get_solver_cb_init(solver, ioArgs);
 	    }
@@ -478,10 +481,10 @@ define([
 
 	// 2.c.2.a have a solver, add to store, increment arrival counter, and save store once all are arrived
 	function _pb_get_solver_cb_init(solver, ioArgs) {
+	    _pb_log("_pb_get_solver_cb_init: solver["+solver.id+"] "+solver.name);
 	    _pb_solverstore.newItem(solver);
 	    _pb_solverArrivalCounter++;
-	    _pb_log("_pb_get_solver_cb_init: solver: "+solver.id);
-	    if (_pb_solverArrivalCounter == _pb_totalSolver){
+	    if (_pb_solverArrivalCounter == _pb_totalSolvers){
 		// we have all the solvers ? (TODO fix this to actually check if this is true!)
 		_pb_log("_pb_get_solver_cb_init: saving store");
 		_pb_solverstore.save({onComplete: _pb_solverstore_save_done_init, onError: _pb_solverstore_save_failed_init});
@@ -491,10 +494,13 @@ define([
 	// 2.c.3.a. solverstore has all solvers, save successful
 	// proceed to phase 3 if 2.b is complete
 	function _pb_solverstore_save_done_init() {
-	    _pb_log("_pb_solverstore_save_done_init: going to _pb_init_phase3");
+	    _pb_log("_pb_solverstore_save_done_init()");
 	    _pb_solverstore_init_complete = 1;
-	    if(_pb_puzzstore_init_complete > 0 && _pb_solverstore_init_complete > 0) {
+	    if(_pb_puzzstore_init_complete > 0) {
+		_pb_log("_pb_solverstore_save_done_init: going to _pb_init_phase3()");
 		_pb_init_phase3();
+	    } else {
+		_pb_log("_pb_solverstore_save_done_init: deferring phase3 to _pb_puzzstore_save_done_init()");
 	    }
 	}
     
@@ -565,6 +571,10 @@ define([
 	},
 	
 	pb_log: _pb_log,
+
+	pb_puzzstore: _pb_puzzstore,
+
+	pb_solverstore: _pb_solverstore,
 	
 	pb_create_round: function(roundid) {
 		if(array.some(_pb_roundlist, function (item) { return item==roundid; })) {

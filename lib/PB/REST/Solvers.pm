@@ -28,6 +28,14 @@ sub full_GET : Runmode {
     return($json);
 }
 
+sub full_GET : Runmode {
+    my $self = shift;
+    my $id = $self->param('id');
+    $solverref = PB::API::get_solver($id);
+    my $json = $self->json_body($solverref);
+    return($json);
+}
+
 sub part_POST : Runmode {
 	my $self = shift;
 	my $solvername = $self->param('id');

@@ -5,6 +5,8 @@ test-data
 data
 #*#
 *~
+*.orig
+*.rej
 admin-tools/pw
 admin-tools/domain
 admin-tools/ldapdc
