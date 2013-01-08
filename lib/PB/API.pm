@@ -309,7 +309,7 @@ sub _google_create_spreadsheet {
 
     print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
     # Prepare command
-    my $cmd = "./AddPuzzleSpreadsheet.sh --puzzle '$puzzle' --round '$round' --hunt '$hunt' --twikiurl '$twikiurl' --puzzleurl '$puzzurl' --domain '$domain' |";
+    my $cmd = "./AddPuzzleSpreadsheet.sh --puzzle '$puzzle' --round '$round' --hunt '$hunt' --twikiurl '$twikiurl' --puzzleurl '$puzzurl' --domain '$domain' --adminpass $PB::Config::TWIKI_USER_PASS|";
     #my $cmdout="";
 
 
@@ -367,7 +367,7 @@ sub _google_create_document {
 
     print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
     # Prepare command
-    my $cmd = "./AddPuzzleDocument.sh --puzzle '$puzzle' --round '$round' --hunt '$hunt'  --domain '$domain' --templatefile '$templatefile' |";
+    my $cmd = "./AddPuzzleDocument.sh --puzzle '$puzzle' --round '$round' --hunt '$hunt'  --domain '$domain' --templatefile '$templatefile' --adminpass $PB::Config::TWIKI_USER_PASS|";
     #my $cmdout="";
 
 
@@ -848,7 +848,7 @@ sub _google_create_round {
 
     print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
     # Prepare command
-    my $cmd = "./AddRound.sh --round '$round' --hunt '$hunt' --domain '$domain' |";
+    my $cmd = "./AddRound.sh --round '$round' --hunt '$hunt' --domain '$domain' --adminpass $PB::Config::TWIKI_USER_PASS|";
     my $cmdout="";
 
     # Execute command
@@ -1098,7 +1098,7 @@ sub google_add_user {
 
     print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
     # Prepare command
-    my $cmd = "./AddDomainUser.sh --firstname '$firstname' --lastname '$lastname' --username '$username' --password '$password' --domain '$domain' |";
+    my $cmd = "./AddDomainUser.sh --firstname '$firstname' --lastname '$lastname' --username '$username' --password '$password' --domain '$domain' --adminpass $PB::Config::TWIKI_USER_PASS|";
     my $cmdout="";
 
     # Execute command

@@ -1,0 +1,3 @@
+# Turn on Expires and set default to 10h
+ExpiresActive On
+ExpiresDefault A36000

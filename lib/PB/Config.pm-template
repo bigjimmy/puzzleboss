@@ -109,7 +109,7 @@ our $ANSWER_ATTEMPT_FILE = "$PB_DATA_PATH/answer_attempts.puzz-ans-user";
 our $LOG_FILE = "$PB_DATA_PATH/log.txt";
 our $LOG_INDEX = "$PB_DATA_PATH/logindex.txt";
 our $CLIENT_INDEX = "$PB_DATA_PATH/clientindex.txt";
-our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE = "$PB_PATH/google-doc-template.odt";
+our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE = "$PB_GOOGLE_PATH/google-doc-template.odt";
 
 1;
 
