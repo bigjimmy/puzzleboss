@@ -39,7 +39,6 @@ define([
     // Callback registry (for those registered to hear from us)
     /////////////////////////////////////////////////////////////////////////////////
     var _pb_cb_init_complete;
-    var _pb_cb_update_roundlist;
     var _pb_cb_add_round;
     var _pb_cb_update_puzzle;
     var _pb_cb_update_puzzle_part;
@@ -269,6 +268,7 @@ define([
 				_pb_cb_add_round(_roundname);
 			}
 		}
+		_pb_roundlist = new_pb_roundlist;
 	}
     
 	function _pb_get_puzzles_cb(puzzlelist, ioArgs) {
@@ -278,7 +278,7 @@ define([
 	}
     
 	function _pb_get_puzzle_cb(puzzle, ioArgs) {
-		_pb_log("_pb_get_puzzle_cb: puzzle: "+puzzle.id);
+		_pb_log("_pb_get_puzzle_cb: puzzle: "+puzzle.name);
 		_pb_puzzArrivalCounter++;
 		// add to puzzstore
 		_pb_puzzstore.newItem(puzzle);
@@ -374,8 +374,6 @@ define([
 		// initial round list
 		_pb_log("_pb_get_rounds_cb_init(): have ["+response+"]");
 		_pb_roundlist = response;
-		// fire callback
-		_pb_cb_update_roundlist(_pb_roundlist);
 	}    
 	
 	// 2. Phase 2 init: request client UID (clientindex) and puzzlelist
@@ -552,10 +550,9 @@ define([
 	    _pb_config.pbrest_root = pbrest_root;
 	},
 	
-	pb_init: function(cb_init_complete, cb_update_roundlist, cb_add_round, cb_update_puzzle, 
+	pb_init: function(cb_init_complete, cb_add_round, cb_update_puzzle, 
 		cb_update_puzzle_part, cb_error, cb_warning, cb_connection_status, cb_connection_mode) {
 	    _pb_cb_init_complete = cb_init_complete;
-	    _pb_cb_update_roundlist = cb_update_roundlist;
 	    _pb_cb_add_round = cb_add_round;
 	    _pb_cb_update_puzzle = cb_update_puzzle;    
 	    _pb_cb_update_puzzle_part = cb_update_puzzle_part;

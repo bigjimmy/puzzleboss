@@ -140,10 +140,6 @@ define([
 		_updateRoundsVsAll();
 	}
 	
-	function roundlist_update_cb(my_roundlist) {
-	    //roundlist = my_roundlist;
-	}
-	
 	function add_round_cb(roundname) {
 	    create_new_round_ui(roundname);
 		roundlist.push(roundname);
@@ -317,7 +313,7 @@ define([
 	    dom.byId("statuscontainer").appendChild(status_button.domNode);
 	    
 	    pbmrc.pb_log("my_init: calling pbmrc.pb_init");
-	    var ret = pbmrc.pb_init(init_complete_cb, roundlist_update_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, 
+	    var ret = pbmrc.pb_init(init_complete_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, 
 				    error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb);
 	    puzzstore = ret.puzzstore;
 	    create_new_round_ui("All");
