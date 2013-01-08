@@ -1,0 +1,47 @@
+.button-status-green {
+    background-image: url('../images/green_circle.png');
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+}
+
+.button-status-yellow {
+    background-image: url('../images/yellow_circle.png');
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+}
+
+.button-status-orange {
+    background-image: url('../images/orange_circle.png');
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+}
+
+.button-status-red {
+    background-image: url('../images/red_circle.png');
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+	border:1px solid #aaa;
+	padding: 1em;
+	cursor: default;
+	background:#fff;
+	width: 200px;
+}
