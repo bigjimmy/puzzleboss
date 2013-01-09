@@ -18,6 +18,14 @@ define([
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
 	var update_solver_store; // function which will be returned from pbmrc.pb_init()
 	
+	var add_solver_ui_handler_connection;
+	var remove_solver_ui_handler_connection;
+	var update_solver_ui_handler_connection;
+	var add_puzz_ui_handler_connection;
+	var remove_puzz_ui_handler_connection;
+	var update_puzz_ui_handler_connection;
+	
+	var poolBox;
 	var puzzBoxes = new Array();
 	var puzzBoxDivs = new Array();
 	var waitDiv;
@@ -35,35 +43,12 @@ define([
 	    pbmrc.pb_log("init_complete_cb()");	
 	    // remove the little waitDiv notice
 	    dom.byId("puzzlecontainer").removeChild(waitDiv);
-		var poolBox = new Source(dom.byId("poolcontainer"));
-		add_puzzle_boxes();
-		solverstore.fetch({
-			onItem: function(item){
-				if (item.puzz == ""){
-					poolBox.insertNodes(false,item.name);
-				}else{
-					puzzBoxes[item.puzz].insertNodes(false,item.name);
-				}
-		 	}
-		 });
-	}
-	
-	function dropped_on_puzz(source, nodes, copy, target){
-		update_solver_store(nodes[0].innerHTML,target.node.id);
-		//Note that this only works if there's exactly one node being dnd'd. 
-		//perhaps our interface should be restricted to moving one at a time?
-	}
-	
-	function roundlist_update_cb(my_roundlist) {
-	    //don't care.
-	}
-	
-	function add_round_cb(roundname) {
-		//don't care.
-	}
-	
-	function add_puzzle_boxes(){
-		pbmrc.pb_log("add_puzzle_boxes(): adding puzzle boxes");
+		poolBox = new Source(dom.byId("poolcontainer"));
+		//hooks up our listeners
+		pbmrc.pb_log("init_complete_cb(): enabling connection handlers");
+		enable_store_ui_handlers();
+		
+		pbmrc.pb_log("init_complete_cb(): adding puzzleboxes");
 		puzzBoxDivs = new Array();
 		puzzBoxes = new Array(); 
 		puzzstore.fetch({
@@ -76,25 +61,152 @@ define([
 				}
 			}
 		});
+		
+		pbmrc.pb_log("init_complete_cb(): adding solvers");
+		solverstore.fetch({
+			onItem: function(item){
+				var node = create_solver_node(item);
+				if (item.puzz == ""){
+					poolBox.insertNodes(false,[node]);
+				}else{
+					puzzBoxes[item.puzz].insertNodes(false,[node]);
+				}
+			}
+		});
 	}
+	
+	function enable_store_ui_handlers(){
+		add_solver_ui_handler_connection = connect.connect(solverstore,"onNew",add_solver_ui);
+		remove_solver_ui_handler_connection = connect.connect(solverstore,"onDelete",remove_solver_ui);
+		update_solver_ui_handler_connection = connect.connect(solverstore,"onSet",update_solver_ui);
+		add_puzz_ui_handler_connection = connect.connect(puzzstore,"onNew",add_puzz_ui);
+		remove_puzz_ui_handler_connection = connect.connect(puzzstore,"onDelete",remove_puzz_ui);
+		update_puzz_ui_handler_connection = connect.connect(puzzstore,"onSet",update_puzz_ui);
+	}
+	
+	function disable_store_ui_handlers(){
+		connect.disconnect(add_solver_ui_handler_connection);
+		connect.disconnect(remove_solver_ui_handler_connection);
+		connect.disconnect(update_solver_ui_handler_connection);
+		connect.disconnect(add_puzz_ui_handler_connection);
+		connect.disconnect(remove_puzz_ui_handler_connection);
+		connect.disconnect(update_puzz_ui_handler_connection);
+	}
+	
+	function create_solver_node(item){
+		return domConstruct.create("div", {class: "solver", id: "solver_div_"+item.name, innerHTML: item.name});
+	}
+	
+	function dropped_on_puzz(source, nodes, copy, target){
+		//Note that this only works if there's exactly one node being dnd'd. 
+		//TODO: perhaps our interface should be restricted to moving one at a time?
+		var solver = nodes[0].innerHTML;
+		var puzz = target.node.id;
+
+		pbmrc.pb_log("dropped_on_puzz(): solver "+solver+" is now in "+puzz);
+		// update client's changes in the store.
+		solverstore.fetchItemByIdentity({
+			identity: solver,
+			onItem: function(item) {
+				disable_store_ui_handlers()
+				solverstore.setValue(item,"puzz",puzz);
+				solverstore.save({onError: error_cb});
+				enable_store_ui_handlers()
+			}
+		});
+	}
+	
+	function add_solver_ui(item, parentinfo){		
+		pbmrc.pb_log("add_solver_ui()");
+		if (item.puzz == ""){
+			var node = create_solver_node(item);
+			poolBox.insertNodes(false,[node]);
+		}else{
+			error_cb("Solver "+item.name+" was added, but is already working on a puzzle?!");
+		}
+	}
+	
+	function remove_solver_ui(item){
+		pbmrc.pb_log("remove_solver_ui()");
+		
+		if (item.puzz==""){
+			poolBox.delItem(item.name)
+		}else{
+			puzzBoxes[item.puzz].delItem(item.name);
+		}
+	}
+	
+	function update_solver_ui(item, attribute, oldValue, newValue){
+		pbmrc.pb_log("update_solver_ui()");
+		if (attribute == "puzz"){
+			if (newValue == ""){
+				poolBox.insertNodes(false, [dom.byId("solver_div_"+item.name)]);
+				poolBox.sync();				
+			}else{
+				puzzBoxes[newValue].insertNodes(false, [dom.byId("solver_div_"+item.name)]);
+				puzzBoxes[newValue].sync();
+			}
+			if (oldValue == ""){
+				poolBox.delItem("solver_div_"+item.name);
+				poolBox.sync();
+			}else{
+				puzzBoxes[oldValue].delItem("solver_div_"+item.name);
+				puzzBoxes[oldValue].sync();
+			}
+		}
+	}
+	
+	function add_puzz_ui(item, parentinfo){
+		pbmrc.pb_log("add_puzz_ui()");
+		
+		if (item.answer == ""){
+			puzzBoxDivs[item.name] = domConstruct.create("div", {class: "container", id: item.name});
+			puzzBoxDivs[item.name].appendChild(domConstruct.create("p",{innerHTML: item.name}));
+			puzzBoxes[item.name] = new Source(puzzBoxDivs[item.name]);					
+			dom.byId("puzzlecontainer").appendChild(puzzBoxDivs[item.name]);
+		}
+	}
+	
+	function remove_puzz_ui(item){
+		pbmrc.pb_log("remove_puzz_ui()");
+		
+		dom.byID("puzzlecontainer").removeChild(puzzBoxDivs[item.name]);
+	}
+	
+	function update_puzz_ui(item, attribute, oldValue, newValue){
+		pbmrc.pb_log("update_puzz_ui()");
+		if (attribute == "status" && newValue == "Solved" && item.answer != "" && oldValue != "Solved"){
+			//this represents a puzzle switched to solved, and with a non-null answer
+			delete_puzz_ui(item);
+		}else if(attribute == "status" && oldValue == "Solved" && newValue != "Solved"){
+			//this represents a puzzle switched from solved to unsolved
+			add_puzz_ui(item);
+		}
+	}
+	
+	function roundlist_update_cb(my_roundlist) {
+		//don't care.
+	}
+	
+	function add_round_cb(roundname) {
+		//don't care.
+	}
+
 	
 	function puzzle_update_cb() {
-		pbmrc.pb_log("puzzle_update_cb()");
-		//we delete any div that belongs to a solved puzzle.
-		for (var i in puzzBoxDivs){
-			dom.byId("puzzlecontainer").removeChild(puzzBoxDivs[i]);
-		}
-		add_puzzle_boxes();
-		
-	    //pbmrc.pb_log("puzzle_update_cb");
-	    //pbmrc.pb_log("puzzle_update_cb: applying round filters");	
-	    //apply_round_filters();
+		pbmrc.pb_log("puzzle_update_cb(): does nothing.");
 	}
 	
-	function puzzle_part_update_cb(puzzle, key, value) {
-	    pbmrc.pb_log("puzzle_part_update_cb: puzzle="+puzzle+" key="+key+" value="+value);
+	function solver_update_cb(){
+		pbmrc.pb_log("solver_update_cb(): does nothing.");
 	}
 	
+	
+	function received_updated_part_cb(store, appid, key, value) {
+	    pbmrc.pb_log("received_updated_part_cb: store="+store+" appid="+appid+" key="+key+" value="+value);
+	}
+
+
 	function error_cb(msg) {
 	    dom.byId("puzzlecontainer").removeChild(waitDiv);
 		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
@@ -228,11 +340,12 @@ define([
 			dom.byId("statuscontainer").appendChild(status_button.domNode);
 	    
 			pbmrc.pb_log("my_init: calling pbmrc.pb_init");
-		    var ret = pbmrc.pb_init(init_complete_cb, roundlist_update_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, error_cb, warning_cb, 
-				meteor_conn_status_cb, meteor_conn_mode_cb);
-		        puzzstore = ret.puzzstore;
-		        solverstore = ret.solverstore;
-		        update_solver_store = ret.update_solverstore;
+		    var ret = pbmrc.pb_init(init_complete_cb, add_round_cb, 
+				puzzle_update_cb, received_updated_part_cb, solver_update_cb, 
+				error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb);
+				
+		    puzzstore = ret.puzzstore;
+		    solverstore = ret.solverstore;
 			topic.subscribe("/dnd/drop",dropped_on_puzz);
 		},	
 	};

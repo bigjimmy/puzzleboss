@@ -595,23 +595,23 @@ sub _get_puzzle_db {
 }
 
 sub update_puzzle_part {
-    my $id = shift;
-    my $part = shift;
-    my $val = shift;
+	my $id = shift;
+	my $part = shift;
+	my $val = shift;
 
-    if($PB::Config::PB_DATA_WRITE_FILES > 0) {
-	my $rval = _update_puzzle_part_files($id, $part, $val);
-	if(looks_like_number($rval) && $rval < 0) {
-	    return $rval;
+	if($PB::Config::PB_DATA_WRITE_FILES > 0) {
+		my $rval = _update_puzzle_part_files($id, $part, $val);
+		if(looks_like_number($rval) && $rval < 0) {
+			return $rval;
+		}
 	}
-    }
     
-    if($PB::Config::PB_DATA_WRITE_DB > 0) {
-	my $rval = _update_puzzle_part_db($id, $part, $val);
-	if(looks_like_number($rval) && $rval < 0) {
-	    return $rval;
+	if($PB::Config::PB_DATA_WRITE_DB > 0) {
+		my $rval = _update_puzzle_part_db($id, $part, $val);
+		if(looks_like_number($rval) && $rval < 0) {
+			return $rval;
+		}
 	}
-    }
 }
 
 sub _update_puzzle_part_files {
@@ -1307,6 +1307,19 @@ sub ldap_get_user_list {
     return \@outdata;
 }
 
+sub update_solver_part {
+    my $id = shift;
+    my $part = shift;
+    my $val = shift;
+	
+	if ($part eq "puzz"){
+		return assign_solver_puzzle($val,$id);
+	}else{
+		#I don't know who you are.
+		return -7;
+	}
+}
+
 sub assign_solver_puzzle {
     my $puzzname = shift;
     my $solver = shift;
@@ -1403,19 +1416,19 @@ sub _assign_solver_puzzle_files {
 }
 
 sub _assign_solver_puzzle_db {    
-    my $puzzname = shift;
-    my $solver = shift;
+	my $puzzname = shift;
+	my $solver = shift;
     
-    my $sql = "INSERT INTO `puzzle_solver` (`puzzle_id`, `solver_id`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?))";
-    my $c = $dbh->do($sql);
-    if(defined($c)) {
-	debug_log("_get_client_index_db: dbh->do returned $c\n",2);
-	_send_meteor_version();
-	return(1);
-    } else {
-	debug_log("_get_client_index_db: dbh->do returned error: ".$dbh->errstr."\n",0);
-	return(-1);
-    }
+	my $sql = "INSERT INTO `puzzle_solver` (`puzzle_id`, `solver_id`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?))";
+	my $c = $dbh->do($sql,undef,$puzzname,$solver);
+	if(defined($c)) {
+		debug_log("_get_client_index_db: dbh->do returned $c\n",2);
+		_send_meteor_version();
+		return(1);
+	} else {
+		debug_log("_get_client_index_db: dbh->do returned error: ".$dbh->errstr."\n",0);
+		return(-1);
+	}
 }
 
 
@@ -1549,11 +1562,12 @@ sub _get_log_diff_files {
 }
 
 sub _get_log_diff_db { 
-    my $from_pos = shift;
+    my $cur_pos = shift;
+	my $from_pos = $cur_pos+1;
     my $to_pos = shift;
     debug_log("_get_log_diff_db: $from_pos - $to_pos\n",6);
     
-    my $sql = "SELECT DISTINCT CONCAT_WS('/', module, name, part) FROM `log` WHERE log.version>= ? AND log.version <= ?";
+    my $sql = "SELECT DISTINCT CONCAT_WS('/', IFNULL(module,''), IFNULL(name,''), IFNULL(part,'')) FROM `log` WHERE log.version>= ? AND log.version <= ?";
     my $res = $dbh->selectcol_arrayref($sql, undef, $from_pos, $to_pos);
     my @changes = @{$res};
     debug_log("_get_log_diff_db: have changes: ".join(',',@changes)."\n", 2);
@@ -1620,11 +1634,12 @@ sub _get_full_log_diff_files {
 }
 
 sub _get_full_log_diff_db { 
-    my $from_pos = shift;
+    my $cur_pos = shift;
+	my $from_pos = $cur_pos+1;
     my $to_pos = shift;
     debug_log("_get_log_diff_db: $from_pos - $to_pos\n",6);
     
-    my $sql = "SELECT CONCAT_WS('/', module, name, part) AS entry, user, time FROM `log` WHERE log.version>= ? AND log.version <= ? ORDER BY id";
+    my $sql = "SELECT CONCAT_WS('/', IFNULL(module,''), IFNULL(name,''), IFNULL(part,'')) AS entry, user, time FROM `log` WHERE log.version>= ? AND log.version <= ? ORDER BY id";
     my $res = $dbh->selectall_arrayref($sql, undef, $from_pos, $to_pos);
     my @entries;
     my @messages;

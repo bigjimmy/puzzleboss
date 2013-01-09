@@ -82,25 +82,25 @@ sub part_GET : Runmode {
 }
 
 sub part_POST : Runmode {
-    my $self = shift;
-    my $id = $self->param('id');
-    my $part = $self->param('part');
-    my $json = $self->query->param('POSTDATA');
-    my $partref = $self->from_json($json);
-    if(exists($partref->{'data'})) {
-	if(PB::API::update_puzzle_part($id,$part,$partref->{'data'}) < 0) {
-	    my $errmsg = "PB::REST::Puzzles::part_POST: could not update $part for $id";
-	    print STDERR $errmsg;
-	    $error_status = 404;
-	    die $errmsg;
+	my $self = shift;
+	my $id = $self->param('id');
+	my $part = $self->param('part');
+	my $json = $self->query->param('POSTDATA');
+	my $partref = $self->from_json($json);
+	if(exists($partref->{'data'})) {
+		if(PB::API::update_puzzle_part($id,$part,$partref->{'data'}) < 0) {
+			my $errmsg = "PB::REST::Puzzles::part_POST: could not update $part for $id";
+			print STDERR $errmsg;
+			$error_status = 404;
+			die $errmsg;
+		}
+	} else {
+		my $errmsg = "PB::REST::Puzzles::part_POST: did not specify data for puzzle $id part $part in json $json";
+		print STDERR $errmsg;
+		$error_status = 400;
+		die $errmsg;
 	}
-    } else {
-	my $errmsg = "PB::REST::Puzzles::part_POST: did not specify data for puzzle $id part $part in json $json";
-	print STDERR $errmsg;
-	$error_status = 400;
-	die $errmsg;
-    }
-    return("");
+	return("");
 }
 
 sub error : ErrorRunmode {

@@ -30,11 +30,7 @@ if (param('showrounds')){
 }
 
 my $editable;
-my $title;
-if (param('edit')){
-	$editable = "true";
-	$title = "$PB::Config::TEAM_NAME -- Puzzles-n-Solvers$PB::Config::PB_DEV_VERSION_POSTPAREN";
-}
+my $title = "PB Solver-o-matic Interface";
 
 my $html = <<"EOF";
 Content-type: text/html

@@ -153,8 +153,12 @@ define([
 	    apply_round_filters();
 	}
 	
-	function puzzle_part_update_cb(puzzle, key, value) {
-	    pbmrc.pb_log("puzzle_part_update_cb: puzzle="+puzzle+" key="+key+" value="+value);
+	function solver_update_cb(){
+		pbmrc.pb_log("solver_update_cb(): does nothing.");
+	}
+	
+	function received_updated_part_cb(store, appid, key, value) {
+	    pbmrc.pb_log("received_updated_part_cb: store="+store+" appid="+appid+" key="+key+" value="+value);
 	}
 	
 	function error_cb(msg) {
@@ -313,8 +317,8 @@ define([
 	    dom.byId("statuscontainer").appendChild(status_button.domNode);
 	    
 	    pbmrc.pb_log("my_init: calling pbmrc.pb_init");
-	    var ret = pbmrc.pb_init(init_complete_cb, add_round_cb, puzzle_update_cb, puzzle_part_update_cb, 
-				    error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb);
+	    var ret = pbmrc.pb_init(init_complete_cb, add_round_cb, puzzle_update_cb, received_updated_part_cb, 
+				    solver_update_cb, error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb);
 	    puzzstore = ret.puzzstore;
 	    create_new_round_ui("All");
 	},

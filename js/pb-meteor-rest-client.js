@@ -28,47 +28,48 @@ define([
     var _pb_puzzArrivalCounter = 0;
     var _pb_solverArrivalCounter = 0;
     var _pb_totalPuzz = 0;
-    var _pb_totalSolvers = 0;
+	var _pb_totalSolvers = 0;
 
-    var _pb_roundlist = null;
-    var _pb_config = new Object();
-    var _pb_puzzstore_onset_handler_connection;
-    var _pb_solverstore_onset_handler_connection;
+	var _pb_roundlist = null;
+	var _pb_config = new Object();
+	var _pb_puzzstore_onset_handler_connection;
+	var _pb_solverstore_onset_handler_connection;
 	
-    /////////////////////////////////////////////////////////////////////////////////
-    // Callback registry (for those registered to hear from us)
-    /////////////////////////////////////////////////////////////////////////////////
-    var _pb_cb_init_complete;
-    var _pb_cb_add_round;
-    var _pb_cb_update_puzzle;
-    var _pb_cb_update_puzzle_part;
-    var _pb_cb_error;
-    var _pb_cb_warning;
-    var _pb_cb_connection_status;
-    var _pb_cb_connection_mode;
+	/////////////////////////////////////////////////////////////////////////////////
+	// Callback registry (for those registered to hear from us)
+	/////////////////////////////////////////////////////////////////////////////////
+	var _pb_cb_init_complete;
+	var _pb_cb_add_round;
+	var _pb_cb_update_puzzle;
+	var _pb_cb_received_updated_part;
+	var _pb_cb_update_solver;
+	var _pb_cb_error;
+	var _pb_cb_warning;
+	var _pb_cb_connection_status;
+	var _pb_cb_connection_mode;
     
     
-    /////////////////////////////////////////////////////////////////////////////////
-    // Internal utility functions
-    /////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////
+	// Internal utility functions
+	/////////////////////////////////////////////////////////////////////////////////
     
 	function _pb_comm_warn(msg) {
 		console.warn(msg);
 		_pb_cb_warning(msg);
 	}
     
-    function _pbrest_post(path,data,loadcb) {
-	xhr.post({
-		url: _pb_config.pbrest_root+"/"+path,
-		sync: false,
-		handleAs: "json",
-		load: loadcb,
-		error: alert,
-		preventCache: true,
-		postData: dojo.toJson(data),
-		headers: {"Content-Type":"text/x-json"}
-	    });
-    }
+	function _pbrest_post(path,data,loadcb) {
+		xhr.post({
+			url: _pb_config.pbrest_root+"/"+path,
+			sync: false,
+			handleAs: "json",
+			load: loadcb,
+			error: alert,
+			preventCache: true,
+			postData: dojo.toJson(data),
+			headers: {"Content-Type":"text/x-json"}
+		});
+	}
     
 	function _pbrest_get(path,loadcb) {
 		xhr.get({
@@ -87,9 +88,21 @@ define([
 		if(!(oldValue==newValue)) {
 			var wrapdata = new Object();
 			wrapdata.data = newValue;
-   		        _pb_log("_pb_puzzstore_data_handler: posting change for puzzle["+item.id+"]="+_pb_puzzstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]");
+			_pb_log("_pb_puzzstore_data_handler: posting change for puzzle["+item.id+"]="+_pb_puzzstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]");
 			_pbrest_post("puzzles/"+_pb_puzzstore.getLabel(item)+"/"+attribute,
-				wrapdata,_pb_post_puzzle_part_cb);
+			wrapdata,_pb_post_puzzle_part_cb);
+		}
+	}
+	
+	function _pb_solverstore_data_set_handler(item, attribute, oldValue, newValue) {
+		_pb_log("_pb_solverstore_data_handler("+item.id+","+attribute+","+oldValue+","+newValue+")");
+		// called when solver data store changes from our user
+		if(!(oldValue==newValue)) {
+			var wrapdata = new Object();
+			wrapdata.data = newValue;
+			_pb_log("_pb_solverstore_data_handler: posting change for solver["+item.id+"]="+_pb_solverstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]");
+			_pbrest_post("solvers/"+_pb_solverstore.getLabel(item)+"/"+attribute,
+			wrapdata,_pb_post_solver_part_cb);
 		}
 	}
     
@@ -100,12 +113,6 @@ define([
 	function _pb_puzzstore_disable_handlers() {
 		connect.disconnect(_pb_puzzstore_onset_handler_connection);
 	}
-	
-	function _pb_solverstore_data_set_handler(item, attribute, oldValue, newValue) {
-		_pb_log("_pb_solverstore_data_handler("+item.id+","+attribute+","+oldValue+","+newValue+")");
-		// called when solver data store changes from our user
-
-	}
     
 	function _pb_solverstore_enable_handlers() {
 		_pb_solverstore_onset_handler_connection = connect.connect(_pb_solverstore, "onSet", _pb_solverstore_data_set_handler);
@@ -115,9 +122,9 @@ define([
 		connect.disconnect(_pb_solverstore_onset_handler_connection);
 	}
     
-    /////////////////////////////////////////////////////////////////////////////////
-    // Meteor functions
-    /////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////
+	// Meteor functions
+	/////////////////////////////////////////////////////////////////////////////////
     
 	function _pb_meteor_init(hostid) {
 		_pb_log("_pb_meteor_init()");
@@ -189,7 +196,7 @@ define([
 		//alert("meteor has:"+version);
 		//dojo.byId("debugme").innerHTML += " "+version;
 		if(version > _pb_dataversion) {
-			_pb_log("_pb_meteor_process_cb: new data exists! (we have version "+_pb_dataversion+", but "+version+" exists on server.");
+			_pb_log("_pb_meteor_process_cb: new data exists! (we have version "+_pb_dataversion+", but "+version+" exists on server.)");
 			_pbrest_get("version/"+_pb_dataversion,_pb_get_version_diff_cb);
 		} 
 	}
@@ -197,9 +204,9 @@ define([
     
     
     
-    /////////////////////////////////////////////////////////////////////////////////
-    // Callback functions (non-init)
-    /////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////
+	// Callback functions (non-init)
+	/////////////////////////////////////////////////////////////////////////////////
     
 	function _pb_get_version_cb(data, ioArgs) {
 		_pb_log("pb_get_version_cb()");
@@ -207,50 +214,72 @@ define([
 		_pb_log("pb_get_version_cb:"+_pb_dataversion);
 	}
     
-    function _pb_get_version_diff_cb(data, ioArgs) {
-	_pb_log("_pb_get_version_diff_cb()");
-	_pb_log("new data is:"+data); 
-	console.dir(data);
-	_pb_dataversion = data.to;
-	for(i in data.diff) {
-	    var path = data.diff[i];
-	    var splitpath = path.split('/');
-	    if(splitpath[0]=="puzzles") {
-		if(splitpath[1]) {
-		    if(splitpath[2]) {
-			_pbrest_get(path, _pb_get_puzzle_part_cb);
-		    } else {
-			_pbrest_get(path, _pb_get_puzzle_cb);
-			_pbrest_get("puzzles", _pb_get_puzzles_cb);
-		    }
-		} else {
-		    _pbrest_get(path, _pb_get_puzzles_cb);
+	function _pb_get_version_diff_cb(data, ioArgs) {
+		_pb_log("_pb_get_version_diff_cb()");
+		//_pb_log("new data is:"+data); 
+		console.dir(data);
+		_pb_dataversion = data.to;
+		for(i in data.diff) {
+			var path = data.diff[i];
+			var splitpath = path.split('/');
+			if(splitpath[0]=="puzzles") {
+				if(splitpath[1]) {
+					if(splitpath[2]) {
+						if (splitpath[2] == "solvers"){
+							//hacky, we need cursolvers too.
+							_pbrest_get("puzzles/"+splitpath[1]+"/cursolvers", _pb_get_puzzle_part_cb);
+						}
+						_pbrest_get(path, _pb_get_puzzle_part_cb);
+					} else {
+						_pbrest_get(path, _pb_get_puzzle_cb);
+						_pbrest_get("puzzles", _pb_get_puzzlelist_cb);
+					}
+				}else if (splitpath[2]) {
+					//if the puzzle ID is null, but part is specified, do nothing.
+					// i.e. this is an update to the solver pool (NOT IMPLEMENTED)
+				}else{
+					_pbrest_get(path, _pb_get_puzzlelist_cb);
+				}
+			} else if(splitpath[0]=="rounds") {
+				if(splitpath[1]) {
+					if(splitpath[2]) {
+						//_pbrest_get(path, _pb_get_round_part_cb);
+						_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
+					} else {
+						//_pbrest_get(path, _path_get_round_cb);
+						//_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
+						_pbrest_get("rounds", _pb_get_roundlist_cb);
+					}
+				} else {
+					_pb_log("requesting _pb_roundlist");
+					_pbrest_get(path, _pb_get_roundlist_cb);
+				}
+			} else if (splitpath[0]=="solvers") {
+				if(splitpath[1]) {
+					if(splitpath[2]) {
+						if (splitpath[2]=="puzzles"){
+							//this is a little hacky.
+							path = "solvers/"+splitpath[1]+"/puzz";
+						}
+						_pbrest_get(path, _pb_get_solver_part_cb);
+					} else {
+						_pbrest_get(path, _pb_get_solver_cb);
+						_pbrest_get("solvers", _pb_get_solverlist_cb);
+					}
+				} else {
+					_pbrest_get(path, _pb_get_solverlist_cb);
+				}
+			}else if (splitpath[0]=="locations"){
+				//TODO: not implemented
+			} else {
+				_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
+			}
 		}
-	    } else if(splitpath[0]=="rounds") {
-		if(splitpath[1]) {
-		    if(splitpath[2]) {
-			//_pbrest_get(path, _pb_get_round_part_cb);
-			_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
-		    } else {
-			//_pbrest_get(path, _path_get_round_cb);
-			//_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
-			_pbrest_get("rounds", _pb_get_rounds_cb);
-		    }
-		} else {
-		    _pb_log("requesting _pb_roundlist");
-		    _pbrest_get(path, _pb_get_rounds_cb);
-		}
-	    } else if (splitpath[0]=="solvers") {
-		//hmm what happens now?
-	    } else {
-		_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
-	    }
 	}
-    }
     
-	function _pb_get_rounds_cb(response, ioArgs) {
+	function _pb_get_roundlist_cb(response, ioArgs) {
 		// round updates
-		_pb_log("_pb_get_rounds_cb()");
+		_pb_log("_pb_get_roundlist_cb()");
 		new_pb_roundlist = response;
 		var haveround = Array();
 		var _i;
@@ -262,15 +291,15 @@ define([
 		for(_i in new_pb_roundlist) {
 			_roundname = new_pb_roundlist[_i];
 			if(haveround[_roundname] !== 1) {
-				_pb_log("_pb_get_rounds_cb: firing off _pb_cb_add_round callback for "+_roundname);
+				_pb_log("_pb_get_roundlist_cb: firing off _pb_cb_add_round callback for "+_roundname);
 				_pb_cb_add_round(_roundname);
 			}
 		}
 		_pb_roundlist = new_pb_roundlist;
 	}
     
-	function _pb_get_puzzles_cb(puzzlelist, ioArgs) {
-		_pb_log("_pb_get_puzzles_cb: puzzlelist: "+puzzlelist+" (UNIMPLEMENTED)");
+	function _pb_get_puzzlelist_cb(puzzlelist, ioArgs) {
+		_pb_log("_pb_get_puzzlelist_cb: puzzlelist: "+puzzlelist+" (UNIMPLEMENTED)");
 		_pb_totalPuzz = puzzlelist.length;
 		// diff and get new puzzles???
 	}
@@ -281,7 +310,7 @@ define([
 		// add to puzzstore
 		_pb_puzzstore.newItem(puzzle);
 		_pb_log("_pb_get_puzzle_cb: saving store");	
-		_pb_puzzstore.save({onComplete: _pb_save_complete_cb, onError: _pb_save_error_cb});
+		_pb_puzzstore.save({onComplete: _pb_puzzle_save_complete_cb, onError: _pb_save_error_cb});
 		// fire off callback
 		//_pb_cb_update_puzzle(puzzle);
 	}
@@ -294,37 +323,57 @@ define([
 			onItem: function(item) {
 				_pb_puzzstore_disable_handlers();
 				_pb_puzzstore.setValue(item,response.part,response.data);
-				_pb_puzzstore.save({onComplete: _pb_save_complete_cb, onError: _pb_save_error_cb});
+				_pb_puzzstore.save({onComplete: _pb_puzzle_save_complete_cb, onError: _pb_save_error_cb});
 				_pb_puzzstore_enable_handlers();
 			}
 		});
 		// fire off callback
-		_pb_cb_update_puzzle_part(response.id, response.part, response.data);
+		_pb_cb_received_updated_part("puzzle", response.id, response.part, response.data);
 	}
 	
-	function _pb_solverstore_client_update(solver, puzz){
-		_pb_log("_pb_solverstore_client_update(): solver "+solver+" is now in "+puzz);
-		// update client's changes in the store.
-//		_pb_solverstore.fetchItemByIdentity({
-//			identity: solver,
-//			onItem: function(item) {
-//				//_pb_solverstore_disable_handlers();
-//				_pb_solverstore.setValue(item,"puzz",puzz);
-///				_pb_solverstore.save({onComplete: _pb_save_complete_cb, onError: _pb_save_error_cb});
-//				var wrapdata = new Object();
-//				wrapdata.data = puzz;
-//				_pbrest_post("solvers/"+solver+"/puzz",
-//				wrapdata,_pb_post_puzzle_part_cb);
-//				//_pb_solverstore_enable_handlers();
-//			}
-//		});
-	}   
+	function _pb_get_solverlist_cb(solverlist, ioArgs) {
+		_pb_log("_pb_get_solverlist_cb: solverlist: "+solverlist+" (UNIMPLEMENTED)");
+		_pb_totalSolvers = solverlist.length;
+	}
     
-	function _pb_save_complete_cb() {
-		_pb_log("store save successful");
+	function _pb_get_solver_cb(solver, ioArgs) {
+		_pb_log("_pb_get_solver_cb: solver: "+solver.name);
+		_pb_solverArrivalCounter++;
+		// add to solverstore
+		_pb_solverstore.newItem(solver);
+		_pb_log("_pb_get_solver_cb: saving store");	
+		_pb_solverstore.save({onComplete: _pb_solver_save_complete_cb, onError: _pb_save_error_cb});
+		// fire off callback
+		//_pb_cb_update_puzzle(puzzle);
+	}
+	
+	function _pb_get_solver_part_cb(response, ioArgs){
+		_pb_log("_pb_get_solver_part_cb()");
+		// update in store from server
+		_pb_solverstore.fetchItemByIdentity({
+			identity: response.id,
+			onItem: function(item) {
+				_pb_solverstore_disable_handlers();
+				_pb_solverstore.setValue(item,response.part,response.data);
+				_pb_solverstore.save({onComplete: _pb_solver_save_complete_cb, onError: _pb_save_error_cb});
+				_pb_solverstore_enable_handlers();
+			}
+		});
+		// fire off callback
+		_pb_cb_received_updated_part("solver", response.id, response.part, response.data);
+	}
+	
+	
+	function _pb_puzzle_save_complete_cb() {
+		_pb_log("puzzstore save successful");
 		_pb_cb_update_puzzle();
 	}
     
+	function _pb_solver_save_complete_cb(){
+		_pb_log("solverstore save successful");
+		_pb_cb_update_solver();
+	}
+	
 	function _pb_save_error_cb() {
 		_pb_log("store save failed");
 		alert("store save failed");
@@ -332,12 +381,21 @@ define([
 	}
     
 	function _pb_post_puzzle_part_cb(response, ioArgs){
-	    _pb_log("_pb_post_puzzle_part_cb()");
-	    if(response.error) {
-		var path = "puzzles/"+response.id+"/"+response.part;
-		_pb_cb_warning("Error while attempting to update ["+path+"] to ["+response.data+"]: " + response.error);
-		_pbrest_get(path, _pb_get_puzzle_part_cb);
-	    }
+		_pb_log("_pb_post_puzzle_part_cb()");
+		if(response != null && "error" in response) {			
+			var path = "puzzles/"+response.id+"/"+response.part;
+			_pb_cb_warning("Error while attempting to update ["+path+"] to ["+response.data+"]: " + response.error);
+			_pbrest_get(path, _pb_get_puzzle_part_cb);
+		}
+	}
+	
+	function _pb_post_solver_part_cb(response, ioArgs){
+		_pb_log("_pb_post_solver_part_cb()");
+		if(response != null &&"error" in response) {
+			var path = "solvers/"+response.id+"/"+response.part;
+			_pb_cb_warning("Error while attempting to update ["+path+"] to ["+response.data+"]: " + response.error);
+			_pbrest_get(path, _pb_get_solver_part_cb);
+		}
 	}
     
 	function _pb_create_round_cb(response, ioArgs) {
@@ -359,7 +417,7 @@ define([
 		// get initial data version first
 		_pbrest_get("version",_pb_get_version_cb_init);
 		// get rounds here?
-		_pbrest_get("rounds",_pb_get_rounds_cb_init); //FIXME does this not work???
+		_pbrest_get("rounds",_pb_get_roundlist_cb_init); //FIXME does this not work???
 	}
     
 	// 1a. have version, proceed to phase 2
@@ -370,17 +428,18 @@ define([
 	}
     
 	// 1b. have roundlist, save for later
-	function _pb_get_rounds_cb_init(response, ioArgs) {
+	function _pb_get_roundlist_cb_init(response, ioArgs) {
 		// initial round list
-		_pb_log("_pb_get_rounds_cb_init(): have ["+response+"]");
+		_pb_log("_pb_get_roundlist_cb_init(): have ["+response+"]");
 		_pb_roundlist = response;
 	}    
 	
 	// 2. Phase 2 init: request client UID (clientindex) and puzzlelist
 	function _pb_init_phase2() {
 		_pb_log("_pb_init_phase2()");
-		// connect store update to handler
-		_pb_puzzstore_enable_handlers(); 		
+		// connect stores update to handlers
+		_pb_puzzstore_enable_handlers(); 
+		_pb_solverstore_enable_handlers();		
 	
 		// get client version (and start meteor in CB)
 		_pbrest_get("client",_pb_get_client_index_cb_init);
@@ -414,23 +473,23 @@ define([
     
 	// 2.b.2 the array of puzzles we requested has arrived. process them one by one.
 	function _pb_get_puzzles_cb_init(puzzles, ioArgs) {
-	    _pb_log("_pb_get_puzzles_cb_init: received "+puzzles.length+" puzzles");
-	    for (var i in puzzles){
-		var puzzle = puzzles[i];
-		_pb_get_puzzle_cb_init(puzzle, ioArgs);
-	    }
+		_pb_log("_pb_get_puzzles_cb_init: received "+puzzles.length+" puzzles");
+		for (var i in puzzles){
+			var puzzle = puzzles[i];
+			_pb_get_puzzle_cb_init(puzzle, ioArgs);
+		}
 	}
 
 	// 2.b.2.a have a puzzle, add to store, increment arrival counter, and save store once all are arrived
 	function _pb_get_puzzle_cb_init(puzzle, ioArgs) {
-	    _pb_log("_pb_get_puzzle_cb_init: puzzle["+puzzle.id+"] "+puzzle.name);
-	    _pb_puzzstore.newItem(puzzle);
-	    _pb_puzzArrivalCounter++;
-	    if (_pb_puzzArrivalCounter == _pb_totalPuzz){
-		// we have all the puzzles ? (TODO fix this to actually check if this is true!)
-		_pb_log("_pb_get_puzzle_cb_init: saving store");
-		_pb_puzzstore.save({onComplete: _pb_puzzstore_save_done_init, onError: _pb_puzzstore_save_failed_init});
-	    }
+		_pb_log("_pb_get_puzzle_cb_init: puzzle["+puzzle.id+"] "+puzzle.name);
+		_pb_puzzstore.newItem(puzzle);
+		_pb_puzzArrivalCounter++;
+		if (_pb_puzzArrivalCounter == _pb_totalPuzz){
+			// we have all the puzzles ? (TODO fix this to actually check if this is true!)
+			_pb_log("_pb_get_puzzle_cb_init: saving store");
+			_pb_puzzstore.save({onComplete: _pb_puzzstore_save_done_init, onError: _pb_puzzstore_save_failed_init});
+		}
 	}
     
 
@@ -470,11 +529,11 @@ define([
 
 	// 2.c.2 the array of solvers we requested has arrived. process them one by one.
 	function _pb_get_solvers_cb_init(solvers, ioArgs) {
-	    _pb_log("_pb_get_solvers_cb_init: received "+solvers.length+" solvers");
-	    for (var i in solvers) {
-		var solver = solvers[i];
-		_pb_get_solver_cb_init(solver, ioArgs);
-	    }
+		_pb_log("_pb_get_solvers_cb_init: received "+solvers.length+" solvers");
+		for (var i in solvers) {
+			var solver = solvers[i];
+			_pb_get_solver_cb_init(solver, ioArgs);
+		}
 	}
 
 	// 2.c.2.a have a solver, add to store, increment arrival counter, and save store once all are arrived
@@ -551,11 +610,13 @@ define([
 	},
 	
 	pb_init: function(cb_init_complete, cb_add_round, cb_update_puzzle, 
-		cb_update_puzzle_part, cb_error, cb_warning, cb_connection_status, cb_connection_mode) {
+		cb_received_updated_part, cb_update_solver, cb_error, cb_warning, 
+		cb_connection_status, cb_connection_mode) {
 	    _pb_cb_init_complete = cb_init_complete;
 	    _pb_cb_add_round = cb_add_round;
 	    _pb_cb_update_puzzle = cb_update_puzzle;    
-	    _pb_cb_update_puzzle_part = cb_update_puzzle_part;
+	    _pb_cb_received_updated_part = cb_received_updated_part;
+		_pb_cb_update_solver = cb_update_solver;
 	    _pb_cb_error = cb_error;
 	    _pb_cb_warning = cb_warning;
 	    _pb_cb_connection_status = cb_connection_status;
@@ -564,7 +625,7 @@ define([
 	    // kick-off initialization process
 	    _pb_init();
 		
-	    return {puzzstore: _pb_puzzstore, solverstore: _pb_solverstore, update_solverstore: _pb_solverstore_client_update};
+	    return {puzzstore: _pb_puzzstore, solverstore: _pb_solverstore};
 	},
 	
 	pb_log: _pb_log,
