@@ -65,7 +65,6 @@ sub part_POST : Runmode {
     my $json = $self->query->param('POSTDATA');
     my $partref = $self->from_json($json);
     if(exists($partref->{'data'})) {
-	#TODO API me up
 	#print STDERR "PB::REST::Puzzles::part_POST: have data for puzzle $id $part = $partref->{'data'}";
 	PB::API::update_puzzle_part($id,$part,$partref->{'data'});
     } else {

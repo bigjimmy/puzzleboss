@@ -632,22 +632,13 @@ sub _update_puzzle_part_files {
     }
 }
 
-sub _send_meteor_version {
-    my $dataversion = _get_log_index_db();
-    if(PB::Meteor::message($PB::Config::METEOR_VERSION_CHANNEL, $dataversion) <= 0) {
-	debug_log("PB::API::_send_meteor_version() sending version $dataversion over meteor\n",0);
-	return -1;
-    }
-    return 1;
-}
-
 sub _update_puzzle_part_db {
     my $id = shift;
     my $part = shift;
     my $val = shift;
 
     # TODO: fix SQL injection attack vector through $part
-    my $sql = 'UPDATE `puzzle_view` SET `'.$part.'` = ? WHERE `id` LIKE ? LIMIT 1';
+    my $sql = 'UPDATE `puzzle_view` SET `'.$part.'` = ? WHERE `name` LIKE ? LIMIT 1';
     my $c = $dbh->do($sql, undef, $val, $id);
     
     if(defined($c)) {
@@ -1780,6 +1771,19 @@ sub get_client_index {
       return _get_client_index_db();
   }
 }
+
+###############
+# Data Version
+###############
+sub _send_meteor_version {
+    my $dataversion = _get_log_index_db();
+    if(PB::Meteor::message($PB::Config::METEOR_VERSION_CHANNEL, $dataversion) <= 0) {
+	debug_log("PB::API::_send_meteor_version() sending version $dataversion over meteor\n",0);
+	return -1;
+    }
+    return 1;
+}
+
 
 
 1;
