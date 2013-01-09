@@ -71,9 +71,6 @@ define([
     }
     
 	function _pbrest_get(path,loadcb) {
-		//we need to chill out from sending updates while we're getting.
-		//why does this work here in the get?????
-		//_pb_store_disable_handlers(_pb_puzzstore);
 		xhr.get({
 			url: _pb_config.pbrest_root+"/"+path,
 			sync: false,
@@ -90,6 +87,7 @@ define([
 		if(!(oldValue==newValue)) {
 			var wrapdata = new Object();
 			wrapdata.data = newValue;
+   		        _pb_log("_pb_puzzstore_data_handler: posting change for puzzle["+item.id+"]="+_pb_puzzstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]");
 			_pbrest_post("puzzles/"+_pb_puzzstore.getLabel(item)+"/"+attribute,
 				wrapdata,_pb_post_puzzle_part_cb);
 		}
@@ -334,10 +332,12 @@ define([
 	}
     
 	function _pb_post_puzzle_part_cb(response, ioArgs){
-		_pb_log("_pb_post_puzzle_part_cb() (UNIMPLEMENTED)");
-		//console.dir(response);
-		//TODO: check if this response is an error and if it is, pass to _pb_cb_warning that we could not update
-	
+	    _pb_log("_pb_post_puzzle_part_cb()");
+	    if(response.error) {
+		var path = "puzzles/"+response.id+"/"+response.part;
+		_pb_cb_warning("Error while attempting to update ["+path+"] to ["+response.data+"]: " + response.error);
+		_pbrest_get(path, _pb_get_puzzle_part_cb);
+	    }
 	}
     
 	function _pb_create_round_cb(response, ioArgs) {

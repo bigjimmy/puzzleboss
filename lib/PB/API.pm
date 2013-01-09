@@ -608,7 +608,7 @@ sub update_puzzle_part {
     
     if($PB::Config::PB_DATA_WRITE_DB > 0) {
 	my $rval = _update_puzzle_part_db($id, $part, $val);
-	if($rval < 0) {
+	if(looks_like_number($rval) && $rval < 0) {
 	    return $rval;
 	}
     }
@@ -1499,6 +1499,9 @@ sub get_log_diff {
 	$curr_pos = 0;
     }
     chomp($curr_pos);
+    if($curr_pos < $log_pos) {
+	return "from log position ($log_pos) cannot be greater than current (to) log position ($curr_pos)";
+    }
     if($PB::Config::PB_DATA_READ_DB_OR_FILES eq "FILES") {
         return _get_log_diff_files($log_pos, $curr_pos);
     } else {
