@@ -102,6 +102,11 @@ define([
 		//TODO: perhaps our interface should be restricted to moving one at a time?
 		var solver = nodes[0].innerHTML;
 		var puzz = target.node.id;
+		
+		if (puzz == "poolcontainer"){
+			//the null puzzle
+			puzz = "";
+		}
 
 		pbmrc.pb_log("dropped_on_puzz(): solver "+solver+" is now in "+puzz);
 		// update client's changes in the store.
@@ -137,7 +142,7 @@ define([
 	}
 	
 	function update_solver_ui(item, attribute, oldValue, newValue){
-		pbmrc.pb_log("update_solver_ui()");
+		pbmrc.pb_log("update_solver_ui(): name="+item.name+" attribute="+attribute+" oldValue="+oldValue+" newValue="+newValue);
 		if (attribute == "puzz"){
 			if (newValue == ""){
 				poolBox.insertNodes(false, [dom.byId("solver_div_"+item.name)]);

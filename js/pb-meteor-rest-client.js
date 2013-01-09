@@ -95,12 +95,12 @@ define([
 	}
 	
 	function _pb_solverstore_data_set_handler(item, attribute, oldValue, newValue) {
-		_pb_log("_pb_solverstore_data_handler("+item.id+","+attribute+","+oldValue+","+newValue+")");
+		//_pb_log("_pb_solverstore_data_set_handler("+item.id+","+attribute+","+oldValue+","+newValue+")");
 		// called when solver data store changes from our user
 		if(!(oldValue==newValue)) {
 			var wrapdata = new Object();
 			wrapdata.data = newValue;
-			_pb_log("_pb_solverstore_data_handler: posting change for solver["+item.id+"]="+_pb_solverstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]");
+			_pb_log("_pb_solverstore_data_set_handler: posting change for solver["+item.id+"]="+_pb_solverstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]");
 			_pbrest_post("solvers/"+_pb_solverstore.getLabel(item)+"/"+attribute,
 			wrapdata,_pb_post_solver_part_cb);
 		}
