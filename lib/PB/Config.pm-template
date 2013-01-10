@@ -2,15 +2,18 @@ package PB::Config;
 
 use strict;
 
-# Automatic check for dev version
 our $PB_DEV_VERSION = "";
-if($0 =~ m/puzzlebitch(\-.+?)\// ||
-   (exists($ENV{'REQUEST_URI'}) && ($ENV{'REQUEST_URI'} =~ m/puzzlebitch(\-.+?)\//)) ||
-   (exists($ENV{'SCRIPT_NAME'}) && ($ENV{'SCRIPT_NAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
-   (exists($ENV{'SCRIPT_FILENAME'}) && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
-   (exists($ENV{'SCRIPT_URL'}) && ($ENV{'SCRIPT_URL'} =~ m/puzzlebitch(\-.+?)\//))
-    ) {
-    $PB_DEV_VERSION = $1;
+if(exists($ENV{'PB_DEV_VERSION'})) {
+    $PB_DEV_VERSION = $ENV{'PB_DEV_VERSION'};
+} else {
+    if($0 =~ m/puzzlebitch(\-.+?)\// ||
+       (exists($ENV{'REQUEST_URI'}) && ($ENV{'REQUEST_URI'} =~ m/puzzlebitch(\-.+?)\//)) ||
+       (exists($ENV{'SCRIPT_NAME'}) && ($ENV{'SCRIPT_NAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
+       (exists($ENV{'SCRIPT_FILENAME'}) && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
+       (exists($ENV{'SCRIPT_URL'}) && ($ENV{'SCRIPT_URL'} =~ m/puzzlebitch(\-.+?)\//)) 
+	) {
+	$PB_DEV_VERSION = $1;
+    }
 }
 
 # Default settings that can be overridden in LocalConfig.pl
