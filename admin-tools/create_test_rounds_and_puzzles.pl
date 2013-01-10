@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
-
-use lib qw(../bin);
+use lib $ENV{'PB_PATH'}."/bin";
 BEGIN {
     require 'pblib.cfg';
 }
