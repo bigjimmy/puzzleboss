@@ -39,7 +39,6 @@ define([
 	roundlist.push("All");
 	
 	function init_complete_cb() {
-	    pbmrc.pb_log("init_complete_cb()");	
 	    // remove the little waitDiv notice
 	    dom.byId("puzzles_layout").removeChild(waitDiv);
 		poolBox = new Source(dom.byId("poolcontainer"));
@@ -332,7 +331,6 @@ define([
 		
 		my_init: function(editable) {
 			my_editable = editable;
-			pbmrc.pb_log("my_init()");
 			//please wait
 			waitDiv = domConstruct.create("div")
 			waitDiv.innerHTML="<b>Please wait, while data loads. (This could take a while!)</b></br>";
