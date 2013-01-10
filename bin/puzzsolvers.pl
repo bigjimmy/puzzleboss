@@ -68,8 +68,8 @@ Content-type: text/html
 <body class="tundra">
 <h1>Puzzles-n-solvers</h1>
 <h2>Solver Pool</h2>
-<div id="poolcontainer" class = "container"></div>
-<div id="puzzlecontainer"></div>
+<div id="poolcontainer" class = "puzzle_container"></div>
+<div id="puzzles_layout"></div>
 <div id="statuscontainer"></div>
 </body>
 </html>
