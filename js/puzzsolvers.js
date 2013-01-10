@@ -26,8 +26,7 @@ define([
 	var update_puzz_ui_handler_connection;
 	
 	var poolBox;
-	var puzzBoxes = new Array();
-	var puzzBoxDivs = new Array();
+	var puzzBoxes;
 	var waitDiv;
 	var status_button;
 	var meteor_status;
@@ -42,22 +41,19 @@ define([
 	function init_complete_cb() {
 	    pbmrc.pb_log("init_complete_cb()");	
 	    // remove the little waitDiv notice
-	    dom.byId("puzzlecontainer").removeChild(waitDiv);
+	    dom.byId("puzzles_layout").removeChild(waitDiv);
 		poolBox = new Source(dom.byId("poolcontainer"));
 		//hooks up our listeners
 		pbmrc.pb_log("init_complete_cb(): enabling connection handlers");
 		enable_store_ui_handlers();
 		
 		pbmrc.pb_log("init_complete_cb(): adding puzzleboxes");
-		puzzBoxDivs = new Array();
 		puzzBoxes = new Array(); 
 		puzzstore.fetch({
 			onItem: function(item){
-				if (item.answer == ""){
-					puzzBoxDivs[item.name] = domConstruct.create("div", {class: "container", id: item.name});
-					puzzBoxDivs[item.name].appendChild(domConstruct.create("p",{innerHTML: item.name}));
-					puzzBoxes[item.name] = new Source(puzzBoxDivs[item.name]);					
-					dom.byId("puzzlecontainer").appendChild(puzzBoxDivs[item.name]);
+				if (item.answer == "" || item.status != "Solved"){
+					puzzBoxes[puzzstore.getValue(item,"name")] = new Source(create_puzzle_node(item));					
+					dom.byId("puzzles_layout").appendChild(puzzBoxes[puzzstore.getValue(item,"name")].node);
 				}
 			}
 		});
@@ -69,7 +65,7 @@ define([
 				if (item.puzz == ""){
 					poolBox.insertNodes(false,[node]);
 				}else{
-					puzzBoxes[item.puzz].insertNodes(false,[node]);
+					puzzBoxes[solverstore.getValue(item,"puzz")].insertNodes(false,[node]);
 				}
 			}
 		});
@@ -97,18 +93,28 @@ define([
 		return domConstruct.create("div", {class: "solver", id: "solver_div_"+item.name, innerHTML: item.name});
 	}
 	
+	function create_puzzle_node(item){
+		return node = domConstruct.create("div", {class: "puzzle_container", id: "puzzle_div_"+item.name, innerHTML: item.name});
+	}
+	
 	function dropped_on_puzz(source, nodes, copy, target){
 		//Note that this only works if there's exactly one node being dnd'd. 
 		//TODO: perhaps our interface should be restricted to moving one at a time?
+		//getting the solver this way is hacky.
 		var solver = nodes[0].innerHTML;
-		var puzz = target.node.id;
 		
-		if (puzz == "poolcontainer"){
+		//need to translate target source name to DB puzzle name
+		var target_source_name = target.node.id;
+		var puzz;
+		if (target_source_name == "poolcontainer"){
 			//the null puzzle
 			puzz = "";
+		}else{
+			var splitpuzz = target_source_name.split('_');
+			puzz = splitpuzz[2];
 		}
 
-		pbmrc.pb_log("dropped_on_puzz(): solver "+solver+" is now in "+puzz);
+		pbmrc.pb_log("dropped_on_puzz(): solver "+solver+" dropped on "+puzz);
 		// update client's changes in the store.
 		solverstore.fetchItemByIdentity({
 			identity: solver,
@@ -137,7 +143,7 @@ define([
 		if (item.puzz==""){
 			poolBox.delItem(item.name)
 		}else{
-			puzzBoxes[item.puzz].delItem(item.name);
+			puzzBoxes[solverstore.getValue(item,"puzz")].delItem(item.name);
 		}
 	}
 	
@@ -165,24 +171,22 @@ define([
 		pbmrc.pb_log("add_puzz_ui()");
 		
 		if (item.answer == ""){
-			puzzBoxDivs[item.name] = domConstruct.create("div", {class: "container", id: item.name});
-			puzzBoxDivs[item.name].appendChild(domConstruct.create("p",{innerHTML: item.name}));
-			puzzBoxes[item.name] = new Source(puzzBoxDivs[item.name]);					
-			dom.byId("puzzlecontainer").appendChild(puzzBoxDivs[item.name]);
+			puzzBoxes[item.name] = new Source(create_puzzle_node(item));					
+			dom.byId("puzzles_layout").appendChild(puzzBoxes[item.name].node);
 		}
 	}
 	
 	function remove_puzz_ui(item){
 		pbmrc.pb_log("remove_puzz_ui()");
 		
-		dom.byID("puzzlecontainer").removeChild(puzzBoxDivs[item.name]);
+		dom.byID("puzzles_layout").removeChild(puzzBoxes[item.name].node);
 	}
 	
 	function update_puzz_ui(item, attribute, oldValue, newValue){
-		pbmrc.pb_log("update_puzz_ui()");
+		pbmrc.pb_log("update_puzz_ui(): name="+item.name+" attribute="+attribute+" oldValue="+oldValue+" newValue="+newValue);
 		if (attribute == "status" && newValue == "Solved" && item.answer != "" && oldValue != "Solved"){
 			//this represents a puzzle switched to solved, and with a non-null answer
-			delete_puzz_ui(item);
+			remove_puzz_ui(item);
 		}else if(attribute == "status" && oldValue == "Solved" && newValue != "Solved"){
 			//this represents a puzzle switched from solved to unsolved
 			add_puzz_ui(item);
@@ -213,10 +217,10 @@ define([
 
 
 	function error_cb(msg) {
-	    dom.byId("puzzlecontainer").removeChild(waitDiv);
-		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
-		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: msg}));
-		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
+	    dom.byId("puzzles_layout").removeChild(waitDiv);
+		dom.byId("puzzles_layout").appendChild(domConstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
+		dom.byId("puzzles_layout").appendChild(domConstruct.create("p",{innerHTML: msg}));
+		dom.byId("puzzles_layout").appendChild(domConstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
 	}
 	
 	function warning_cb(msg) {
@@ -332,7 +336,7 @@ define([
 			//please wait
 			waitDiv = domConstruct.create("div")
 			waitDiv.innerHTML="<b>Please wait, while data loads. (This could take a while!)</b></br>";
-			dom.byId("puzzlecontainer").appendChild(waitDiv);
+			dom.byId("puzzles_layout").appendChild(waitDiv);
 	    
 			pbmrc.pb_log("my_init: creating status indicator / button");
 			status_button = new formbutton({
