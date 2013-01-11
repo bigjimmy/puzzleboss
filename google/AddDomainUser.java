@@ -46,7 +46,7 @@ public class AddDomainUser {
 	opt.addOption(OptionBuilder.withLongOpt("password").withArgName("PASSWORD").hasArg().isRequired().withDescription("Initial password for user.").create("p"));
 	opt.addOption(OptionBuilder.withLongOpt("firstname").withArgName("FIRSTNAME").hasArg().isRequired().withDescription("First name of user.").create("f"));
 	opt.addOption(OptionBuilder.withLongOpt("lastname").withArgName("LASTNAME").hasArg().isRequired().withDescription("Last name of user.").create("l"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a");
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);

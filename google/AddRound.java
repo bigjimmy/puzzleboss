@@ -54,14 +54,14 @@ public class AddRound {
 	opt.addOption(OptionBuilder.withLongOpt("domain").withArgName("DOMAIN").hasArg().isRequired().withDescription("Domain in which to add round.").create("d"));
 	opt.addOption(OptionBuilder.withLongOpt("round").withArgName("ROUND_NAME").hasArg().isRequired().withDescription("Round Name (Subfolder for new spreadsheet)").create("r"));
 	opt.addOption(OptionBuilder.withLongOpt("hunt").withArgName("HUNT_NAME").hasArg().isRequired().withDescription("Hunt Name (Root folder for new spreadsheet)").create("h"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a");
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);
 	    domainString = cl.getOptionValue('d');
 	    roundString = cl.getOptionValue('r');
 	    huntString = cl.getOptionValue('h');
-	    passSstring = cl.getOptionValue('a');
+	    passString = cl.getOptionValue('a');
 	} catch (MissingOptionException moe) {
 	    HelpFormatter formatter = new HelpFormatter();
 	    formatter.printHelp( commandlineString, opt );

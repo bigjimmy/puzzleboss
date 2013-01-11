@@ -43,7 +43,7 @@ public class AddPuzzleDocument {
 	opt.addOption(OptionBuilder.withLongOpt("round").withArgName("ROUND_NAME").hasArg().isRequired().withDescription("Round Name (Subfolder for new document)").create("r"));
 	opt.addOption(OptionBuilder.withLongOpt("hunt").withArgName("HUNT_NAME").hasArg().isRequired().withDescription("Hunt Name (Root folder for new document)").create("h"));
 	opt.addOption(OptionBuilder.withLongOpt("templatefile").withArgName("TEMPLATE_FILE").hasArg().withDescription("Template file (initial contents of new document)").create("t"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a");
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);

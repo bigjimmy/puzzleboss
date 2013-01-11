@@ -52,7 +52,7 @@ public class AddHunt {
 	Options opt = new Options();
 	opt.addOption(OptionBuilder.withLongOpt("domain").withArgName("DOMAIN").hasArg().isRequired().withDescription("Domain in which to create hunt.").create("d"));
 	opt.addOption(OptionBuilder.withLongOpt("hunt").withArgName("HUNT_NAME").hasArg().isRequired().withDescription("Hunt Name (Root folder for new spreadsheet)").create("h"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a");
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);

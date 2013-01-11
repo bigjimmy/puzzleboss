@@ -38,7 +38,7 @@ public class DeleteEntries {
 	Options opt = new Options();
 	opt.addOption(OptionBuilder.withLongOpt("domain").withArgName("DOMAIN").hasArg().isRequired().withDescription("Domain in which to add round.").create("d"));
 	opt.addOption(OptionBuilder.withLongOpt("entry").withArgName("PUZZLE_NAME").hasArg().isRequired().withDescription("Entry name to delete").create("e"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a");
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);

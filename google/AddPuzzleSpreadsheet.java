@@ -60,7 +60,7 @@ public class AddPuzzleSpreadsheet {
 	opt.addOption(OptionBuilder.withLongOpt("hunt").withArgName("HUNT_NAME").hasArg().isRequired().withDescription("Hunt Name (Root folder for new spreadsheet)").create("h"));
 	opt.addOption(OptionBuilder.withLongOpt("twikiurl").withArgName("TWIKI_URL").hasArg().isRequired().withDescription("The URL to the puzzle TWiki page.").create("t"));
 	opt.addOption(OptionBuilder.withLongOpt("puzzleurl").withArgName("PUZZLE_URL").hasArg().isRequired().withDescription("The URL to the puzzle itself").create("u"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a");
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);
