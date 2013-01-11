@@ -570,7 +570,9 @@ sub _get_puzzle_db {
     my $res;
     my $sql = 'SELECT * FROM `puzzle_view`';
     my $sth;
+    my $always_return_array = 0;
     if ($idin eq '*') {
+	$always_return_array = 1;
 	$sth  = $dbh->prepare($sql);
 	$sth->execute() or die $dbh->errstr;;
     } else {
@@ -587,7 +589,7 @@ sub _get_puzzle_db {
 	}
 	push @rows, $res;
     }
-    if(@rows > 1) {
+    if($always_return_array > 0 | @rows > 1) {
 	return \@rows;
     } else {
 	return \%{$rows[0]};

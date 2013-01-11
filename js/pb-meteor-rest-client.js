@@ -10,28 +10,32 @@ define([
     "dojo/_base/json",
     "dojo/data/ItemFileWriteStore",
        ], 
-       function(parser, connect, array, xhr, dojo, ItemFileWriteStore) {
+    function(parser, connect, array, xhr, dojo, ItemFileWriteStore) {
 	   
     /////////////////////////////////////////////////////////////////////////////////
     // Internal vars
     /////////////////////////////////////////////////////////////////////////////////
-	var debug_lvl = 1;
+	var debug_lvl = 100;
 	
-    var _pb_puzzstore_structure = {identifier: 'name', label: 'name', items: []};
-    var _pb_puzzstore = new ItemFileWriteStore({data: _pb_puzzstore_structure});
-    var _pb_puzzstore_init_complete = 0;
+	var _pb_puzzstore_structure = {identifier: 'name', label: 'name', items: []};
+	var _pb_puzzstore = new ItemFileWriteStore({data: _pb_puzzstore_structure});
+	var _pb_puzzstore_init_complete = 0;
 	
-    var _pb_solverstore_structure = {identifier: 'name', label: 'name', items: []};
-    var _pb_solverstore = new ItemFileWriteStore({data: _pb_solverstore_structure});
-    var _pb_solverstore_init_complete = 0;
+	var _pb_solverstore_structure = {identifier: 'name', label: 'name', items: []};
+	var _pb_solverstore = new ItemFileWriteStore({data: _pb_solverstore_structure});
+	var _pb_solverstore_init_complete = 0;
+	
+	var _pb_dataversion = -1;
 
-    var _pb_dataversion = -1;
-    var _pb_clientindex;
-    var _pb_puzzArrivalCounter = 0;
-    var _pb_solverArrivalCounter = 0;
-    var _pb_totalPuzz = 0;
+	var _pb_meteor_dataversion_enabled = true;
+	var _pb_dataversion_queued = -1;
+
+	var _pb_clientindex;
+	var _pb_puzzArrivalCounter = 0;
+	var _pb_solverArrivalCounter = 0;
+	var _pb_totalPuzz = 0;
 	var _pb_totalSolvers = 0;
-
+	
 	var _pb_roundlist = null;
 	var _pb_config = new Object();
 	var _pb_puzzstore_onset_handler_connection;
@@ -49,6 +53,7 @@ define([
 	var _pb_cb_warning;
 	var _pb_cb_connection_status;
 	var _pb_cb_connection_mode;
+	var _pb_filter_version_diff;
     
     
 	/////////////////////////////////////////////////////////////////////////////////
@@ -141,6 +146,7 @@ define([
 		Meteor.joinChannel(_pb_config.meteor_version_channel,1);
 		Meteor.mode = 'stream';
 		_pb_log("_pb_meteor_init: connecting meteor"+" (_pb_clientindex "+_pb_clientindex+")",1);
+//	    Meteor.debugmode=true;
 		Meteor.connect();
 		_pb_cb_connection_mode(Meteor.mode);
 	}
@@ -166,7 +172,8 @@ define([
     
 	function _pb_meteor_statuschanged_cb(newstatus) {
 		_pb_log("_pb_meteor_statuschanged_cb(),2");
-		// Statuses:0 = Uninitialised,
+		// Statuses
+		//0 = Uninitialised,
 		//1 = Loading stream,
 		//2 = Loading controller frame,
 		//3 = Controller frame timeout, retrying.
@@ -194,13 +201,25 @@ define([
 	}
     
 	function _pb_meteor_process_cb(version) {
-		_pb_log("_pb_meteor_process_cb("+version+")",2);
-		//alert("meteor has:"+version);
-		//dojo.byId("debugme").innerHTML += " "+version;
-		if(version > _pb_dataversion) {
-			_pb_log("_pb_meteor_process_cb: new data exists! (we have version "+_pb_dataversion+", but "+version+" exists on server.)",1);
-			_pbrest_get("version/"+_pb_dataversion,_pb_get_version_diff_cb);
-		} 
+	    _pb_log("_pb_meteor_process_cb("+version+")",2);
+	    // disable receiving of meteor updates until we have finished processing this one! (i.e. in the callback from the pbrest)
+	    //alert("meteor has:"+version);
+	    //dojo.byId("debugme").innerHTML += " "+version;
+	    if(_pb_meteor_dataversion_enabled && (version > _pb_dataversion)) {
+		_pb_log("_pb_meteor_process_cb: new data exists! (we have version "+_pb_dataversion+", but "+version+" exists on server.)",1);
+		_pb_meteor_dataversion_enabled = false;
+		_pbrest_get("version/"+_pb_dataversion,_pb_get_version_diff_cb);
+	    } else if(!_pb_meteor_dataversion_enabled) {
+		_pb_log("_pb_meteor_process_cb: dataversion processing disabled",3);
+		if(version > _pb_dataversion_queued) {
+		    _pb_log("_pb_meteor_process_cb: updating queued version to "+version+" (for later processing)",3);
+		    _pb_dataversion_queued = version;
+		} else {
+		    _pb_log("_pb_meteor_process_cb: received version not newer than existing queued data version",3);
+		}
+	    } else {
+		_pb_log("_pb_meteor_process_cb: dataversion processing enabled, but version not newer than existing data version",3);
+	    }
 	}
     
     
@@ -210,30 +229,30 @@ define([
 	// Callback functions (non-init)
 	/////////////////////////////////////////////////////////////////////////////////
     
-	function _pb_get_version_cb(data, ioArgs) {
-		_pb_log("pb_get_version_cb()",2);
-		_pb_dataversion = data.version;
-		_pb_log("pb_get_version_cb:"+_pb_dataversion,2);
-	}
-    
 	function _pb_get_version_diff_cb(data, ioArgs) {
-		_pb_log("_pb_get_version_diff_cb()",2);
-		//console.dir(data);
-		_pb_dataversion = data.to;
-		for(i in data.diff) {
-			var path = data.diff[i];
+	    _pb_log("_pb_get_version_diff_cb()",2);
+	    //console.dir(data);
+	    _pb_dataversion = data.to;
+	    
+	    if(!_pb_meteor_dataversion_enabled && (_pb_dataversion_queued > _pb_dataversion)) {
+		_pb_meteor_dataversion_enabled = true;
+		_pbrest_get("version/"+_pb_dataversion, _pb_get_version_diff_cb);
+	    }
+	    _pb_meteor_dataversion_enabled = true;
+	    
+	    _pb_log("_pb_get_version_diff_cb: before filtering, we have "+data.diff.length+" items in diff",1);
+	    var diff = _pb_filter_version_diff(data.diff);
+	    _pb_log("_pb_get_version_diff_cb: after filtering, we have "+diff.length+" items in diff",1);
+	    for(i in diff) {
+			var path = diff[i];
 			var splitpath = path.split('/');
 			if(splitpath[0]=="puzzles") {
 				if(splitpath[1]) {
 					if(splitpath[2]) {
-						if (splitpath[2] == "solvers"){
-							//hacky, we need cursolvers too.
-							_pbrest_get("puzzles/"+splitpath[1]+"/cursolvers", _pb_get_puzzle_part_cb);
-						}
 						_pbrest_get(path, _pb_get_puzzle_part_cb);
 					} else {
 						_pbrest_get(path, _pb_get_puzzle_cb);
-						_pbrest_get("puzzles", _pb_get_puzzlelist_cb);
+						//_pbrest_get("puzzles", _pb_get_puzzlelist_cb);
 					}
 				}else if (splitpath[2]) {
 					//if the puzzle ID is null, but part is specified, do nothing.
@@ -265,7 +284,7 @@ define([
 						_pbrest_get(path, _pb_get_solver_part_cb);
 					} else {
 						_pbrest_get(path, _pb_get_solver_cb);
-						_pbrest_get("solvers", _pb_get_solverlist_cb);
+						//_pbrest_get("solvers", _pb_get_solverlist_cb);
 					}
 				} else {
 					_pbrest_get(path, _pb_get_solverlist_cb);
@@ -596,7 +615,7 @@ define([
 	}
     
 	function _pb_log(msg, lvl) {
-		if (lvl <= debug_lvl){
+		if (!lvl || lvl <= debug_lvl){
 			console.log(msg);
 		}
 	}
@@ -614,7 +633,7 @@ define([
 	
 	pb_init: function(cb_init_complete, cb_add_round, cb_update_puzzle, 
 		cb_received_updated_part, cb_update_solver, cb_error, cb_warning, 
-		cb_connection_status, cb_connection_mode) {
+		cb_connection_status, cb_connection_mode,filter_version_diff) {
 	    _pb_cb_init_complete = cb_init_complete;
 	    _pb_cb_add_round = cb_add_round;
 	    _pb_cb_update_puzzle = cb_update_puzzle;    
@@ -624,6 +643,7 @@ define([
 	    _pb_cb_warning = cb_warning;
 	    _pb_cb_connection_status = cb_connection_status;
 	    _pb_cb_connection_mode = cb_connection_mode;
+		_pb_filter_version_diff = filter_version_diff;
 	    
 	    // kick-off initialization process
 	    _pb_init();

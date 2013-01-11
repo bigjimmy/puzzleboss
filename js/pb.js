@@ -3,6 +3,7 @@ define([
      "../js/pb-meteor-rest-client.js",
      "dojo/parser", 
      "dojo/_base/connect",
+	 "dojo/_base/array",
      "dijit/TitlePane", 
      "dojox/grid/EnhancedGrid", 
      "dojox/grid/cells",
@@ -13,7 +14,7 @@ define([
      "dojo/domReady!",
      "dojo/dnd/Source",
        ], 
-    function(pbmrc, parser, connect, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, domready, dndsource) {
+    function(pbmrc, parser, connect, array, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, domready, dndsource) {
 
 	var puzzstore; // will be returned from pbmrc.pb_init()
 	var waitDiv;
@@ -245,6 +246,17 @@ define([
 	    }    
 	}
 	
+	var is_any_puzzles_patt = /^puzzles/;
+	var is_any_version_patt = /^version/;
+	var is_any_rounds_patt = /^rounds/;
+	function version_diff_filter(diff){
+	    // N.B. all pbmrcs must listen to version!
+		return array.filter(diff, function(item){
+			return is_any_version_patt.test(item) || is_any_puzzles_patt.test(item) || is_any_rounds_patt.test(item);
+		});
+	}
+
+	
 	function _updateHideSolved(){
 			var toggled = dom.byId("hidesolved").checked;
 		    if (toggled == true){
@@ -318,7 +330,8 @@ define([
 	    
 	    pbmrc.pb_log("my_init: calling pbmrc.pb_init");
 	    var ret = pbmrc.pb_init(init_complete_cb, add_round_cb, puzzle_update_cb, received_updated_part_cb, 
-				    solver_update_cb, error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb);
+				    solver_update_cb, error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb,
+					version_diff_filter);
 	    puzzstore = ret.puzzstore;
 	    create_new_round_ui("All");
 	},
