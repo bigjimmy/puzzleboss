@@ -571,6 +571,7 @@ sub _get_puzzle_db {
     my $sql = 'SELECT * FROM `puzzle_view`';
     my $sth;
     my $always_return_array = 0;
+    #This fixes problem with type error when there is exactly one puzzle in the DB.
     if ($idin eq '*') {
 	$always_return_array = 1;
 	$sth  = $dbh->prepare($sql);
@@ -1082,7 +1083,10 @@ sub _get_solver_db {
     my $res;
     my $sql = 'SELECT * FROM `solver_view`';
     my $sth;
+    #This fixes problem with type error when there is exactly one solver in the DB.
+    my $always_return_array = 0;
     if ($idin eq '*') {
+	$always_return_array = 1;
 	$sth  = $dbh->prepare($sql);
 	$sth->execute() or die $dbh->errstr;;
     } else {
@@ -1099,7 +1103,7 @@ sub _get_solver_db {
 	}
 	push @rows, $res;
     }
-    if(@rows > 1) {
+    if(@rows > 1 || $always_return_array) {
 	return \@rows;
     } else {
 	return \%{$rows[0]};
