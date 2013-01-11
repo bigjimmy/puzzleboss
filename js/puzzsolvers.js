@@ -3,17 +3,17 @@ define([
 	   "../js/pb-meteor-rest-client.js",
 	   "dojo/parser", 
 	   "dojo/_base/connect",
+	   "dojo/_base/lang",
 	   "dojo/_base/array",
 	   "dijit/Dialog", 
 	   "dijit/form/Button", 
-	   "dijit/form/TextBox",
 	   "dojo/dnd/Source",
 	   "dojo/topic",
 	   "dojo/dom",
 	   "dojo/dom-construct",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, dialog, formbutton, formtextbox, Source, topic, dom, domConstruct, domready) {
+    function(pbmrc, parser, connect, lang, array, dialog, formbutton, Source, topic, dom, domConstruct, domready) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -38,11 +38,15 @@ define([
 	
 	var roundlist = new Array();
 	roundlist.push("All");
-	
+
+	//disable copying from Sources (i.e. only allow move)
+	lang.extend(Source, {copyState: function(keyPressed,self) {return false;}});
+
 	function init_complete_cb() {
 	    // remove the little waitDiv notice
 	    dom.byId("puzzles_layout").removeChild(waitDiv);
-		poolBox = new Source(dom.byId("poolcontainer"));
+	    poolBox = new Source(dom.byId("poolcontainer"));
+	    poolBox.singular=true;
 		//hooks up our listeners
 		pbmrc.pb_log("init_complete_cb(): enabling connection handlers");
 		enable_store_ui_handlers();
@@ -52,8 +56,9 @@ define([
 		puzzstore.fetch({
 			onItem: function(item){
 				if (puzzstore.getValue(item,"answer") == "" || puzzstore.getValue(item,"status") != "Solved"){
-					puzzBoxes[puzzstore.getValue(item,"name")] = new Source(create_puzzle_node(item));					
-					dom.byId("puzzles_layout").appendChild(puzzBoxes[puzzstore.getValue(item,"name")].node);
+				    puzzBoxes[puzzstore.getValue(item,"name")] = new Source(create_puzzle_node(item));
+				    puzzBoxes[puzzstore.getValue(item,"name")].singular=true;
+				    dom.byId("puzzles_layout").appendChild(puzzBoxes[puzzstore.getValue(item,"name")].node);
 				}
 			}
 		});
@@ -63,9 +68,14 @@ define([
 			onItem: function(item){
 				var node = create_solver_node(item);
 				if (solverstore.getValue(item,"puzz") == ""){
-					poolBox.insertNodes(false,[node]);
+				    poolBox.insertNodes(false,[node]);
 				}else{
-					puzzBoxes[solverstore.getValue(item,"puzz")].insertNodes(false,[node]);
+				    var box = puzzBoxes[solverstore.getValue(item,"puzz")];
+				    if (box){
+					box.insertNodes(false,[node]);
+				    }else{
+					poolBox.insertNodes(false,[node]);
+				    }
 				}
 			}
 		});
@@ -94,25 +104,25 @@ define([
 	}
 	
 	function create_puzzle_node(item){
-		return node = domConstruct.create("div", {class: "puzzle_container", id: "puzzle_div_"+puzzstore.getValue(item,"name"), innerHTML: puzzstore.getValue(item,"name")});
+	    return node = domConstruct.create("div", {class: "puzzle_container", id: "puzzle_div_"+puzzstore.getValue(item,"name"), innerHTML: puzzstore.getValue(item,"name")});
 	}
 	
 	function dropped_on_puzz(source, nodes, copy, target){
-		//Note that this only works if there's exactly one node being dnd'd. 
-		//TODO: perhaps our interface should be restricted to moving one at a time?
-		//getting the solver this way is hacky.
-		var solver = nodes[0].innerHTML;
+	    //note this only works if we move one at a time (hence Source.singular is set)
+	    var moved_node_name = nodes[0].id;
+	    var splitsolver = moved_node_name.split('_');
+	    var solver = splitsolver[2];
 		
-		//need to translate target source name to DB puzzle name
-		var target_source_name = target.node.id;
-		var puzz;
-		if (target_source_name == "poolcontainer"){
-			//the null puzzle
-			puzz = "";
-		}else{
-			var splitpuzz = target_source_name.split('_');
-			puzz = splitpuzz[2];
-		}
+	    //need to translate target source name to DB puzzle name
+	    var target_source_name = target.node.id;
+	    var puzz;
+	    if (target_source_name == "poolcontainer"){
+		//the null puzzle
+		puzz = "";
+	    }else{
+		var splitpuzz = target_source_name.split('_');
+		puzz = splitpuzz[2];
+	    }
 
 		pbmrc.pb_log("dropped_on_puzz(): solver "+solver+" dropped on "+puzz);
 		// update client's changes in the store.
@@ -171,14 +181,14 @@ define([
 		pbmrc.pb_log("add_puzz_ui()");
 		
 		if (puzzstore.getValue(item,"answer") == "" || puzzstore.getValue(item,"status") != "Solved"){
-			puzzBoxes[puzzstore.getValue(item,"name")] = new Source(create_puzzle_node(item));					
-			dom.byId("puzzles_layout").appendChild(puzzBoxes[puzzstore.getValue(item,"name")].node);
+		    puzzBoxes[puzzstore.getValue(item,"name")] = new Source(create_puzzle_node(item));					
+		    puzzBoxes[puzzstore.getValue(item,"name")].singular = true;
+		    dom.byId("puzzles_layout").appendChild(puzzBoxes[puzzstore.getValue(item,"name")].node);
 		}
 	}
 	
 	function remove_puzz_ui(item){
 		pbmrc.pb_log("remove_puzz_ui()");
-		pbmrc.pb_log(puzzBoxes[puzzstore.getValue(item,"name")])
 		dom.byId("puzzles_layout").removeChild(puzzBoxes[puzzstore.getValue(item,"name")].node);
 		pbmrc.pb_log("successfully removed node");
 	}

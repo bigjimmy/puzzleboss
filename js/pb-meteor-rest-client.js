@@ -15,7 +15,7 @@ define([
     /////////////////////////////////////////////////////////////////////////////////
     // Internal vars
     /////////////////////////////////////////////////////////////////////////////////
-	var debug_lvl = 100;
+	var debug_lvl = 1;
 	
 	var _pb_puzzstore_structure = {identifier: 'name', label: 'name', items: []};
 	var _pb_puzzstore = new ItemFileWriteStore({data: _pb_puzzstore_structure});

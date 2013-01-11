@@ -119,16 +119,16 @@ define([
 	function apply_round_filters() {
 	    pbmrc.pb_log("apply_round_filters()");
 	    for (var i in roundlist){
-			var roundname = roundlist[i];
-			if (roundname != "All"){
-				pbmrc.pb_log("apply_round_filters: calling grid["+roundname+"].filter({round: "+roundname+", answer:  "+solved_answer_filter+"}, true); with rowCount="+grid[roundname].rowCount);
-				grid[roundname].filter({round: roundname, answer: solved_answer_filter}, true);
-			}else{
-				pbmrc.pb_log("apply_round_filters: calling grid["+roundname+"].filter({answer:  "+solved_answer_filter+"}, true); with rowCount="+grid[roundname].rowCount);
-				grid[roundname].filter({answer: solved_answer_filter},true);
-			}
+		var roundname = roundlist[i];
+		if (roundname != "All"){
+		    pbmrc.pb_log("apply_round_filters: calling grid["+roundname+"].filter({round: "+roundname+", answer:  "+solved_answer_filter+"}, true); with rowCount="+grid[roundname].rowCount,3);
+		    grid[roundname].filter({round: roundname, answer: solved_answer_filter}, true);
+		}else{
+		    pbmrc.pb_log("apply_round_filters: calling grid["+roundname+"].filter({answer:  "+solved_answer_filter+"}, true); with rowCount="+grid[roundname].rowCount,3);
+		    grid[roundname].filter({answer: solved_answer_filter},true);
+		}
 	    }
-
+	    
 	}
 
 	
