@@ -235,7 +235,7 @@ EOB
 sub confirm_validation : Runmode {
     my $self = shift;
     my $q = $self->query();
-    my $html = $q->start_html('The-Internet User Registration: Validation Code');
+    my $html = $q->start_html($PB::Config::TEAM_NAME.' User Registration: Validation Code');
 
     my $firstname;
     my $lastname;
@@ -297,11 +297,11 @@ sub confirm_validation : Runmode {
 	$html.=$q->p.'User added to <a href="$PB::Config::TWIKI_URI">TWiki</a>.';
     }
 
-    my $ldap_rval = PB::API::add_solver($username);
-    if($ldap_rval != 0) {
-	$html.=$q->p."Error adding user to solver list.";
+    my $pbdb_rval = PB::API::add_solver($username);
+    if(!($pbdb_rval < 0)) {
+	$html.=$q->p."User added to solver database.";
     } else {
-	$html.=$q->p."User added to solver list.";
+	$html.=$q->p."Error adding user to solver database.";
     }
     
     $html.=$q->p.'If all was successful, you should now be able to login to the TWiki: <a href="'.$PB::Config::TWIKI_URI.'">'.$PB::Config::TWIKI_URI.'</a>';
@@ -314,7 +314,7 @@ sub error : Runmode {
     my $q = $self->query();
     my $html = "";
 
-    $html .= $q->start_html('The-Internet User Registration: Error');
+    $html .= $q->start_html($PB::Config::TEAM_NAME.' User Registration: Error');
     $html .= $q->p."An error occurred: $errormessage\n";
 
     return($html);
