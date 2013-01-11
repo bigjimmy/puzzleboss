@@ -1,8 +1,8 @@
 #!/bin/bash
 
 admin_pass=`cat pw`
-domain = `cat domain`
-ldapdc = `cat ldapdc`
+domain=`cat domain`
+ldapdc=`cat ldapdc`
 
 deleteuser=`echo $1 | perl -pi -e 's/[[:space:]*]//g'`
 
@@ -17,7 +17,7 @@ else
 	echo "ldap user does not exist"
     else 
 	echo "deleting ldap dn $deletedn"
-	ldapdelete -x -D cn=admin,dc=stormynight,dc=org -w ${admin_pass} $deletedn
+	ldapdelete -x -D cn=admin,${ldapdc} -w ${admin_pass} $deletedn
     fi
 
 

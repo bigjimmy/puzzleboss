@@ -3,8 +3,8 @@
 username=$1
 
 admin_pass=`cat pw`
-domain = `cat domain`
-ldapdc = `cat ldapdc`
+domain=`cat domain`
+ldapdc=`cat ldapdc`
 
 if [[ -n "${username}" ]]; then
     ldif=`ldapsearch -x -D cn=admin,dc=stormynight,dc=org -w ${admin_pass} -LLL -b "dc=${ldapdc}" uid=${username} uid sn givenName userPassword`

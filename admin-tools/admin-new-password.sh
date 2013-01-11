@@ -13,8 +13,8 @@ if [[ -n "${username}" ]]; then
 	newpass=`ldappasswd -D "cn=admin,dc=stormynight,dc=org" -x -w "${admin_pass}" "${dn}" | perl -pi -e 's/^.*?:[[:space:]]+//'`
 	if [[ -n "${newpass}" ]]; then
 	    echo "changed LDAP password to: ${newpass}"
-	    #(cd /canadia/puzzlebitch/google && ./ChangeUserPass.sh --domain "${domain}" --username "${username}" --password "${newpass}" )
-	    #This script no longer exists? I think everything is handled by LDAP now?
+	    echo "attempting to change google apps password (for GTalk with external clients?)"
+	    (cd /canadia/puzzlebitch/google && ./ChangeUserPass.sh --domain "${domain}" --username "${username}" --password "${newpass}" )
 	else
 	    echo "could not change ldap password"
 	    exit 3
