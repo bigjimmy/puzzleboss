@@ -402,6 +402,23 @@ sub _google_create_document {
     return(\%output);
 }
 
+sub puzzle_solved {
+    my $idin = shift;
+    debug_log("puzzle_solved():  $idin has been solved\n", 5);
+
+    #We want to send off notifications to users still tooling on this puzzle
+    #Also perhaps to watercooler?
+    #TODO: UNIMPLEMENTED!
+    
+    #We want to send solvers working on this puzzle to the pool.
+    my $puzzref = get_puzzle($idin);
+    my @cursolvers = split(",", $puzzref->{"cursolvers"});
+    foreach my $solver (@cursolvers){
+	assign_solver_puzzle("", $solver);
+    }
+    
+}
+
 
 sub get_puzzle {
     my $idin = shift;
@@ -590,7 +607,7 @@ sub _get_puzzle_db {
 	}
 	push @rows, $res;
     }
-    if($always_return_array > 0 | @rows > 1) {
+    if($always_return_array > 0 || @rows > 1) {
 	return \@rows;
     } else {
 	return \%{$rows[0]};
@@ -601,6 +618,25 @@ sub update_puzzle_part {
 	my $id = shift;
 	my $part = shift;
 	my $val = shift;
+
+	#We need special handling for a puzzle part update which imples the puzzle is solved
+	#This might be either a status change to "Solved", or an answer change to non-null
+	#Our accepted logic, system wide, is that only both of these things represent a solved puzzle
+	
+	if ($part eq "status" && $val eq "Solved"){
+	    #is there an answer?
+	    my $puzzref = get_puzzle($id);
+	    if ($puzzref->{"answer"} ne ""){
+		puzzle_solved($id);
+	    }
+	}elsif ($part eq "answer" && $val ne ""){
+	    #am I solved status?
+	    my $puzzref = get_puzzle($id);
+	    if ($puzzref->{"status"} eq "Solved"){
+		puzzle_solved($id);
+	    }
+	}
+
 
 	if($PB::Config::PB_DATA_WRITE_FILES > 0) {
 		my $rval = _update_puzzle_part_files($id, $part, $val);

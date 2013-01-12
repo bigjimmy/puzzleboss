@@ -11,10 +11,10 @@ define([
      "dijit/form/Button", 
      "dijit/form/TextBox",
      "dojo/dom",
-     "dojo/domReady!",
      "dojo/dnd/Source",
+     "dojo/domReady!"
        ], 
-    function(pbmrc, parser, connect, array, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, domready, dndsource) {
+    function(pbmrc, parser, connect, array, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, dndsource) {
 
 	var puzzstore; // will be returned from pbmrc.pb_init()
 	var waitDiv;
@@ -133,12 +133,13 @@ define([
 
 	
 	function init_complete_cb() {
-	    pbmrc.pb_log("init_complete_cb()");	
+	    pbmrc.pb_log("init_complete_cb()",2);	
 	    //apply_round_filters();
 	    // remove the little waitDiv notice
 	    dom.byId("puzzlecontainer").removeChild(waitDiv); 
 	    _updateHideSolved();
-		_updateRoundsVsAll();
+	    _updateRoundsVsAll();
+	    pbmrc.pb_log("init_complete_cb(): init complete");
 	}
 	
 	function add_round_cb(roundname) {
@@ -155,7 +156,7 @@ define([
 	}
 	
 	function solver_update_cb(){
-		pbmrc.pb_log("solver_update_cb(): does nothing.");
+		pbmrc.pb_log("solver_update_cb(): does nothing.",2);
 	}
 	
 	function received_updated_part_cb(store, appid, key, value) {
