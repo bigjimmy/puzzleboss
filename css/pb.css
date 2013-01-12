@@ -38,10 +38,94 @@
     padding: 0;
 }
 
-.puzzle_container {
-	border:1px solid #aaa;
-	padding: 1em;
-	cursor: default;
-	background:#fff;
-	width: 200px;
+#poolcontainer {
+    border: 1px solid #aaa;
+    padding: 4px;
+    cursor: default;
+    background: #fff;
+    width: 35%;
+    float:left;
 }
+
+#puzzles_layout {
+    border: 1px solid #aaa;
+    padding: 4px;
+    cursor: default;
+    background:#fff;
+    float: right;
+    width: 63%;
+}
+
+#status_container {
+    clear: both;
+}
+
+.puzzle_container {
+    border:1px solid #aaa;
+    padding: 1ex;
+    margin: 0.5ex;
+    cursor: default;
+    background:#fff;
+    display: inline-block;
+    font-weight: bold;
+    vertical-align: top;
+}
+
+.solver {
+    padding: 1ex;
+    font-weight: normal;
+}
+
+#poolcontainer .solver{
+    display: inline-block;
+}
+
+
+.fixedwidthformat{
+    font-family: monospace;
+    font-size: 150%;
+}
+
+/* DnD avatar-specific settings */
+.dojoDndAvatar                  {font-size: 75%; color: red;}
+.dojoDndAvatarHeader td {padding-left: 20px; padding-right: 4px;  height: 16px;}
+.dojoDndAvatarHeader    {background: #ccc;}
+.dojoDndAvatarItem              {background: #eee;}
+.dojoDndMove .dojoDndAvatarHeader       {background-image: url(images/dndNoMove.png); background-repeat: no-repeat;}
+.dojoDndCopy .dojoDndAvatarHeader       {background-image: url(images/dndNoCopy.png); background-repeat: no-repeat;}
+.dojoDndMove .dojoDndAvatarCanDrop .dojoDndAvatarHeader {background-image: url(images/dndMove.png); background-repeat: no-repeat;}
+.dojoDndCopy .dojoDndAvatarCanDrop .dojoDndAvatarHeader {background-image: url(images/dndCopy.png); background-repeat: no-repeat;}
+
+.dojoDndHandle {cursor: move;}
+.dojoDndIgnore {cursor: default;}
+
+.dj_a11y .dojoDndAvatar { font-size: 1em; font-weight:bold;}
+.dj_a11y .dojoDndAvatarHeader td {padding-left:2px !important;}
+.dj_a11y .dojoDndAvatarHeader td span {padding-right: 5px;}
+
+/* Some basic jazz stolen from dojo.css, then modified */
+body { 
+    font-family: Myriad,Helvetica,Tahoma,Arial,clean,sans-Serif; 
+}
+
+h1 {
+        font-size: 1.5em; 
+        font-weight: normal;
+        line-height: 1.5em; 
+        margin-top: 1em;
+        margin-bottom:0.5em;
+}
+
+h2 { 
+        font-size: 1.1667em; 
+        font-weight: bold; 
+        line-height: 1.286em; 
+        margin-bottom:0.5em;
+	margin-top:0.5em;
+}
+
+h3, h4, h5, h6 {
+        font-size: 1em; 
+        font-weight: bold; 
+        line-height: 1.5em; 
+ 

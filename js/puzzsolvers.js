@@ -5,6 +5,7 @@ define([
 	   "dojo/_base/connect",
 	   "dojo/_base/lang",
 	   "dojo/_base/array",
+	   "dojo/_base/window",
 	   "dijit/Dialog", 
 	   "dijit/form/Button", 
 	   "dojo/dnd/Source",
@@ -14,7 +15,7 @@ define([
 	   "dojo/dom-style",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, lang, array, dialog, formbutton, Source, topic, dom, domconstruct, domstyle) {
+    function(pbmrc, parser, connect, lang, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -45,7 +46,7 @@ define([
 
 	function init_complete_cb() {
 	    // remove the little waitDiv notice
-	    dom.byId("puzzles_layout").removeChild(waitDiv);
+	    win.body().removeChild(waitDiv);
 	    poolBox = new Source(dom.byId("poolcontainer"));
 	    poolBox.singular=true;
 	    //hooks up our listeners
@@ -235,7 +236,7 @@ define([
 
 
 	function error_cb(msg) {
-	    dom.byId("puzzles_layout").removeChild(waitDiv);
+	    win.body().removeChild(waitDiv);
 		dom.byId("puzzles_layout").appendChild(domconstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
 		dom.byId("puzzles_layout").appendChild(domconstruct.create("p",{innerHTML: msg}));
 		dom.byId("puzzles_layout").appendChild(domconstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
@@ -339,7 +340,7 @@ define([
 			//please wait
 			waitDiv = domconstruct.create("div")
 			waitDiv.innerHTML="<b>Please wait, while data loads. (This could take a while!)</b></br>";
-			dom.byId("puzzles_layout").appendChild(waitDiv);
+			win.body().appendChild(waitDiv);
 	    
 			pbmrc.pb_log("my_init: creating status indicator / button");
 			status_button = new formbutton({

@@ -34,7 +34,7 @@ define([
 	var tpdivs = new Array();
 	
 	function fixedwidthFormatter(value){
-	    return "<span style='font-family: monospace'>"+value+"</span>";
+	    return "<span class='fixedwidthformat'>"+value+"</span>";
 	}
 	
 	function smallfontFormatter(value){
@@ -79,7 +79,7 @@ define([
 				     { field: 'answer', width: "150px", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
 				     { field: 'xyzloc', width: "125px", name: "Location", editable: my_editable, formatter: smallfontFormatter },
 				     { field: 'cursolvers', width: "250px", name:"Solvers", formatter:smallfontFormatter},
-				     { field: 'comments', width: "400px", name: "Comments", editable: my_editable, formatter: smallfontFormatter}
+				     { field: 'comments', width: "400px", name: "PB Notes", editable: my_editable, formatter: smallfontFormatter}
 				     ];
 	
 	    grid[roundname] = new enhancedgrid({

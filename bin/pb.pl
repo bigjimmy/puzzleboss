@@ -47,10 +47,10 @@ Content-type: text/html
 <head>
 <title>$title</title>
     <style type="text/css">
-        \@import "$PB::Config::PB_CSS_REL/pb.css";
         \@import "$PB::Config::DOJO_ROOT/dijit/themes/tundra/tundra.css";
         \@import "$PB::Config::DOJO_ROOT/dojox/grid/resources/Grid.css";
         \@import "$PB::Config::DOJO_ROOT/dojox/grid/resources/tundraGrid.css";
+        \@import "$PB::Config::PB_CSS_REL/pb.css";
     </style>
     <script type="text/javascript" src="$PB::Config::METEOR_JS_URI"></script>
     <script type="text/javascript" src="$PB::Config::DOJO_ROOT/dojo/dojo.js" 

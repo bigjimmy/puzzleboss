@@ -40,11 +40,9 @@ Content-type: text/html
 <head>
 <title>$title</title>
     <style type="text/css">
+    \@import "$PB::Config::DOJO_ROOT/dijit/themes/tundra/tundra.css";
         \@import "$PB::Config::PB_CSS_REL/pb.css";
-		\@import "$PB::Config::DOJO_ROOT/dojo/resources/dnd.css";
-		\@import "$PB::Config::DOJO_ROOT/dojo/resources/dojo.css";
-		\@import "$PB::Config::DOJO_ROOT/dijit/themes/tundra/tundra.css";
-    </style>
+</style>
     <script type="text/javascript" src="$PB::Config::METEOR_JS_URI"></script>
     <script type="text/javascript" src="$PB::Config::DOJO_ROOT/dojo/dojo.js" 
             data-dojo-config="async: true, parseOnLoad: true"></script>
@@ -66,11 +64,16 @@ Content-type: text/html
     </script>
 </head>
 <body class="tundra">
-<h1>Puzzles-n-solvers</h1>
-<h2>Solver Pool</h2>
-<div id="poolcontainer" class = "puzzle_container"></div>
-<div id="puzzles_layout"></div>
-<div id="statuscontainer"></div>
+    <h1>Puzzles-n-solvers</h1>
+    <div id="poolcontainer">
+    <h2>Solver Pool</h2>
+    </div>
+
+    <div id="puzzles_layout">
+    <h2>Unsolved Puzzles</h2>
+    </div>
+
+    <div id="statuscontainer"></div>
 </body>
 </html>
 
