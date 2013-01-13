@@ -78,38 +78,33 @@ define([
 		return html_msg;
 	}
 	
-	function show_answer(item){
-		var html_msg = ": ????????";
-		var my_answer = puzzstore.getValue(item,"answer");
-		if (my_answer != ""){
-			html_msg = ": "+my_answer;
-		}
-		
-		return html_msg;
-	}
-
-	function create_puzzle_node(item){
-		var puzzinfo = domconstruct.create("div", {id: "puzzleinfo_div_"+puzzstore.getValue(item,"name")});
-		
-		//the status image
-		puzzinfo.appendChild(domconstruct.create("span", {id: "pi_statusimg_div_"+puzzstore.getValue(item,"name"), innerHTML: choose_status_image(item)}));
-		
-		//links to spreadsheet and puzzle pages
-		puzzinfo.appendChild(domconstruct.create("span",{innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/spreadsheet.png' alt='Spreadsheet'></a>"}));
-		puzzinfo.appendChild(domconstruct.create("span",{innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' alt='Spreadsheet'></a>"}));
-		
-		//the Puzzle name
-		puzzinfo.appendChild(domconstruct.create("span", {id: "pi_name_div_"+puzzstore.getValue(item,"name"), class: "pi_name", innerHTML: puzzstore.getValue(item,"name")}));
-		
-		//the answer (if known);
-		puzzinfo.appendChild(domconstruct.create("span", {id: "pi_answer_div_"+puzzstore.getValue(item,"name"), innerHTML: show_answer(item)}));
-		
-		return puzzinfo;
-	}
-	
 	function add_puzz_ui(item, parentinfo){
 		pbmrc.pb_log("add_puzz_ui()");
-		roundboxes[puzzstore.getValue(item,"round")].appendChild(create_puzzle_node(item));
+		var name = puzzstore.getValue(item,"name");
+		
+		var puzzinfo = domconstruct.create("div", {id: "puzzleinfo_div_"+name});
+		
+		//the status image
+		puzzinfo.appendChild(domconstruct.create("span", {id: "pi_statusimg_span_"+name, innerHTML: choose_status_image(item)}));
+			
+		//the Puzzle name
+		var namespan = domconstruct.create("span", {id: "pi_name_span_"+name, class: "pi_name", innerHTML: name});
+		if 	(puzzstore.getValue(item,"status") == "Solved"){
+			domstyle.set(namespan,"color","#bbb");
+		}
+		puzzinfo.appendChild(namespan);
+		
+		//the answer 
+		puzzinfo.appendChild(domconstruct.create("span", {id: "pi_answer_span_"+name, class: "pi_answer", innerHTML: puzzstore.getValue(item,"answer")}));			
+
+		if (puzzstore.getValue(item,"answer") == ""){
+			//links to spreadsheet and puzzle pages if answer unknown
+			puzzinfo.appendChild(domconstruct.create("span",{id: "pi_links_span_"+name,
+				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/spreadsheet.png' alt='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' alt='Spreadsheet'></a>"}));
+	
+		}
+		
+		roundboxes[puzzstore.getValue(item,"round")].appendChild(puzzinfo);
 	}
 	
 	function remove_puzz_ui(item){
@@ -121,10 +116,24 @@ define([
 	
 	function update_puzz_ui(item, attribute, oldValue, newValue){
 		pbmrc.pb_log("update_puzz_ui(): name="+puzzstore.getValue(item,"name")+" attribute="+attribute+" oldValue="+oldValue+" newValue="+newValue);
+		var name = puzzstore.getValue(item,"name");
 		if (attribute == "status"){
-			dom.byId("pi_statusmsg_div_"+puzzstore.getValue(item,"name")).innerHTML=choose_status_image(item);
+			pbmrc.pb_log("looking for pi_statusmsg_span_"+name);
+			dom.byId("pi_statusimg_span_"+name).innerHTML=choose_status_image(item);
+			if (newValue == "Solved" && oldValue != "Solved"){
+				domstyle.set(dom.byId("pi_name_span_"+name),"color","#bbb");
+			}else if(newValue != "Solved" && oldValue == "Solved"){
+				domstyle.set(dom.byId("pi_name_span_"+name),"color","#000");
+			}
 		} else if ( attribute == "answer"){
-			dom.byId("pi_answer_div_"+puzzstore.getValue(item,"name")).innerHTML=show_answer(item);
+			dom.byId("pi_answer_span_"+name).innerHTML=puzzstore.getValue(item,"answer");				
+			if (newValue == "" && oldValue != ""){
+				//we'are deleting the answer, here, so reveal the solving links.
+				domstyle.set(dom.byId("pi_links_span_"+name),"display","inline");
+			}else if (newValue != "" && oldValue == ""){
+				//we're inserting the answer, so hide the solving links
+				domstyle.set(dom.byId("pi_links_span_"+name),"display","none");
+			}
 		}
 	}
 	
@@ -235,7 +244,7 @@ define([
 	    }    
 	}
 	
-	var is_addpuzzle_patt = /^puzzles\/[^\/]*$/;
+	var is_addpuzzle_patt = /^puzzles\/[^\/]*\/$/;
 	var is_any_rounds_patt = /^rounds/;
 	var is_answerstatus_patt = /^puzzles\/[^\/]*\/(answer|status)$/;
 	var is_any_version_patt = /^version/;

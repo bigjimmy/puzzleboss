@@ -87,7 +87,14 @@
 
 
 .pi_name{
-    font-size: 25px;
+    font-size: 20px;
+    padding: 0.5ex;
+}
+
+
+.pi_answer{
+    font-size: 20px;
+    font-family: monospace;
 }
 
 .round_container{

@@ -316,7 +316,7 @@ define([
 	    }    
 	}
 	
-	var is_addpuzzle_patt = /^puzzles\/[^\/]*$/;
+	var is_addpuzzle_patt = /^puzzles\/[^\/]*\/$/;
 	var is_answerstatus_patt = /^puzzles\/[^\/]*\/(answer|status)$/;
 	var is_solvers_patt = /^solvers/;
 	var is_any_version_patt = /^version/;
