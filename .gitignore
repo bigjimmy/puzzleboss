@@ -5,6 +5,7 @@ test-data
 data
 *#
 *~
+.#*
 *.orig
 *.rej
 *class
@@ -12,3 +13,4 @@ admin-tools/pw
 admin-tools/domain
 admin-tools/ldapdc
 lib/PB/Config.pm
+google-drive/bigjimmy-oauth-cache.json

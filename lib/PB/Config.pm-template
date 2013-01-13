@@ -25,39 +25,49 @@ our $TWIKI_PROTOCOL = "https";
 # Call in LocalConfig.pl
 # require 'LocalConfig.pl';
 
-our $DOMAIN_NAME = "ourdomain";
-our $TWIKI_WEB = "MH2013";
-our $TWIKI_USER = "BigJimmy";
-our $TWIKI_USER_PASS = "password";
-our $TWIKI_HOST = "$DOMAIN_NAME";
-our $METEOR_HTTP_HOST = "series-of-tubes.$DOMAIN_NAME";
+our $HUNT = "MH2013";
+our $USER = "BigJimmy";
+our $PASS = "password";
 our $TEAM_NAME = "Wind Up Birds";
+our $DOMAIN_NAME = "ourdomain";
 our $INSTALL_PATH = "/canadia";
+
+our $TWIKI_WEB = $HUNT;
+our $TWIKI_USER = $USER;
+our $TWIKI_USER_PASS = $PASS;
+our $TWIKI_HOST = "$DOMAIN_NAME";
 our $ROUNDLIST_TOPIC = "WebHome";
+
+our $METEOR_HTTP_HOST = "series-of-tubes.$DOMAIN_NAME";
 our $METEOR_CONTROL_HOST = "series-of-tubes.$DOMAIN_NAME";
 our $METEOR_CONTROL_PORT = "4671";
+our $METEOR_VERSION_CHANNEL = "version$PB_DEV_VERSION";
+our $METEOR_JS_URI = "https://$METEOR_HTTP_HOST/meteor.js";
+
+our $BIGJIMMY_CONTROL_HOST = "series-of-tubes.$DOMAIN_NAME";
+our $BIGJIMMY_CONTROL_PORT = "8080";
+our $BIGJIMMY_CONTROL_PATH = "bigjimmy";
+our $BIGJIMMY_CONTROL_USER = lc($USER);
+our $BIGJIMMY_CONTROL_PASS = $PASS;
+our $BIGJIMMY_BOT_CONTROL_URI = "http://".$BIGJIMMY_CONTROL_HOST.":".$BIGJIMMY_CONTROL_PORT."/".$BIGJIMMY_CONTROL_PATH;
 
 our $PB_DATA_WRITE_FILES = 0;
 our $PB_DATA_WRITE_DB = 1;
 our $PB_DATA_READ_DB_OR_FILES = "DB";
 our $PB_DATA_DB_HOST = "localhost";
 our $PB_DATA_DB_PORT = "3306";
-our $PB_DATA_DB_USER = "bigjimmy";
-our $PB_DATA_DB_PASS = "password";
-
+our $PB_DATA_DB_USER = lc($USER);
+our $PB_DATA_DB_PASS = $PASS;
 
 our $REGISTER_LDAP_HOST = 'ldap.$DOMAIN_NAME';
-our $REGISTER_LDAP_DC = insert dc record here;
+our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $DOMAIN_NAME));
 our $REGISTER_LDAP_DOMAIN = '$DOMAIN_NAME';
 our $REGISTER_LDAP_ADMIN_USER = 'admin';
-our $REGISTER_LDAP_ADMIN_PASS = 'password';
+our $REGISTER_LDAP_ADMIN_PASS = $PASS;
 our $REGISTER_LDAP_O = $TEAM_NAME;
 our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
-our $GOOGLE_DOMAIN = "$DOMAIN_NAME";
 
-# Derived settings (NB cannot be changed by LocalConfig.pl)
-our $METEOR_VERSION_CHANNEL = "version$PB_DEV_VERSION";
-our $METEOR_JS_URI = "https://$METEOR_HTTP_HOST/meteor.js";
+our $GOOGLE_DOMAIN = "$DOMAIN_NAME";
 
 our $PB_DEV_VERSION_POSTPAREN = "";
 if($PB_DEV_VERSION ne "") {
