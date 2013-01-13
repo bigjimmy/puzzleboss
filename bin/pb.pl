@@ -124,6 +124,7 @@ $html .= <<"EOF"
 
 <!--administrative stuff below here-->
 
+<p>To move solvers among puzzles, open <a href="puzzsolvers">this page</a> in a separate tab.</p>
 
 <!-- new puzzle -->
 <table>

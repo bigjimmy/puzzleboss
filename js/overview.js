@@ -67,13 +67,13 @@ define([
 		var html_msg = "";
 		var my_status = puzzstore.getValue(item,"status");
 		if(my_status == "New"){
-			html_msg = "<img src=\"../images/new_bang.jpg\"> ";
+			html_msg = "<img src=\"../images/new_bang.jpg\" title='New'> ";
 		}else if (my_status == "Being worked"){
-			html_msg = "<img src=\"../images/work_gear.png\"> ";
+			html_msg = "<img src=\"../images/work_gear.png\" title='Being worked'> ";
 		}else if (my_status == "Needs eyes"){
-			html_msg = "<img src=\"../images/eyes_sauron.jpg\"> ";
+			html_msg = "<img src=\"../images/eyes_sauron.jpg\" title='Needs eyes'> ";
 		}else if (my_status == "Solved"){
-			html_msg = "<img src=\"../images/solved_tick.png\"> ";
+			html_msg = "<img src=\"../images/solved_tick.png\" title='Solved'> ";
 		}
 		return html_msg;
 	}
@@ -100,7 +100,7 @@ define([
 		if (puzzstore.getValue(item,"answer") == ""){
 			//links to spreadsheet and puzzle pages if answer unknown
 			puzzinfo.appendChild(domconstruct.create("span",{id: "pi_links_span_"+name,
-				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/spreadsheet.png' alt='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' alt='Spreadsheet'></a>"}));
+				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/spreadsheet.png' title='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' title='Spreadsheet'></a>"}));
 	
 		}
 		
