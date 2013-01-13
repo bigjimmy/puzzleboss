@@ -167,7 +167,7 @@ sub _add_puzzle_db {
     
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
-	_send_meteor_version();
+	_send_data_version();
 	return(1);
     } else {
 	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr."\n",0);
@@ -646,7 +646,7 @@ sub _update_puzzle_part_db {
     
     if(defined($c)) {
 	debug_log("_update_puzzle_part_db: id=$id part=$part val=$val dbh->do returned $c\n",2);
-	_send_meteor_version();
+	_send_data_version();
 	return(1);
     } else {
 	debug_log("_update_puzzle_part_db: id=$id part=$part val=$val dbh->do returned error: ".$dbh->errstr."\n",0);
@@ -916,7 +916,7 @@ sub _add_round_db {
     
     if(defined($c)) {
 	debug_log("_add_round_db: dbh->do returned $c\n",2);
-	_send_meteor_version();
+	_send_data_version();
 	return(1);
     } else {
 	debug_log("_add_round_db: dbh->do returned error: ".$dbh->errstr."\n",0);
@@ -1137,7 +1137,7 @@ sub _add_solver_db {
     
     if(defined($c)) {
 	debug_log("_add_solver_db: dbh->do returned $c\n",2);
-	_send_meteor_version();
+	_send_data_version();
 	return(1);
     } else {
 	debug_log("_add_solver_db: dbh->do returned error: ".$dbh->errstr."\n",0);
@@ -1429,7 +1429,7 @@ sub _assign_solver_puzzle_db {
 	my $c = $dbh->do($sql,undef,$puzzname,$solver);
 	if(defined($c)) {
 		debug_log("_get_client_index_db: dbh->do returned $c\n",2);
-		_send_meteor_version();
+		_send_data_version();
 		return(1);
 	} else {
 		debug_log("_get_client_index_db: dbh->do returned error: ".$dbh->errstr."\n",0);
@@ -1465,7 +1465,7 @@ sub _assign_solver_location_db {
     my $c = $dbh->do($sql);
     if(defined($c)) {
 	debug_log("_get_client_index_db: dbh->do returned $c\n",2);
-	_send_meteor_version();
+	_send_data_version();
 	return(1);
     } else {
 	debug_log("_get_client_index_db: dbh->do returned error: ".$dbh->errstr."\n",0);
@@ -1799,13 +1799,23 @@ sub get_client_index {
 ###############
 # Data Version
 ###############
-sub _send_meteor_version {
+sub _send_data_version {
     my $dataversion = _get_log_index_db();
-    if(PB::Meteor::message($PB::Config::METEOR_VERSION_CHANNEL, $dataversion) <= 0) {
-	debug_log("PB::API::_send_meteor_version() sending version $dataversion over meteor\n",0);
-	return -1;
+    my $ret = 1;
+
+    # Send to bigjimmy bot
+    if(PB::Bigjimmy::send_version($dataversion) <= 0) {
+	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
+	$ret = -1;
     }
-    return 1;
+
+    # Send to meteor
+    if(PB::Meteor::message($PB::Config::METEOR_VERSION_CHANNEL, $dataversion) <= 0) {
+	debug_log("PB::API::_send_data_version() error sending version $dataversion over meteor\n",0);
+	$ret = -1;
+    }
+
+    return $ret;
 }
 
 
