@@ -7,6 +7,7 @@ use Scalar::Util qw(tainted looks_like_number);
 use PB::Config;
 use PB::Meteor;
 use PB::TWiki;
+use PB::BigJimmy;
 
 use Net::LDAP;
 
@@ -1540,7 +1541,11 @@ sub _get_log_index_db {
     my $res = $dbh->selectcol_arrayref($sql);
     my $version = -1;
     if(defined($res)) {
-        $version = $res->[0];
+	if($res->[0] eq 'null') {
+	    $version = "";
+	} else {
+	    $version = $res->[0];
+	}
     }
     return $version;
 }
@@ -1840,7 +1845,7 @@ sub _send_data_version {
     my $ret = 1;
 
     # Send to bigjimmy bot
-    if(PB::Bigjimmy::send_version($dataversion) <= 0) {
+    if(PB::BigJimmy::send_version($dataversion) <= 0) {
 	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
 	$ret = -1;
     }

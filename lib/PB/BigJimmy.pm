@@ -1,4 +1,4 @@
-package PB::Bigjimmy;
+package PB::BigJimmy;
 
 use strict;
 use PB::Config;
@@ -14,9 +14,11 @@ sub debug_log {
 sub send_version {
     my $version = shift;
     
+    my $version_post_uri = $PB::Config::BIGJIMMY_BOT_CONTROL_URI."version";
+
     my $ua = LWP::UserAgent->new;
     my $req = HTTP::Request->new(
-	POST => $PB::Config::BIGJIMMY_BOT_CONTROL_URI,
+	POST => $version_post_uri,
 	);
     
     $req->authorization_basic($PB::Config::BIGJIMMY_BOT_CONTROL_USER, $PB::Config::BIGJIMMY_BOT_CONTROL_PASS);
@@ -27,7 +29,7 @@ sub send_version {
     if ($res->is_success) {
 	return 1;
     } else {
-	debug_log("PB:Bigjimmy error, http status: ".$res->status_line."\n",0);
+	debug_log("PB:BigJimmy error, http status: [".$res->status_line."] from [".$version_post_uri."]\n",0);
 	return -1;
     }
 }
