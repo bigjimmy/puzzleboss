@@ -30,7 +30,6 @@ define([
 	
 	var poolBox;
 	var puzzBoxes;
-	var waitDiv;
 	var status_button;
 	var meteor_status;
 	var meteor_mode;
@@ -46,7 +45,7 @@ define([
 
 	function init_complete_cb() {
 	    // remove the little waitDiv notice
-	    win.body().removeChild(waitDiv);
+	    win.body().removeChild(dom.byId("waitDiv"));
 	    poolBox = new Source(dom.byId("poolcontainer"));
 	    poolBox.singular=true;
 	    //hooks up our listeners
@@ -236,7 +235,7 @@ define([
 
 
 	function error_cb(msg) {
-	    win.body().removeChild(waitDiv);
+	    win.body().removeChild(dom.byId("waitDiv"));
 		dom.byId("puzzles_layout").appendChild(domconstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
 		dom.byId("puzzles_layout").appendChild(domconstruct.create("p",{innerHTML: msg}));
 		dom.byId("puzzles_layout").appendChild(domconstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
@@ -337,10 +336,6 @@ define([
 		
 		my_init: function(editable) {
 			my_editable = editable;
-			//please wait
-			waitDiv = domconstruct.create("div")
-			waitDiv.innerHTML="<b>Please wait, while data loads. (This could take a while!)</b></br>";
-			win.body().appendChild(waitDiv);
 	    
 			pbmrc.pb_log("my_init: creating status indicator / button");
 			status_button = new formbutton({

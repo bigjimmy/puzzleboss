@@ -104,7 +104,8 @@
 .dj_a11y .dojoDndAvatarHeader td span {padding-right: 5px;}
 
 /* Some basic jazz stolen from dojo.css, then modified */
-body { 
+body {
+    overflow-x: hidden;
     font-family: Myriad,Helvetica,Tahoma,Arial,clean,sans-Serif; 
 }
 
