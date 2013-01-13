@@ -60,7 +60,7 @@ our $PB_DATA_DB_USER = lc($USER);
 our $PB_DATA_DB_PASS = $PASS;
 
 our $REGISTER_LDAP_HOST = 'ldap.$DOMAIN_NAME';
-our $REGISTER_LDAP_DC = insert dc record here;
+our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $DOMAIN_NAME));
 our $REGISTER_LDAP_DOMAIN = '$DOMAIN_NAME';
 our $REGISTER_LDAP_ADMIN_USER = 'admin';
 our $REGISTER_LDAP_ADMIN_PASS = $PASS;
