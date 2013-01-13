@@ -65,6 +65,7 @@ Content-type: text/html
 </head>
 <body class="tundra">
     <h1>Puzzles-n-solvers</h1>
+    <div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
     <div id="poolcontainer">
     <h2>Solver Pool</h2>
     </div>

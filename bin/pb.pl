@@ -91,7 +91,7 @@ Content-type: text/html
 </head>
 <body class="tundra">
 <h1>$title</h1>
-
+<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
 <!--<div id="gridMessages">grid messages</div>-->
 
 <div id="puzzlecontainer"></div>
@@ -123,19 +123,6 @@ $html .= <<"EOF"
 <!-- <div jsId="createnewrounddialogStandby" dojoType="dojox.widget.Standby" target="createnewrounddialog"></div> -->
 
 <!--administrative stuff below here-->
-<table border=1>
-
-<!-- ghetto interface for solver removal -->
-<tr><td><table>
-<tr><td>Unassign a solver from his current puzzle:
-<table><tr><th>Solver</td></tr>
-<tr><form action="solver_resting.pl" method="post">
-<td><INPUT TYPE="text" NAME="solver" VALUE=""/>
-<INPUT TYPE="hidden" NAME="returnurl" VALUE="$PB::Config::PB_BIN_REL/pb.pl"</td>
-<td><INPUT TYPE="submit" NAME="Unassign!" VALUE="Unassign!"/></td>
-</form>
-</tr></table>
-</td></tr></table></td>
 
 
 <!-- new puzzle -->
@@ -156,6 +143,9 @@ To add a new puzzle:
 </html>
 
 EOF
+
+}else{
+$html .= "</body></html>\n";
 }
 
 print $html;
