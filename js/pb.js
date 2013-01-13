@@ -53,18 +53,18 @@ define([
 	}
 	
 	function statusFormatter(value){
-	    switch(value){
-	    case "New":
-		return "<span style='font-size: 12'>NEW</span>";
-	    case "Being worked":
-		return "<span style='font-size: 12'>WORK</span>";
-	    case "Needs eyes":
-		return "<span style='font-size: 12'>EYES</span>";
-	    case "Solved":
-		return "<span style='font-size: 12'>SOLVED</span>";
-	    default:
-		return "<span style='font-size: 12'>ERROR</span>";
-	    };
+		switch(value){
+			case "New":
+			return "<span style='font-size: 12'>NEW</span>";
+			case "Being worked":
+			return "<span style='font-size: 12'>WORK</span>";
+			case "Needs eyes":
+			return "<span style='font-size: 12'>EYES</span>";
+			case "Solved":
+			return "<span style='font-size: 12'>SOLVED</span>";
+			default:
+			return "<span style='font-size: 12'>ERROR</span>";
+		};
 	}
 	
 	function create_new_round_ui(roundname) {
@@ -165,9 +165,9 @@ define([
 	
 	function error_cb(msg) {
 	    win.body().removeChild(dom.byId("waitDiv"));
-	    dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
-	    dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: msg}));
-	    dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: msg}));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
 	}
 
 	

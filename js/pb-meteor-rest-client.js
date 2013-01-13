@@ -234,11 +234,11 @@ define([
 	    //console.dir(data);
 	    _pb_dataversion = data.to;
 	    
-	    if(!_pb_meteor_dataversion_enabled && (_pb_dataversion_queued > _pb_dataversion)) {
+		if(!_pb_meteor_dataversion_enabled && (_pb_dataversion_queued > _pb_dataversion)) {
+			_pb_meteor_dataversion_enabled = true;
+			_pbrest_get("version/"+_pb_dataversion, _pb_get_version_diff_cb);
+		}
 		_pb_meteor_dataversion_enabled = true;
-		_pbrest_get("version/"+_pb_dataversion, _pb_get_version_diff_cb);
-	    }
-	    _pb_meteor_dataversion_enabled = true;
 	    
 	    _pb_log("_pb_get_version_diff_cb: before filtering, we have "+data.diff.length+" items in diff",1);
 	    var diff = _pb_filter_version_diff(data.diff);
@@ -266,8 +266,8 @@ define([
 						//_pbrest_get(path, _pb_get_round_part_cb);
 						_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
 					} else {
-						//_pbrest_get(path, _path_get_round_cb);
 						//_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
+						//Should we be warning that we can't get an individual round?
 						_pbrest_get("rounds", _pb_get_roundlist_cb);
 					}
 				} else {

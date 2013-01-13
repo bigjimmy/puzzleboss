@@ -38,6 +38,12 @@
     padding: 0;
 }
 
+#status_container {
+    clear: both;
+}
+
+
+/*Puzzsolvers stuff*/
 #poolcontainer {
     border: 1px solid #aaa;
     padding: 4px;
@@ -56,9 +62,6 @@
     width: 63%;
 }
 
-#status_container {
-    clear: both;
-}
 
 .puzzle_container {
     border:1px solid #aaa;
@@ -80,7 +83,23 @@
     display: inline-block;
 }
 
+/*Overview stuff*/
 
+
+.pi_name{
+    font-size: 25px;
+}
+
+.round_container{
+    border:1px solid #aaa;
+    padding: 1ex;
+    margin: 0.5ex;
+    background: #fff;
+    display: inline-block;
+    vertical-align:top;
+}
+
+/*PB main stuff*/
 .fixedwidthformat{
     font-family: monospace;
     font-size: 150%;
