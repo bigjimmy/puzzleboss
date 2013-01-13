@@ -6,9 +6,7 @@ before things will work:
 1. edit pblib.cfg (required edits are obvious)
 2. edit Config.pm:
  * Domain name
- * LDAP DC
- * TWiki admin passwd
- * DB admin passwd
+ * admin password
 3. admin-tools expects three files with bits of info:
  * domain
  * ldapdc

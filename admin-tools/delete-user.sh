@@ -22,7 +22,7 @@ else
 
 
     echo "deleting google user $deleteuser"
-    (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${domain})
+    (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${domain} -a ${admin_pass})
 
 
     twikitopic=/canadia/twiki/data/Main/$deleteuser.txt
