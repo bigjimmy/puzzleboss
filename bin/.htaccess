@@ -42,19 +42,7 @@ Options -Indexes +ExecCGI
 #    </FilesMatch>
 #  </IfModule>
 
-<FilesMatch "pbrest.pl">
-	require valid-user
-</FilesMatch>
-
-<FilesMatch "overview.pl">
-	require valid-user
-</FilesMatch>
-
-<FilesMatch "pbbrowse.pl">
-	require valid-user
-</FilesMatch>
-
-<FilesMatch "pb.pl">
+<FilesMatch "^.+$">
 	require valid-user
 </FilesMatch>
 
