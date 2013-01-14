@@ -100,7 +100,7 @@ sub part_POST : Runmode {
 		$error_status = 400;
 		die $errmsg;
 	}
-	return("");
+	return $self->json_body({'status'=>'ok'});
 }
 
 sub error : ErrorRunmode {
@@ -110,7 +110,8 @@ sub error : ErrorRunmode {
     my $json = $self->query->param('POSTDATA');
     my $partref = $self->from_json($json);
     my $data = $partref->{'data'} || "";
-    return $self->json_body({ 'error' => $error,
+    return $self->json_body({ 'status' => 'error',
+			      'error' => $error,
 			      'id' => $self->param('id'),
 			      'part' => $self->param('part'),
 			      'data' => $data,

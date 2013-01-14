@@ -6,7 +6,7 @@ define([
     "dojo/parser", 
     "dojo/_base/connect",
     "dojo/_base/array",
-    "dojo/_base/xhr",
+    "dojo/request/xhr",
     "dojo/_base/json",
     "dojo/data/ItemFileWriteStore",
        ], 
@@ -15,7 +15,7 @@ define([
     /////////////////////////////////////////////////////////////////////////////////
     // Internal vars
     /////////////////////////////////////////////////////////////////////////////////
-	var debug_lvl = 1;
+	var debug_lvl = 100;
 	
 	var _pb_puzzstore_structure = {identifier: 'name', label: 'name', items: []};
 	var _pb_puzzstore = new ItemFileWriteStore({data: _pb_puzzstore_structure});
@@ -61,34 +61,85 @@ define([
 	/////////////////////////////////////////////////////////////////////////////////
     
 	function _pb_comm_warn(msg) {
-		console.warn(msg);
-		_pb_cb_warning(msg);
+	    _pb_log("_pb_comm_warn()",2);
+	    console.warn(msg);
+	    _pb_cb_warning(msg);
 	}
     
-	function _pbrest_post(path,data,loadcb) {
-		xhr.post({
-			url: _pb_config.pbrest_root+"/"+path,
-			sync: false,
-			handleAs: "json",
-			load: loadcb,
-			error: alert,
-			preventCache: true,
-			postData: dojo.toJson(data),
-			headers: {"Content-Type":"text/x-json"}
-		});
+	function _pb_comm_fail(msg) {
+	    _pb_log("_pb_comm_fail()",2);
+	    console.warn(msg);
+	    _pb_cb_warning(msg);
 	}
     
-	function _pbrest_get(path,loadcb) {
-		xhr.get({
-			url: _pb_config.pbrest_root+"/"+path,
+	function _pbrest_post(path, data, loadcb, errcb) {
+	    xhr.post(_pb_config.pbrest_root+"/"+path, {
+			 sync: false, 
+			 handleAs: "text",
+			 preventCache: true,
+			 data: dojo.toJson(data),
+			 headers: {"Content-Type":"text/x-json"}
+		     }).then(function(jsondata) {
+				 _pb_log("_pbrest_post: jsondata:"+jsondata, 10);
+				 try {
+				     data = dojo.fromJson(jsondata);
+				     _pb_log("_pbrest_post: data:", 10);
+				     _pb_log(data, 10);
+				     loadcb(data);
+				 } catch (x) {
+				     _pb_log("_pbrest_post: caught exception converting toJson: "+x);
+				     // error converting to json - probably a login page or capture portal
+		                     if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
+					 _pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
+					 setTimeout(function(){
+							window.location.reload( true );
+						    }, 5000);
+				     } else {
+					 _pb_comm_warn("Error retrieving "+path);
+				     }
+				 }
+			     }, function(err) {
+				 _pb_log("_pbrest_post: error:", 10);
+				 _pb_log(err, 10);
+				 errcb(err);
+			     }, function(evt) {
+				 _pb_log("_pbrest_post: event:", 10);
+				 _pb_log(evt, 10);
+			     });
+	}
+	
+	function _pbrest_get(path, loadcb, errcb) {
+	    xhr.get(_pb_config.pbrest_root+"/"+path, {
 			sync: false,
-			handleAs: "json",
-			load: loadcb,
-			error: alert,
+			handleAs: "text",
 			preventCache: true
-		});
+		    }).then(function(jsondata) {
+				 _pb_log("_pbrest_get: jsondata:"+jsondata, 10);
+				try {
+				     data = dojo.fromJson(jsondata);  
+				     _pb_log("_pbrest_get: data:", 10);
+				     _pb_log(data, 10);
+				     loadcb(data);
+				 } catch (x) {
+				     _pb_log("_pbrest_get: caught exception converting toJson: "+x);
+				     // error converting to json - probably a login page or capture portal
+		                     if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
+					 _pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
+					 setTimeout(function(){
+							window.location.reload( true );
+						    }, 5000);
+				     } else {
+					 _pb_comm_warn("Error retrieving "+path);
+				     }
+				 }
+			    }, function(err) {
+				_pb_log("_pbrest_get: error:"+err, 10);
+				errcb(err);
+			    }, function(evt) {
+				_pb_log("_pbrest_get: event:"+evt, 10);
+			    });
 	}
-
+       
 	function _pb_puzzstore_data_set_handler(item, attribute, oldValue, newValue) {
 		_pb_log("_pb_puzzstore_data_handler("+item.id+","+attribute+","+oldValue+","+newValue+")",2);
 		// called when puzzle data store changes from our user
@@ -97,7 +148,7 @@ define([
 			wrapdata.data = newValue;
 			_pb_log("_pb_puzzstore_data_handler: posting change for puzzle["+item.id+"]="+_pb_puzzstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]",1);
 			_pbrest_post("puzzles/"+_pb_puzzstore.getLabel(item)+"/"+attribute,
-			wrapdata,_pb_post_puzzle_part_cb);
+			wrapdata,_pb_post_puzzle_part_cb, function(err) {_pb_log("_pb_puzzstore_data_set_handler: error from _pbrest_post:"+err,1)});
 		}
 	}
 	
@@ -109,7 +160,7 @@ define([
 			wrapdata.data = newValue;
 			_pb_log("_pb_solverstore_data_set_handler: posting change for solver["+item.id+"]="+_pb_solverstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]",1);
 			_pbrest_post("solvers/"+_pb_solverstore.getLabel(item)+"/"+attribute,
-			wrapdata,_pb_post_solver_part_cb);
+			wrapdata,_pb_post_solver_part_cb, function(err) {_pb_log("_pb_solverstore_data_set_handler: error from _pbrest_post:"+err,1)});
 		}
 	}
     
@@ -661,7 +712,7 @@ define([
 		if(array.some(_pb_roundlist, function (item) { return item==roundid; })) {
 			return("ERROR: "+roundid+" already exists");
 		} else {
-			_pbrest_post("rounds/"+roundid, _pb_create_round_cb);
+			_pbrest_post("rounds/"+roundid, _pb_create_round_cb, function(err) {_pb_log("pb_create_round: error from _pbrest_post:"+err,1)});
 			//_pbrest_post("rounds/"+roundid, callback);
 			return("Please wait, attempting to create round "+roundid+"...");
 		}

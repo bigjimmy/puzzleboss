@@ -103,7 +103,11 @@ sub error : ErrorRunmode {
     my $self = shift;
     my $error = shift;
     $self->header_add( -status => $status );
-    return $self->json_body({ 'error' => $error });
+    return $self->json_body({ 'status' => 'error',
+			      'error' => $error,
+			      'id' => $self->param('id'),
+			      'part' => $self->param('part'),
+			    });
 }
 
 1;

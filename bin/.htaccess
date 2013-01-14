@@ -43,7 +43,6 @@ Options -Indexes +ExecCGI
 #  </IfModule>
 
 <FilesMatch "pbrest.pl">
-#	SetHandler cgi-script
 	require valid-user
 </FilesMatch>
 
