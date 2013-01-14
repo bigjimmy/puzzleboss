@@ -18,15 +18,15 @@ define([
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
+	var remote_user;
 	
-    var add_puzz_ui_handler_connection;
-    var remove_puzz_ui_handler_connection;
-    var update_puzz_ui_handler_connection;
+	var add_puzz_ui_handler_connection;
+	var remove_puzz_ui_handler_connection;
+	var update_puzz_ui_handler_connection;
 
 	var status_button;
 	var meteor_status;
 	var meteor_mode;
-	var my_editable;
 	
 	var summary = dom.byId("summary_layout");
 	var roundboxes = new Array();
@@ -262,27 +262,29 @@ define([
 	
 	return {
 		
-		my_init: function(editable) {
-			my_editable = editable;
-	    
-			pbmrc.pb_log("my_init: creating status indicator / button");
-			status_button = new formbutton({
-				label: "Status", 
-				onClick: pbmrc.pb_meteor_reconnect_stream, 
-				showLabel: true,
-				iconClass: "button-status-red",
-			});
-			pbmrc.pb_log("my_init: attaching status button to container");
-			dom.byId("statuscontainer").appendChild(status_button.domNode);
-	    
-			pbmrc.pb_log("my_init: calling pbmrc.pb_init");
+		my_init: function(my_init_remote_user) {
+		    remote_user = my_init_remote_user;
+		    pbmrc.pb_log("my_init: remote_user is "+remote_user)
+		    
+		    pbmrc.pb_log("my_init: creating status indicator / button");
+		    status_button = new formbutton({
+						       label: "Status", 
+						       onClick: pbmrc.pb_meteor_reconnect_stream, 
+						       showLabel: true,
+						       iconClass: "button-status-red",
+						   });
+		    pbmrc.pb_log("my_init: attaching status button to container");
+		    dom.byId("statuscontainer").appendChild(status_button.domNode);
+		    
+		    pbmrc.pb_log("my_init: calling pbmrc.pb_init");
 		    var ret = pbmrc.pb_init(init_complete_cb, add_round_cb, 
-				puzzle_update_cb, received_updated_part_cb, solver_update_cb, 
-				error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb,version_diff_filter);
-				
+					    puzzle_update_cb, received_updated_part_cb, solver_update_cb, 
+					    error_cb, warning_cb, meteor_conn_status_cb, meteor_conn_mode_cb,version_diff_filter);
+		    
 		    puzzstore = ret.puzzstore;
 		    solverstore = ret.solverstore;
 		},	
+	    
 	};
 		
     });

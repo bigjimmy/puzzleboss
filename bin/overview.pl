@@ -31,6 +31,8 @@ if (param('showrounds')){
 my $editable;
 my $title = "$PB::Config::TEAM_NAME ($PB::Config::PB_DEV_VERSION) Hunt Overview";
 
+my $remote_user = $ENV{'REMOTE_USER'};
+
 my $html = <<"EOF";
 Content-type: text/html
 
@@ -48,16 +50,16 @@ Content-type: text/html
 	<script type="text/javascript">
 
 		var my_pbmrc;
-		var my_pb;
+		var my_overview;
 		require({
 			waitSeconds: 5,
 		},
 		["../js/pb-meteor-rest-client.js", "../js/overview.js"],
-		function(pbmrc,pb) {
+		function(pbmrc,overview) {
 		    pbmrc.pb_set_config("$PB::Config::METEOR_HTTP_HOST", "$PB::Config::METEOR_VERSION_CHANNEL", "$PB::Config::PBREST_ROOT");
 			my_pbmrc = pbmrc;
-			my_pb = pb;
-			pb.my_init(true);
+			my_overview = overview;
+			overview.my_init("$remote_user");
 		});	
 
 	</script>
