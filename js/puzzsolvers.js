@@ -33,7 +33,6 @@ define([
 	var status_button;
 	var meteor_status;
 	var meteor_mode;
-	var my_editable;
 
 	var solved_answer_filter='*';
 	
@@ -334,8 +333,7 @@ define([
 	
 	return {
 		
-		my_init: function(editable) {
-			my_editable = editable;
+		my_init: function() {
 	    
 			pbmrc.pb_log("my_init: creating status indicator / button");
 			status_button = new formbutton({
