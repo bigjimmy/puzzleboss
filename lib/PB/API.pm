@@ -185,21 +185,22 @@ sub _add_puzzle_google {
 
     # create google spreadsheet for this puzzle
     debug_log("add_puzzle: creating google spreadsheet\n",0);
-    my $google = google_create_spreadsheet($id, $round, $PB::Config::TWIKI_WEB, $PB::Config::TWIKI_URI."/twiki/bin/view/".$PB::Config::TWIKI_WEB."/".$puzzletopic, $uri);
+    my $google = _google_create_spreadsheet($id, $round, $PB::Config::TWIKI_WEB, $PB::Config::TWIKI_URI."/twiki/bin/view/".$PB::Config::TWIKI_WEB."/".$puzzletopic, $uri);
     my $gssuri = $google->{'spreadsheet'};
     debug_log("add_puzzle: have google spreadsheet $gssuri\n",0);
     my $folderuri = $google->{'subfolder'};
     debug_log("add_puzzle: have google folder $folderuri\n",0);
     
     # create google document for this puzzle
-    debug_log("add_puzzle: creating google document\n",0);
-    $google = google_create_document($id, $round, $PB::Config::TWIKI_WEB);
-    my $gduri = $google->{'document'};
-    debug_log("add_puzzle: have google document $gduri\n",0);
-    my $gdfolderuri = $google->{'subfolder'};
-    debug_log("add_puzzle: have google folder $gdfolderuri\n",0);
+    #debug_log("add_puzzle: creating google document\n",0);
+    #$google = _google_create_document($id, $round, $PB::Config::TWIKI_WEB);
+    #my $gduri = $google->{'document'};
+    #debug_log("add_puzzle: have google document $gduri\n",0);
+    #my $gdfolderuri = $google->{'subfolder'};
+    #debug_log("add_puzzle: have google folder $gdfolderuri\n",0);
 
     # TODO update URI in data store
+    return $gssuri;
 }
 
 sub _add_puzzle_twiki {
@@ -256,22 +257,6 @@ sub add_puzzle {
 
     debug_log("add_puzzle()\n",2);
 
-    # Add to backend data store files
-    if($PB::Config::PB_DATA_WRITE_FILES > 0) {
-	if(_add_puzzle_files($id, $round, $uri, "") <= 0) {
-	    debug_log("add_puzzle: Can't write fields for puzzle data!!\n",0);
-	    return(-1);
-	}
-    }    
-    
-    # Add to database
-    if($PB::Config::PB_DATA_WRITE_DB > 0) {
-	if(_add_puzzle_db($id, $round, $uri, "") <= 0) {
-	    debug_log("add_puzzle: couldn't add to db!\n",0);
-	    return(-101);
-	}
-    }    
-    
     # Figure out what names of TWiki topics should be
     my $puzzletopic = $id."Puzzle";
     my $roundtopic = $round."Round";
@@ -280,7 +265,25 @@ sub add_puzzle {
     }
     
     #_add_puzzle_twiki($id, $round, $uri, $templatetopic, $puzzletopic, $roundtopic);
-    #_add_puzzle_google($id, $round, $uri, $templatetopic, $puzzletopic);
+    #my $gssuri = _add_puzzle_google($id, $round, $uri, $templatetopic, $puzzletopic);
+    my $gssuri = "";
+
+
+    # Add to backend data store files
+    if($PB::Config::PB_DATA_WRITE_FILES > 0) {
+	if(_add_puzzle_files($id, $round, $uri, $gssuri) <= 0) {
+	    debug_log("add_puzzle: Can't write fields for puzzle data!!\n",0);
+	    return(-1);
+	}
+    }    
+    
+    # Add to database
+    if($PB::Config::PB_DATA_WRITE_DB > 0) {
+	if(_add_puzzle_db($id, $round, $uri, $gssuri) <= 0) {
+	    debug_log("add_puzzle: couldn't add to db!\n",0);
+	    return(-101);
+	}
+    }    
     
     return 0; # success
 }
