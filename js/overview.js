@@ -100,7 +100,7 @@ define([
 		if (puzzstore.getValue(item,"answer") == ""){
 			//links to spreadsheet and puzzle pages if answer unknown
 			puzzinfo.appendChild(domconstruct.create("span",{id: "pi_links_span_"+name,
-				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/spreadsheet.png' title='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' title='Spreadsheet'></a>"}));
+				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"gssuri"))+"' target='_blank'><img src='../images/spreadsheet.png' title='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' title='Spreadsheet'></a>"}));
 	
 		}
 		

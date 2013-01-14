@@ -29,7 +29,7 @@ if (param('showrounds')){
 }
 
 my $editable;
-my $title = "$PB::Config::TEAM_NAME Hunt Overview";
+my $title = "$PB::Config::TEAM_NAME ($PB::Config::PB_DEV_VERSION) Hunt Overview";
 
 my $html = <<"EOF";
 Content-type: text/html
@@ -63,7 +63,7 @@ Content-type: text/html
 	</script>
 </head>
 <body class="tundra">
-	<h1>$PB::Config::TEAM_NAME Hunt Overview</h1>
+	<h1>$PB::Config::TEAM_NAME ($PB::Config::PB_DEV_VERSION) Hunt Overview</h1>
 	<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
 
 	<div id="summary_layout"></div>
