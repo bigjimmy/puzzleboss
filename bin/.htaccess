@@ -42,11 +42,12 @@ Options -Indexes +ExecCGI
 #    </FilesMatch>
 #  </IfModule>
 
-#<FilesMatch "pbrest.pl">
+<FilesMatch "pbrest.pl">
 #	SetHandler cgi-script
-#</FilesMatch>
+	require valid-user
+</FilesMatch>
 
-<FilesMatch "pboverview.pl">
+<FilesMatch "overview.pl">
 	require valid-user
 </FilesMatch>
 

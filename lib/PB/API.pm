@@ -163,6 +163,10 @@ sub _add_puzzle_db {
     my $uri = shift;
     my $gssuri = shift;
 
+    # convert gssuri to null (undef) if not set
+    if($gssuri eq '') {
+	$gssuri = undef;
+    }
     my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, 'New');";
     my $c = $dbh->do($sql, undef, $id, $round, $uri, $gssuri);
     

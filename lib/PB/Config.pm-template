@@ -22,9 +22,6 @@ our $DEBUG = 1;
 our $TWIKI_DEBUG = 1;
 our $TWIKI_PROTOCOL = "https";
 
-# Call in LocalConfig.pl
-# require 'LocalConfig.pl';
-
 our $HUNT = "MH2013";
 our $USER = "BigJimmy";
 our $PASS = "password";
@@ -59,15 +56,17 @@ our $PB_DATA_DB_PORT = "3306";
 our $PB_DATA_DB_USER = lc($USER);
 our $PB_DATA_DB_PASS = $PASS;
 
-our $REGISTER_LDAP_HOST = 'ldap.$DOMAIN_NAME';
+our $REGISTER_LDAP_HOST = "ldap.$DOMAIN_NAME";
 our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $DOMAIN_NAME));
-our $REGISTER_LDAP_DOMAIN = '$DOMAIN_NAME';
-our $REGISTER_LDAP_ADMIN_USER = 'admin';
+our $REGISTER_LDAP_DOMAIN = "$DOMAIN_NAME";
+our $REGISTER_LDAP_ADMIN_USER = "admin";
 our $REGISTER_LDAP_ADMIN_PASS = $PASS;
 our $REGISTER_LDAP_O = $TEAM_NAME;
 our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
 
 our $GOOGLE_DOMAIN = "$DOMAIN_NAME";
+our $GOOGLE_CLIENT_ID = "123456789012.apps.googleusercontent.com";
+our $GOOGLE_CLIENT_SECRET = "AAAAAAAAAAAA-AAAAAAAAAAA";
 
 our $PB_DEV_VERSION_POSTPAREN = "";
 if($PB_DEV_VERSION ne "") {
@@ -99,6 +98,10 @@ our $PB_BIN_REL = "$PB_REL/bin";
 our $PB_BIN_PATH = "$PB_PATH/bin";
 our $PB_BIN_URI = "$PB_URI/bin";
 
+our $PB_ADMIN_TOOLS_REL = "$PB_REL/admin_tools";
+our $PB_ADMIN_TOOLS_PATH = "$PB_PATH/admin_tools";
+our $PB_ADMIN_TOOLS_URI = "$PB_URI/admin_tools";
+
 our $PB_CSS_REL = "$PB_REL/css";
 our $PB_CSS_PATH = "$PB_PATH/css";
 our $PB_CSS_URI = "$PB_URI/css";
@@ -111,6 +114,7 @@ our $PB_GOOGLE_PATH = "$PB_PATH/google";
 
 our $DOJO_ROOT = "$PB_REL/dojoroot";
 our $PBREST_ROOT = "$PB_BIN_REL/pbrest.pl";
+our $PBREST_URI = "$PB_BIN_URI/pbrest.pl";
 
 our $TWIKI_USERS_FILE = "$TWIKI_DATA_PATH/.htpasswd";
 our $ROUNDS_FILE = "$PB_DATA_PATH/rounds.list";
@@ -123,6 +127,18 @@ our $LOG_FILE = "$PB_DATA_PATH/log.txt";
 our $LOG_INDEX = "$PB_DATA_PATH/logindex.txt";
 our $CLIENT_INDEX = "$PB_DATA_PATH/clientindex.txt";
 our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE = "$PB_GOOGLE_PATH/google-doc-template.odt";
+
+sub export_to_bash {
+    foreach my $entry (keys %{PB::Config::}) { 
+	print "export $entry=\"".${$PB::Config::{$entry}}."\";\n";
+    }
+}
+
+sub export_to_tcsh {
+    foreach my $entry (keys %{PB::Config::}) { 
+	print "setenv $entry \"".${$PB::Config::{$entry}}."\";\n";
+    }
+}
 
 1;
 

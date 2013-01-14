@@ -23,7 +23,7 @@ sub send_version {
     
     $req->authorization_basic($PB::Config::BIGJIMMY_BOT_CONTROL_USER, $PB::Config::BIGJIMMY_BOT_CONTROL_PASS);
 
-    $req->content('version='.$version);
+    $req->content('{"version":"'.$version.'"}');
     my $res = $ua->request($req);
     
     if ($res->is_success) {
