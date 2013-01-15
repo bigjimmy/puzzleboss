@@ -71,6 +71,15 @@ Content-type: text/html
 	<div id="summary_layout"></div>
 	
 	<div id="statuscontainer"></div>
+	
+	<h2>Help:</h2>
+	<span id="overview_legend">
+	<b>Status icons: </b>
+	New (<img class="pi_icon" src="../images/new.png" >),
+	Being worked (<img class="pi_icon" src="../images/work.png">),
+	Needs eyes (<img class="pi_icon" src="../images/eyes.png">),
+	Solved (<img class="pi_icon" src="../images/solved.png">)
+	</span>
 </body>
 </html>
 

@@ -87,13 +87,22 @@
 
 
 .pi_name{
-    font-size: 20px;
-    padding: 0.5ex;
+    font-size: 16px;
+    padding: 0.25ex;
+	vertical-align: middle;
 }
 
+.pi_container{
+	margin-bottom: 0.25em;
+}
+
+.pi_icon{
+	vertical-align: middle;
+	cursor: pointer;
+}
 
 .pi_answer{
-    font-size: 20px;
+    font-size: 16px;
     font-family: monospace;
 }
 

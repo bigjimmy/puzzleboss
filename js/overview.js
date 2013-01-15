@@ -12,9 +12,11 @@ define([
 	   "dojo/dom",
 	   "dojo/dom-construct",
 	   "dojo/dom-style",
+	   "dojo/dom-class",
+	   "dojo/NodeList-traverse",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle) {
+    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle, domclass) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -64,31 +66,35 @@ define([
 	}
 
 	function choose_status_image(item){
+		pbmrc.pb_log("choose_status_item()",2);
 		var html_msg = "";
 		var my_status = puzzstore.getValue(item,"status");
 		if(my_status == "New"){
-			html_msg = "<img src=\"../images/new_bang.jpg\" title='New'> ";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/new.png\" title='New'>";
 		}else if (my_status == "Being worked"){
-			html_msg = "<img src=\"../images/work_gear.png\" title='Being worked'> ";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/work.png\" title='Being worked'>";
 		}else if (my_status == "Needs eyes"){
-			html_msg = "<img src=\"../images/eyes_sauron.jpg\" title='Needs eyes'> ";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/eyes.png\" title='Needs eyes'>";
 		}else if (my_status == "Solved"){
-			html_msg = "<img src=\"../images/solved_tick.png\" title='Solved'> ";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/solved.png\" title='Solved'>";
 		}
+		
 		return html_msg;
 	}
 	
 	function add_puzz_ui(item, parentinfo){
-		pbmrc.pb_log("add_puzz_ui()");
+		pbmrc.pb_log("add_puzz_ui()",2);
 		var name = puzzstore.getValue(item,"name");
 		
-		var puzzinfo = domconstruct.create("div", {id: "puzzleinfo_div_"+name});
+		var puzzinfo = domconstruct.create("div", {class: "pi_container", id: "puzzleinfo_div_"+name});
 		
 		//the status image
-		puzzinfo.appendChild(domconstruct.create("span", {id: "pi_statusimg_span_"+name, innerHTML: choose_status_image(item)}));
+		var statusimg_span = domconstruct.create("span", {id: "pi_statusimg_span_"+name, innerHTML: choose_status_image(item)});
+		connect.connect(statusimg_span,"onclick",function () {show_puzzle_dialog(name);});
+		puzzinfo.appendChild(statusimg_span);
 			
 		//the Puzzle name
-		var namespan = domconstruct.create("span", {id: "pi_name_span_"+name, class: "pi_name", innerHTML: name});
+		var namespan = domconstruct.create("span", {id: "pi_name_span_"+name, class: "pi_name", innerHTML: name+": "});
 		if 	(puzzstore.getValue(item,"status") == "Solved"){
 			domstyle.set(namespan,"color","#bbb");
 		}
@@ -100,7 +106,7 @@ define([
 		if (puzzstore.getValue(item,"answer") == ""){
 			//links to spreadsheet and puzzle pages if answer unknown
 			puzzinfo.appendChild(domconstruct.create("span",{id: "pi_links_span_"+name,
-				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"gssuri"))+"' target='_blank'><img src='../images/spreadsheet.png' title='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img src='../images/puzzle.png' title='Spreadsheet'></a>"}));
+				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"gssuri"))+"' target='_blank'><img class=\"pi_icon\" src='../images/spreadsheet.png' title='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img class=\"pi_icon\" src='../images/puzzle.png' title='Spreadsheet'></a>"}));
 	
 		}
 		
@@ -118,7 +124,7 @@ define([
 		pbmrc.pb_log("update_puzz_ui(): name="+puzzstore.getValue(item,"name")+" attribute="+attribute+" oldValue="+oldValue+" newValue="+newValue);
 		var name = puzzstore.getValue(item,"name");
 		if (attribute == "status"){
-			pbmrc.pb_log("looking for pi_statusmsg_span_"+name);
+			pbmrc.pb_log("looking for pi_statusimg_span_"+name);
 			dom.byId("pi_statusimg_span_"+name).innerHTML=choose_status_image(item);
 			if (newValue == "Solved" && oldValue != "Solved"){
 				domstyle.set(dom.byId("pi_name_span_"+name),"color","#bbb");
@@ -126,7 +132,7 @@ define([
 				domstyle.set(dom.byId("pi_name_span_"+name),"color","#000");
 			}
 		} else if ( attribute == "answer"){
-			dom.byId("pi_answer_span_"+name).innerHTML=puzzstore.getValue(item,"answer");				
+			dom.byId("pi_answer_span_"+name).innerHTML=": "+puzzstore.getValue(item,"answer");				
 			if (newValue == "" && oldValue != ""){
 				//we'are deleting the answer, here, so reveal the solving links.
 				domstyle.set(dom.byId("pi_links_span_"+name),"display","inline");
@@ -137,6 +143,28 @@ define([
 		}
 	}
 	
+	function show_puzzle_dialog(puzz){
+		var puzzDialog = new dialog({
+			title: "Hello "+remote_user+"!",
+			content: new formbutton({
+				type: "submit",
+				label: "I'm working on "+puzz+"!", 
+				onClick: function(){		
+					solverstore.fetchItemByIdentity({
+						identity: remote_user,
+						onItem: function(item) {
+							disable_store_ui_handlers()
+							solverstore.setValue(item,"puzz",puzz);
+							solverstore.save({onError: error_cb});
+							enable_store_ui_handlers()
+						}
+					});}, 
+					showLabel: true,
+				})
+			});
+			puzzDialog.show();
+		}
+
 	function roundlist_update_cb(my_roundlist) {
 		//don't care.
 	}
