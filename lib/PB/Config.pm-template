@@ -15,6 +15,7 @@ our $PB_PASS = "password";
 our $PB_DOMAIN_NAME = "example.com";
 our $TEAM_NAME = "Example Team Name";
 our $INSTALL_PATH = "/canadia";
+our $BIGJIMMY_IP = "0.0.0.0"; # IP for bigjimmy (can access pbrest without auth)
 
 ##############################################################################
 # You may not need to edit this section

@@ -158,7 +158,7 @@
 	          'pbrest.pl' => {
 		    Order => 'Deny,Allow',
 		    Deny => 'from all',
-		    Allow => 'from 184.106.156.137',
+		    Allow => 'from $BIGJIMMY_IP',
 		    Require => 'valid-user',
 		    Satisfy => 'Any',
 		  },
