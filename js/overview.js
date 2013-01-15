@@ -19,10 +19,11 @@ define([
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
 	var remote_user;
-	
+
 	var add_puzz_ui_handler_connection;
 	var remove_puzz_ui_handler_connection;
 	var update_puzz_ui_handler_connection;
+	var update_solver_ui_handler_connection;
 
 	var status_button;
 	var meteor_status;
@@ -38,8 +39,8 @@ define([
 	    win.body().removeChild(dom.byId("waitDiv"));
 		
 		//spray out some admin functionality
-		var admindiv = dom.byId("adminDiv");
-		admindiv.appendChild(new formbutton({
+		var take_a_break = dom.byId("take_a_break");
+		take_a_break.appendChild(new formbutton({
 			type: "break",
 			label: "Take a break!", 
 			onClick: function(){		
@@ -55,23 +56,27 @@ define([
 				show_puzzle_dialog("");
 				},
 			}).domNode);
-			admindiv.appendChild(domconstruct.create("p", {id: "logout_span",
-				innerHTML: "Not "+remote_user+"? <a href='"+
-				encodeURI("https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo="+location.href)+
-				"'>Logout</a>"
-			}));
+
 
 	    //hooks up our listeners
 	    pbmrc.pb_log("init_complete_cb(): enabling connection handlers");
 	    enable_store_ui_handlers();
 	    
 	    pbmrc.pb_log("init_complete_cb(): adding puzzles");
-		puzzstore.fetch({
-			onItem: function(item){
-				add_puzz_ui(item);
-			}
-			});
+	    puzzstore.fetch({
+				onItem: function(item){
+				    add_puzz_ui(item);
+				}
+			    });
 
+	    pbmrc.pb_log("init_complete_cb(): adding solver for remote_user: "+remote_user);
+	    solverstore.fetchItemByIdentity({
+						identity: remote_user,
+						onItem: function(item){
+						    add_solver_ui(item);
+						}
+					    });
+					    
 	    pbmrc.pb_log("init_complete_cb(): init complete");		
 	}
 	
@@ -79,12 +84,14 @@ define([
 		add_puzz_ui_handler_connection = connect.connect(puzzstore,"onNew",add_puzz_ui);
 		remove_puzz_ui_handler_connection = connect.connect(puzzstore,"onDelete",remove_puzz_ui);
 		update_puzz_ui_handler_connection = connect.connect(puzzstore,"onSet",update_puzz_ui);
+		update_solver_ui_handler_connection = connect.connect(solverstore,"onSet",update_solver_ui);
 	}
 	
 	function disable_store_ui_handlers(){
 		connect.disconnect(add_puzz_ui_handler_connection);
 		connect.disconnect(remove_puzz_ui_handler_connection);
 		connect.disconnect(update_puzz_ui_handler_connection);
+	        connect.disconnect(update_solver_ui_handler_connection);
 	}
 
 	function choose_status_image(item){
@@ -163,6 +170,42 @@ define([
 				domstyle.set(dom.byId("pi_links_span_"+name),"display","none");
 			}
 		}
+	}
+	
+	function add_solver_ui(item, parentinfo){
+	    pbmrc.pb_log("add_solver_ui()",2);
+	    var name = solverstore.getValue(item,"name");
+	    pbmrc.pb_log("add_solver_ui: name="+name+" remote_user="+remote_user, 3);
+	    if(name == remote_user) {
+		var puzz = solverstore.getValue(item,"puzz");
+		pbmrc.pb_log("add_solver_ui: puzz="+puzz, 3);
+		// this is the data for the currently logged-in user
+		update_solver_ui(item, "puzz", "", puzz);
+	    } else {
+		// don't care about other users		    
+	    }
+	}
+
+	function update_solver_ui(item, attribute, oldValue, newValue){
+	    pbmrc.pb_log("update_solver_ui()",2);
+	    pbmrc.pb_log("update_solver_ui: name="+solverstore.getValue(item,"name")+" attribute="+attribute+" oldValue="+oldValue+" newValue="+newValue);
+	    var name = solverstore.getValue(item,"name");
+	    if(name == remote_user) {
+		// this is an update to the currently logged-in user
+		if (attribute == "puzz"){
+		    if (newValue != "") {
+			dom.byId("current_puzzle").innerHTML="I think you are currently working on "+newValue+".";
+			domstyle.set(dom.byId("take_a_break"),"display","inline");
+		    } else {
+			dom.byId("current_puzzle").innerHTML="I don't think you are currently working on anything.";
+			domstyle.set(dom.byId("take_a_break"),"display","none");
+		    }
+		} else {
+		    // don't care about other attributes
+		}
+	    } else {
+		// don't care about other users
+	    }
 	}
 	
 	function show_puzzle_dialog(puzz){
@@ -313,15 +356,18 @@ define([
 	var is_any_rounds_patt = /^rounds/;
 	var is_answerstatus_patt = /^puzzles\/[^\/]*\/(answer|status)$/;
 	var is_any_version_patt = /^version/;
-
 	function version_diff_filter(diff){
 	    // N.B. all pbmrcs must listen to version!
 	    pbmrc.pb_log("version_diff_filter()")
 	    return array.filter(diff, function(item){
+				    remote_user_regex_string = "^solvers\/"+remote_user;
+				    is_solver_remote_user = new RegExp(remote_user_regex_string);
+				    pbmrc.pb_log("version_diff_filter: item="+item+" is_solver_remote_user.test(item)="+is_solver_remote_user.test(item)+" regex string="+remote_user_regex_string);
 				    return (is_any_version_patt.test(item) ||
 					    is_addpuzzle_patt.test(item) || 
 					    is_any_rounds_patt.test(item) || 
-					    is_answerstatus_patt.test(item));
+					    is_answerstatus_patt.test(item) || 
+					    is_solver_remote_user.test(item));
 				});
 	}
 	
@@ -348,6 +394,7 @@ define([
 		    
 		    puzzstore = ret.puzzstore;
 		    solverstore = ret.solverstore;
+
 		},	
 	    
 	};

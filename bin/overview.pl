@@ -11,6 +11,7 @@ use PB::Config;
 use PB::API;
 use CGI qw(:standard:);
 use CGI qw(param);
+use URI::Escape;
 
 my $debugp="false";
 if($PB::Config::PB_DEV_VERSION ne "") {
@@ -32,6 +33,7 @@ my $editable;
 my $title = "Hunt Overview$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 
 my $remote_user = $ENV{'REMOTE_USER'};
+my $selfuri = uri_escape($PB::Config::PB_BIN_URI."/overview.pl");
 
 my $html = <<"EOF";
 Content-type: text/html
@@ -65,9 +67,15 @@ Content-type: text/html
 	</script>
 </head>
 <body class="tundra">
-	<h1>$title</h1>
-	<div id="adminDiv">Hello, $remote_user. </div>
-	
+    <h1>$title - <a href="/twiki/bin/view" target="_twiki">TWiki</a></h1>
+    <div id="adminDiv">Hello, $remote_user. 
+    <span id="current_puzzle"></span>
+    <span id="take_a_break"></span>
+      <p id="logout_span">Not $remote_user? 
+        <a href="https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo=$selfuri">Logout</a> (or close browser)
+      </p>
+    </div>
+    
 	<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
 
 	<div id="summary_layout"></div>
