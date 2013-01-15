@@ -112,9 +112,9 @@ our $PB_BIN_REL = "$PB_REL/bin";
 our $PB_BIN_PATH = "$PB_PATH/bin";
 our $PB_BIN_URI = "$PB_URI/bin";
 
-our $PB_ADMIN_TOOLS_REL = "$PB_REL/admin_tools";
-our $PB_ADMIN_TOOLS_PATH = "$PB_PATH/admin_tools";
-our $PB_ADMIN_TOOLS_URI = "$PB_URI/admin_tools";
+our $PB_ADMIN_TOOLS_REL = "$PB_REL/admin-tools";
+our $PB_ADMIN_TOOLS_PATH = "$PB_PATH/admin-tools";
+our $PB_ADMIN_TOOLS_URI = "$PB_URI/admin-tools";
 
 our $PB_CSS_REL = "$PB_REL/css";
 our $PB_CSS_PATH = "$PB_PATH/css";

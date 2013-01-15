@@ -73,39 +73,41 @@ define([
 	}
     
 	function _pbrest_post(path, data, loadcb, errcb) {
-	    xhr.post(_pb_config.pbrest_root+"/"+path, {
-			 sync: false, 
-			 handleAs: "text",
-			 preventCache: true,
-			 data: dojo.toJson(data),
-			 headers: {"Content-Type":"text/x-json"}
-		     }).then(function(jsondata) {
-				 _pb_log("_pbrest_post: jsondata:"+jsondata, 10);
-				 try {
-				     data = dojo.fromJson(jsondata);
-				     _pb_log("_pbrest_post: data:", 10);
-				     _pb_log(data, 10);
-				     loadcb(data);
-				 } catch (x) {
-				     _pb_log("_pbrest_post: caught exception converting toJson: "+x);
-				     // error converting to json - probably a login page or capture portal
-		                     if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
-					 _pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
-					 setTimeout(function(){
-							window.location.reload( true );
-						    }, 5000);
-				     } else {
-					 _pb_comm_warn("Error retrieving "+path);
-				     }
-				 }
-			     }, function(err) {
-				 _pb_log("_pbrest_post: error:", 10);
-				 _pb_log(err, 10);
-				 errcb(err);
-			     }, function(evt) {
-				 _pb_log("_pbrest_post: event:", 10);
-				 _pb_log(evt, 10);
-			     });
+		xhr.post(_pb_config.pbrest_root+"/"+path, {
+			sync: false, 
+			handleAs: "text",
+			preventCache: true,
+			data: dojo.toJson(data),
+			headers: {"Content-Type":"text/x-json"}
+		}).then(function(jsondata) {
+			_pb_log("_pbrest_post: jsondata:"+jsondata, 10);
+			try {
+				data = dojo.fromJson(jsondata);
+				if (data.status == "error"){
+					errcb(data);
+				}else{
+					loadcb(data);
+				}
+			} catch (x) {
+				_pb_log("_pbrest_post: caught exception converting toJson: "+x);
+				// error converting to json - probably a login page or capture portal
+				if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
+					_pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
+					setTimeout(function(){
+						window.location.reload( true );
+					}, 5000);
+				} else {
+					_pb_comm_warn("Error retrieving "+path);
+				}
+			}
+		}, function(err) {
+			_pb_log("_pbrest_post: error:", 10);
+			_pb_log(err, 10);
+			errcb(err);
+		}, function(evt) {
+			_pb_log("_pbrest_post: event:", 10);
+			_pb_log(evt, 10);
+		});
 	}
 	
 	function _pbrest_get(path, loadcb, errcb) {
@@ -469,13 +471,13 @@ define([
 		}
 	}
     
-	function _pb_create_round_cb(response, ioArgs) {
-		_pb_log("_pb_create_round_cb() (UNIMPLEMENTED)",2);
-		// could pass along to a registered handler?
+	function _pb_create_round_cb(roundid, ioArgs) {
+		//could alert user that round has been created, but dialog is too in-your-face
+		//First time PB might be confused, but afterwards they'll just be annoyed by it.
+		//maybe we should have a little log box somewhere?
+		_pb_log("_pb_create_round_cb: UNIMPLEMENTED",3);
 	}
-    
-    
-    
+   
     
     
     /////////////////////////////////////////////////////////////////////////////////
@@ -709,13 +711,11 @@ define([
 	pb_solverstore: _pb_solverstore,
 	
 	pb_create_round: function(roundid) {
-		if(array.some(_pb_roundlist, function (item) { return item==roundid; })) {
-			return("ERROR: "+roundid+" already exists");
-		} else {
-			_pbrest_post("rounds/"+roundid, _pb_create_round_cb, function(err) {_pb_log("pb_create_round: error from _pbrest_post:"+err,1)});
-			//_pbrest_post("rounds/"+roundid, callback);
-			return("Please wait, attempting to create round "+roundid+"...");
-		}
+			var nodata = new Object();
+			_pbrest_post("rounds/"+roundid, 
+				nodata, 
+				_pb_create_round_cb, 
+				function(returndata){_pb_cb_warning(returndata.error)});
 	},
 	
 	pb_meteor_reconnect_stream: function() {

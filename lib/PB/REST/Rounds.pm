@@ -23,33 +23,19 @@ sub full_POST : Runmode {
 	#    my $json = $self->query->param('POSTDATA');
 	#    my $roundref = $self->from_json($json);
 
-	$roundid =~ s/\-/Dash/g;
-	$roundid =~ s/\_/Underscore/g;
+	print STDERR "PB::REST::Rounds::full_POST: request to create round $roundid\n"; 
 
-	print STDERR "PB::REST::Rounds::full_POST: request to create round $roundid\n"; #dump ".Dumper($roundref)."\n";
-	if($roundid =~ /^([A-Z][[:alnum:]]+)$/) {
-		# ok round id, try to add it
-		my $rval = PB::API::add_round($roundid);
-		if($rval == 0) {
-			# success!
-			return $self->json_body({ 'status'=>'ok',
-						  'roundid'=>$roundid
-						});
-		} else {
-		    # error adding round
-		    PB::API::debug_log("Rounds.pm: full_POST: error adding round\n",1);
-		    my $errmsg = "could not add $roundid, error $rval";
-		    print STDERR $errmsg;
-		    $error_status = 404;
-		    die $errmsg;
-		}
+	# ok round id, try to add it
+	my $rval = PB::API::add_round($roundid);
+	if($rval == 0) {
+		# success!
+		return $self->json_body({ 'status'=>'ok',
+		'roundid'=>$roundid
+		});
 	} else {
-		my $fixuproundid = $roundid;
-		$fixuproundid =~ s/[^[:alnum:]]//g; # must be alphanumeric
-		$fixuproundid = ucfirst($fixuproundid); # must start with uppercase letter
-		PB::API::debug_log("Rounds.pm: full_POST: roundid $roundid not valid, try $fixuproundid\n",3);
-#		$status{roundid} = $fixuproundid;
-		my $errmsg = "roundid contained invalid characters. try: $fixuproundid";
+		# error adding round
+		PB::API::debug_log("Rounds.pm: full_POST: error adding round\n",1);
+		my $errmsg = "could not add $roundid, alphanumeric characters, only, please";
 		print STDERR $errmsg;
 		$error_status = 404;
 		die $errmsg;
