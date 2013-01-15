@@ -79,6 +79,10 @@
     font-weight: normal;
 }
 
+.activesolver {
+    border: 2px dashed #aaa;
+}
+
 #poolcontainer .solver{
     display: inline-block;
 }

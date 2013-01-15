@@ -1,4 +1,3 @@
-
 define([
 	   "../js/pb-meteor-rest-client.js",
 	   "dojo/parser", 
@@ -12,9 +11,10 @@ define([
 	   "dojo/dom",
 	   "dojo/dom-construct",
 	   "dojo/dom-style",
+	   "dojo/dom-class",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle) {
+    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle, domclass) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -47,10 +47,10 @@ define([
 				solverstore.fetchItemByIdentity({
 					identity: remote_user,
 					onItem: function(item) {
-						disable_store_ui_handlers()
+					    //disable_store_ui_handlers()
 						solverstore.setValue(item,"puzz","");
 						solverstore.save({onError: error_cb});
-						enable_store_ui_handlers()
+					    //enable_store_ui_handlers()
 					}
 				});
 				show_puzzle_dialog("");
@@ -58,7 +58,7 @@ define([
 			}).domNode);
 
 
-	    //hooks up our listeners
+	    //hooks up our listeners initially
 	    pbmrc.pb_log("init_complete_cb(): enabling connection handlers");
 	    enable_store_ui_handlers();
 	    
@@ -99,13 +99,13 @@ define([
 		var html_msg = "";
 		var my_status = puzzstore.getValue(item,"status");
 		if(my_status == "New"){
-			html_msg = "<img class=\"pi_icon\" src=\"../images/new.png\" title='New'>";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/new.png\" title=\"New\" alt=\"new\" >";
 		}else if (my_status == "Being worked"){
-			html_msg = "<img class=\"pi_icon\" src=\"../images/work.png\" title='Being worked'>";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/work.png\" title=\"Being worked\" alt=\"being worked\">";
 		}else if (my_status == "Needs eyes"){
-			html_msg = "<img class=\"pi_icon\" src=\"../images/eyes.png\" title='Needs eyes'>";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/eyes.png\" title=\"Needs eyes\" alt=\"needs eyes\">";
 		}else if (my_status == "Solved"){
-			html_msg = "<img class=\"pi_icon\" src=\"../images/solved.png\" title='Solved'>";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/solved.png\" title=\"Solved\" alt=\"solved\">";
 		}
 		
 		return html_msg;
@@ -135,7 +135,7 @@ define([
 		if (puzzstore.getValue(item,"answer") == ""){
 			//links to spreadsheet and puzzle pages if answer unknown
 			puzzinfo.appendChild(domconstruct.create("span",{id: "pi_links_span_"+name,
-				innerHTML:"<a href='"+encodeURI(puzzstore.getValue(item,"gssuri"))+"' target='_blank'><img class=\"pi_icon\" src='../images/spreadsheet.png' title='Spreadsheet'></a><a href='"+encodeURI(puzzstore.getValue(item,"uri"))+"' target='_blank'><img class=\"pi_icon\" src='../images/puzzle.png' title='Puzzle'></a>"}));
+				innerHTML:"<a href=\""+encodeURI(puzzstore.getValue(item,"gssuri"))+"\" target=\"_gss\"><img class=\"pi_icon\" src=\"../images/spreadsheet.png\" title=\"Spreadsheet\" alt=\"spreadsheet\"></a><a href=\""+encodeURI(puzzstore.getValue(item,"uri"))+"\" target=\"_puzz\"><img class=\"pi_icon\" src=\"../images/puzzle.png\" title=\"Puzzle\" alt=\"puzzle\"></a>"}));
 	
 		}
 		
@@ -193,9 +193,15 @@ define([
 	    if(name == remote_user) {
 		// this is an update to the currently logged-in user
 		if (attribute == "puzz"){
+		    if (oldValue != "") {
+			pbmrc.pb_log("update_solver_ui: removing activesolver class from puzzleinfo_div_"+oldValue, 3);
+			domclass.remove("puzzleinfo_div_"+oldValue, "activesolver");
+		    }
 		    if (newValue != "") {
 			dom.byId("current_puzzle").innerHTML="I think you are currently working on "+newValue+".";
 			domstyle.set(dom.byId("take_a_break"),"display","inline");
+			pbmrc.pb_log("update_solver_ui: adding activesolver class to puzzleinfo_div_"+newValue, 3);
+			domclass.add("puzzleinfo_div_"+newValue, "activesolver");
 		    } else {
 			dom.byId("current_puzzle").innerHTML="I don't think you are currently working on anything.";
 			domstyle.set(dom.byId("take_a_break"),"display","none");
@@ -232,10 +238,10 @@ define([
 						solverstore.fetchItemByIdentity({
 							identity: remote_user,
 							onItem: function(item) {
-								disable_store_ui_handlers()
+							    // disable_store_ui_handlers()
 								solverstore.setValue(item,"puzz",puzz);
 								solverstore.save({onError: error_cb});
-								enable_store_ui_handlers()
+							    //	enable_store_ui_handlers()
 							}
 						});}, 
 						showLabel: true,

@@ -83,12 +83,13 @@ Content-type: text/html
 	<div id="statuscontainer"></div>
 	
 	<h2>Help:</h2>
+        <p>Click on the status icon (e.g. <img class="pi_icon" src="../images/new.png" alt="new">) of a puzzle to let us know that you are working on it. Click on the spreadsheet icon (<img class="pi_icon" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img class="pi_icon" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
 	<span id="overview_legend">
 	<b>Status icons: </b>
-	New (<img class="pi_icon" src="../images/new.png" >),
-	Being worked (<img class="pi_icon" src="../images/work.png">),
-	Needs eyes (<img class="pi_icon" src="../images/eyes.png">),
-	Solved (<img class="pi_icon" src="../images/solved.png">)
+	New (<img class="pi_icon" src="../images/new.png" alt="new">),
+	Being worked (<img class="pi_icon" src="../images/work.png" alt="being worked">),
+	Needs eyes (<img class="pi_icon" src="../images/eyes.png" alt="needs eyes">),
+	Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">)
 	</span>
 </body>
 </html>
