@@ -27,6 +27,7 @@ before things will work:
 
 6. Run the following admin-tools:
  * ./admin-tools/init-db.sh  (initializes the mysql database)
+ * ./admin-tools/set-db-config.sh (copies some data from Config.pm into database)
  * ./admin-tools/install-apache-conf.sh (sets up an apache config in ./apache-conf/sites/canadia-apache.conf)
  * ./admin-tools/add_all_ldap_users_as_solvers.pl (adds all users in LDAP to the PB database)
 
