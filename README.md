@@ -5,9 +5,13 @@ before things will work:
 
 1. cp puzzlebitch/lib/PB/Config.pm-template puzzlebitch/lib/PB/Config.pm
 
-2. edit puzzlebitch/lib/PB/Config.pm
- * Domain name
- * admin password
+2. edit (at least the top section) of puzzlebitch/lib/PB/Config.pm to set:
+ * hunt title (TWiki Web)
+ * username
+ * password
+ * domain name
+ * team name
+ * install path (or just install in /canadia/puzzlebitch)
 
 3. Set the PERL5LIB environment variable before running scripts in admin-tools:
  * export PERL5LIB=[INSTALL_DIR]/puzzlebitch/lib:${PERL5LIB}
@@ -18,7 +22,7 @@ before things will work:
 
 5. If you are working in a "dev" version, set PERL5LIB accordingly and also 
    set the PB_DEV_VERSION environment variable to the string that comes after 
-   puzzlebitch in the dev version.
+   puzzlebitch in the dev version, otherwise set PB_DEV_VERSION="".
  * export PB_DEV_VERSION="-dev"
 
 6. Run the following admin-tools:

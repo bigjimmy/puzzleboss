@@ -3,8 +3,11 @@ package PB::Config;
 use strict;
 
 ##############################################################################
-# Edit this section after copying lib/PB/Config.pm-template to
-# lib/PB/Config.pm 
+# Edit this file after copying lib/PB/Config.pm-template to lib/PB/Config.pm
+##############################################################################
+
+##############################################################################
+# It is essential to edit this section
 ##############################################################################
 our $PB_HUNT = "MH2013";
 our $PB_USER = "ExampleUser"; 
@@ -12,6 +15,10 @@ our $PB_PASS = "password";
 our $PB_DOMAIN_NAME = "example.com";
 our $TEAM_NAME = "Example Team Name";
 our $INSTALL_PATH = "/canadia";
+
+##############################################################################
+# You may not need to edit this section
+##############################################################################
 our $REGISTER_LDAP_ADMIN_USER = "admin";
 our $PB_DATA_DB_HOST = "localhost";
 our $PB_DATA_DB_PORT = "3306";
@@ -24,7 +31,7 @@ our $BIGJIMMY_CONTROL_PORT = "8080";
 
 
 ##############################################################################
-#
+# You do not need to edit this section unless you need to debug
 ##############################################################################
 our $ANSWERSALLCAPS = 1;
 our $DEBUG = 1;
@@ -33,7 +40,8 @@ our $JS_DEBUG = 1;
 
 
 ##############################################################################
-# You should not normally need to edit anything below this line.
+# You should not normally need to edit anything below this line unless you
+# have a very non-standard configuration.
 ##############################################################################
 our $PB_DEV_VERSION = "";
 if(exists($ENV{'PB_DEV_VERSION'})) {
