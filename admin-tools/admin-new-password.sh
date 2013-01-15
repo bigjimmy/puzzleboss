@@ -1,20 +1,18 @@
 #!/bin/bash
 
+eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
+
 username=$1
 
-admin_pass=`cat pw`
-domain=`cat domain`
-ldapdc=`cat ldapdc`
-
 if [[ -n "${username}" ]]; then
-    dn=`ldapsearch -xLLL -b "${ldapdc}" uid=${username} dn | perl -pi -e 's/dn:\ //'`
+    dn=`ldapsearch -xLLL -b "${REGISTER_LDAP_DC}" uid=${username} dn | perl -pi -e 's/dn:\ //'`
     if [[ -n "${dn}" ]]; then
 	echo "have dn ${dn}, resetting password."
-	newpass=`ldappasswd -D "cn=admin,dc=stormynight,dc=org" -x -w "${admin_pass}" "${dn}" | perl -pi -e 's/^.*?:[[:space:]]+//'`
+	newpass=`ldappasswd -D "cn=${REGISTER_LDAP_ADMIN_USER},${REGISTER_LDAP_DC}" -x -w "${REGISTER_LDAP_ADMIN_PASS}" "${dn}" | perl -pi -e 's/^.*?:[[:space:]]+//'`
 	if [[ -n "${newpass}" ]]; then
 	    echo "changed LDAP password to: ${newpass}"
 	    echo "attempting to change google apps password (for GTalk with external clients?)"
-	    (cd /canadia/puzzlebitch/google && ./ChangeUserPass.sh --domain "${domain}" --username "${username}" --password "${newpass}" )
+	    (cd /canadia/puzzlebitch/google && ./ChangeUserPass.sh --domain "${GOOGLE_DOMAIN}" --username "${username}" --password "${newpass}" )
 	else
 	    echo "could not change ldap password"
 	    exit 3

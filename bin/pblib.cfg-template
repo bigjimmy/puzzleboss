@@ -1,4 +1,4 @@
-use lib "/canadia/puzzlebitch/lib";
-use lib "/canadia/puzzlebitch/bin";
+use lib "$PB_PATH/lib";
+use lib "$PB_PATH/bin";
 
 1;

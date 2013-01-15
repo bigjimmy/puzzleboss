@@ -1,8 +1,6 @@
 #!/bin/bash
 
-admin_pass=`cat pw`
-domain=`cat domain`
-ldapdc=`cat ldapdc`
+eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
 
 deleteuser=`echo $1 | perl -pi -e 's/[[:space:]*]//g'`
 
@@ -12,17 +10,17 @@ if [ -z "$deleteuser" ]; then
 else
 
     echo "deleting user $deleteuser"
-    deletedn=`ldapsearch -xLLL -b "${ldapdc}" uid=$deleteuser dn|cut -d':' -f2|head -n 1|perl -pi -e 's/[[:space:]*]//g'`
+    deletedn=`ldapsearch -xLLL -b "${REGISTER_LDAP_DC}" uid=$deleteuser dn|cut -d':' -f2|head -n 1|perl -pi -e 's/[[:space:]*]//g'`
     if [ -z "$deletedn" ]; then
 	echo "ldap user does not exist"
     else 
 	echo "deleting ldap dn $deletedn"
-	ldapdelete -x -D cn=admin,${ldapdc} -w ${admin_pass} $deletedn
+	ldapdelete -x -D cn=${REGISTER_LDAP_ADMIN_USER},${REGISTER_LDAP_DC} -w ${REGISTER_LDAP_ADMIN_PASS} $deletedn
     fi
 
 
     echo "deleting google user $deleteuser"
-    (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${domain} -a ${admin_pass})
+    (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${GOOGLE_DOMAIN} -a ${GOOGLE_ADMIN_PASS})
 
 
     twikitopic=/canadia/twiki/data/Main/$deleteuser.txt
