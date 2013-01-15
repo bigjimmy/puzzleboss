@@ -85,6 +85,14 @@
 
 /*Overview stuff*/
 
+#adminDiv {
+	display: inline;
+}
+
+#logout_span {
+	display: inline;
+	font-size: 10px;
+}
 
 .pi_name{
     font-size: 16px;

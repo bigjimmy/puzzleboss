@@ -12,11 +12,9 @@ define([
 	   "dojo/dom",
 	   "dojo/dom-construct",
 	   "dojo/dom-style",
-	   "dojo/dom-class",
-	   "dojo/NodeList-traverse",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle, domclass) {
+    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -38,6 +36,30 @@ define([
 	function init_complete_cb() {
 	    // remove the little waitDiv notice
 	    win.body().removeChild(dom.byId("waitDiv"));
+		
+		//spray out some admin functionality
+		var admindiv = dom.byId("adminDiv");
+		admindiv.appendChild(new formbutton({
+			type: "break",
+			label: "Take a break!", 
+			onClick: function(){		
+				solverstore.fetchItemByIdentity({
+					identity: remote_user,
+					onItem: function(item) {
+						disable_store_ui_handlers()
+						solverstore.setValue(item,"puzz","");
+						solverstore.save({onError: error_cb});
+						enable_store_ui_handlers()
+					}
+				});
+				show_puzzle_dialog("");
+				},
+			}).domNode);
+			admindiv.appendChild(domconstruct.create("p", {id: "logout_span",
+				innerHTML: "Not "+remote_user+"? <a href='"+
+				encodeURI("https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo="+location.href)+
+				"'>Logout</a>"
+			}));
 
 	    //hooks up our listeners
 	    pbmrc.pb_log("init_complete_cb(): enabling connection handlers");
@@ -144,24 +166,39 @@ define([
 	}
 	
 	function show_puzzle_dialog(puzz){
-		var puzzDialog = new dialog({
-			title: "Hello "+remote_user+"!",
-			content: new formbutton({
+		var puzzDialog;
+		
+		if (puzz == ""){
+			var goodnight_div = domconstruct.create("div", {innerHTML: "Enjoy your well-earned rest, "+remote_user+"!<br>"});
+			goodnight_div.appendChild(new formbutton({
+				label: "Logout", 
 				type: "submit",
-				label: "I'm working on "+puzz+"!", 
-				onClick: function(){		
-					solverstore.fetchItemByIdentity({
-						identity: remote_user,
-						onItem: function(item) {
-							disable_store_ui_handlers()
-							solverstore.setValue(item,"puzz",puzz);
-							solverstore.save({onError: error_cb});
-							enable_store_ui_handlers()
-						}
-					});}, 
-					showLabel: true,
-				})
+				onClick: function (){location.href=encodeURI("https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo="+location.href);}}).domNode
+			);
+			puzzDialog = new dialog({
+				title: "Sleep well.",
+				content: goodnight_div
 			});
+		}else{
+			puzzDialog = new dialog({
+				title: "Hello "+remote_user+"!",
+				content: new formbutton({
+					type: "submit",
+					label: "I'm working on "+puzz+"!", 
+					onClick: function(){		
+						solverstore.fetchItemByIdentity({
+							identity: remote_user,
+							onItem: function(item) {
+								disable_store_ui_handlers()
+								solverstore.setValue(item,"puzz",puzz);
+								solverstore.save({onError: error_cb});
+								enable_store_ui_handlers()
+							}
+						});}, 
+						showLabel: true,
+					})
+				});
+			}
 			puzzDialog.show();
 		}
 

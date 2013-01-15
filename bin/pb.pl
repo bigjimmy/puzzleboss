@@ -33,10 +33,10 @@ my $editable;
 my $title;
 if (param('edit')){
 	$editable = "true";
-	$title = "$PB::Config::TEAM_NAME -- Puzzlebitch Central$PB::Config::PB_DEV_VERSION_POSTPAREN";
+	$title = "Puzzlebitch Central$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }else{
 	$editable = "false";
-	$title = "$PB::Config::TEAM_NAME -- Hunt Status$PB::Config::PB_DEV_VERSION_POSTPAREN";
+	$title = "Hunt Status$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }
 
 my $html = <<"EOF";

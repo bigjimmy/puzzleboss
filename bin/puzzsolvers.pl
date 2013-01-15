@@ -29,7 +29,7 @@ if (param('showrounds')){
 	$showrounds="checked";
 }
 
-my $title = "$PB::Config::TEAM_NAME PB Solver-o-matic Interface";
+my $title = "PB Solver-o-matic$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 
 my $html = <<"EOF";
 Content-type: text/html
@@ -63,7 +63,7 @@ Content-type: text/html
     </script>
 </head>
 <body class="tundra">
-    <h1>$PB::Config::TEAM_NAME PPuzzles-n-solvers</h1>
+    <h1>$title</h1>
     <div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
     <div id="poolcontainer">
     <h2>Solver Pool</h2>

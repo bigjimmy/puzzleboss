@@ -29,7 +29,7 @@ if (param('showrounds')){
 }
 
 my $editable;
-my $title = "$PB::Config::TEAM_NAME ($PB::Config::PB_DEV_VERSION) Hunt Overview";
+my $title = "Hunt Overview$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 
 my $remote_user = $ENV{'REMOTE_USER'};
 
@@ -65,7 +65,9 @@ Content-type: text/html
 	</script>
 </head>
 <body class="tundra">
-	<h1>$PB::Config::TEAM_NAME ($PB::Config::PB_DEV_VERSION) Hunt Overview</h1>
+	<h1>$title</h1>
+	<div id="adminDiv">Hello, $remote_user. </div>
+	
 	<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
 
 	<div id="summary_layout"></div>
