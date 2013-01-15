@@ -70,23 +70,6 @@ Content-type: text/html
 		my_pb = pb;
 		pb.my_init($editable);
 	    });
-
-	function create_round_cb(data, ioArgs) {
-	    //    alert("round creation completed");
-	    //alert("round creation callback: "+dojo.toJson(data));
-	    //TODO handle errors
-	    //createnewrounddialogStandby.hide();
-	    //dijit.byId('createnewrounddialog').hide();
-	}
-	
-	function create_wait(msg) {
-	    //TODO: implement (and have create_round_cb tear it down)
-	    //alert(msg);
-	    //createnewrounddialogStandby.show();
-	    //dijit.byId('createnewrounddialog').show();
-	}
-	
-
     </script>
 </head>
 <body class="tundra">
@@ -107,7 +90,7 @@ if ($editable eq "true"){
 $html .= <<"EOF"	
 <!-- new round -->
 <button dojoType="dijit.form.Button" onclick="dijit.byId('createnewrounddialog').show()">Create New Round</button>
-<div dojoType="dijit.Dialog" id="createnewrounddialog" title="Enter new round information" execute="msg=my_pbmrc.pb_create_round(arguments[0].newroundid); if(msg.indexOf('ERROR') > -1) {error_cb(msg)} else { create_wait(msg); }">
+<div dojoType="dijit.Dialog" id="createnewrounddialog" title="Enter new round information" execute="my_pbmrc.pb_create_round(arguments[0].newroundid);">
     <table>
       <tr>
 	<td><label for="newroundid">Round Name:</label></td>
