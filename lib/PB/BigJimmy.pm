@@ -14,7 +14,7 @@ sub debug_log {
 sub send_version {
     my $version = shift;
     
-    my $version_post_uri = $PB::Config::BIGJIMMY_BOT_CONTROL_URI."version";
+    my $version_post_uri = $PB::Config::BIGJIMMY_BOT_CONTROL_URI."/version";
 
     my $ua = LWP::UserAgent->new;
     my $req = HTTP::Request->new(
