@@ -122,7 +122,9 @@ define([
 		puzzinfo.appendChild(answer_span);			
 
 		//the status image
-		var statusimg_span = domconstruct.create("span", {id: "pi_statusimg_span_"+name, innerHTML: choose_status_image(item)});
+		var statusimg_span = domconstruct.create("span", {id: "pi_statusimg_span_"+name, 
+								  class: "pi_status",
+								  innerHTML: choose_status_image(item)});
 		connect.connect(statusimg_span,"onclick",function () {show_puzzle_dialog(name);});
 		puzzinfo.appendChild(statusimg_span);
 			
@@ -135,9 +137,10 @@ define([
 		
 	        //links to spreadsheet and puzzle pages 
   	        var links_span = domconstruct.create("span",{id: "pi_links_span_"+name,
+							     class: "pi_links",
 							     innerHTML:"<a href=\""+encodeURI(puzzstore.getValue(item,"gssuri"))+"\" target=\"_gss\"><img class=\"pi_icon\" src=\"../images/spreadsheet.png\" title=\"Spreadsheet\" alt=\"spreadsheet\"></a><a href=\""+encodeURI(puzzstore.getValue(item,"uri"))+"\" target=\"_puzz\"><img class=\"pi_icon\" src=\"../images/puzzle.png\" title=\"Puzzle\" alt=\"puzzle\"></a>"});
 	        if (puzzstore.getValue(item,"status") == "Solved") {
-		    domstyle.set(links_span,"opacity","0.5");
+		    domstyle.set(links_span,"opacity","0.3");
 		} else {
 		    domstyle.set(links_span,"opacity","1.0");
 		}
@@ -161,19 +164,13 @@ define([
 			dom.byId("pi_statusimg_span_"+name).innerHTML=choose_status_image(item);
 			if (newValue == "Solved" && oldValue != "Solved"){
 				domstyle.set(dom.byId("pi_name_span_"+name),"color","#bbb");
+				domstyle.set(dom.byId("pi_links_span_"+name),"opacity","0.3");
 			}else if(newValue != "Solved" && oldValue == "Solved"){
 				domstyle.set(dom.byId("pi_name_span_"+name),"color","#000");
+				domstyle.set(dom.byId("pi_links_span_"+name),"opacity","1.0");
 			}
 		} else if ( attribute == "answer"){
-			dom.byId("pi_answer_span_"+name).innerHTML=puzzstore.getValue(item,"answer");
-
-			if (newValue == "" && oldValue != ""){
-				//we'are deleting the answer, here, so reveal the solving links.
-				domstyle.set(dom.byId("pi_links_span_"+name),"opacity","1.0");
-			}else if (newValue != "" && oldValue == ""){
-				//we're inserting the answer, so hide the solving links
-				domstyle.set(dom.byId("pi_links_span_"+name),"opacity","0.5");
-			}
+			dom.byId("pi_answer_span_"+name).innerHTML=newValue;
 		}
 	}
 	
@@ -262,7 +259,17 @@ define([
 	
 	function add_round_cb(roundname) {
 		pbmrc.pb_log("add_round_cb(): adding round "+roundname);
-		roundboxes[roundname] = domconstruct.create("div", {class: "round_container", id: "round_div_"+roundname, innerHTML: "<h2>"+roundname+"</h2>"});
+		roundboxes[roundname] = domconstruct.create("div", {class: "round_container", id: "round_div_"+roundname});
+	        var meta_container = domconstruct.create("div", {class: "meta_container", id: "meta_container_"+roundname});
+	        var meta_answer = domconstruct.create("div", {class: "meta_answer", id: "meta_answer_"+roundname});
+	        meta_container.appendChild(meta_answer);
+	        var meta_status = domconstruct.create("div", {class: "meta_status", id: "meta_status_"+roundname});
+	        meta_container.appendChild(meta_status);
+  	        var meta_name = domconstruct.create("div", {class: "meta_name", id: "meta_name_"+roundname, innerHTML: roundname});
+	        meta_container.appendChild(meta_name);
+	        var meta_links = domconstruct.create("div", {class: "meta_links", id: "meta_links_"+roundname});
+	        meta_container.appendChild(meta_links);
+	        roundboxes[roundname].appendChild(meta_container);
 		summary.appendChild(roundboxes[roundname]);	
 	}
 

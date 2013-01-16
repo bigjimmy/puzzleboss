@@ -79,9 +79,12 @@
     font-weight: normal;
 }
 
+/*
 .activesolver {
     border: 2px dashed #aaa;
 }
+*/
+
 
 #poolcontainer .solver{
     display: inline-block;
@@ -98,19 +101,59 @@
 	font-size: 10px;
 }
 
-.pi_name{
-    font-size: 16px;
-    padding: 0.25ex;
-	vertical-align: middle;
-}
-
-.pi_container{
-	margin-bottom: 0.25em;
-}
 
 .pi_icon{
 	vertical-align: middle;
 	cursor: pointer;
+}
+
+
+.round_container{
+    border:1px solid #aaa;
+    padding: 1ex;
+    margin: 0.5ex;
+    background: #fff;
+    display: inline-table;
+    vertical-align:top;
+}
+
+.meta_container{
+    display: table-row;
+}
+
+.pi_container{
+    display: table-row;
+	margin-bottom: 0.25em;
+}
+
+.meta_answer, .meta_status, .meta_name, .meta_links {
+    display: table-cell;
+    vertical-align: bottom;
+    font-weight: bold;
+}
+
+.pi_answer, .pi_status, .pi_name, .pi_links {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.activesolver .pi_answer {
+    border: 2px dashed #aaa;
+    border-right: none;
+}
+.activesolver .pi_status {
+    border: 2px dashed #aaa;
+    border-left: none;
+    border-right: none;
+}
+.activesolver .pi_name {
+    border: 2px dashed #aaa;
+    border-left: none;
+    border-right: none;
+}
+.activesolver .pi_links {
+    border: 2px dashed #aaa;
+    border-left: none;
 }
 
 .pi_answer{
@@ -118,13 +161,16 @@
     font-family: monospace;
 }
 
-.round_container{
-    border:1px solid #aaa;
-    padding: 1ex;
-    margin: 0.5ex;
-    background: #fff;
-    display: inline-block;
-    vertical-align:top;
+.pi_status{
+}
+
+.pi_name{
+    font-size: 16px;
+    padding: 0.25ex;
+}
+
+.pi_links{
+    min-width: 40px;
 }
 
 /*PB main stuff*/
