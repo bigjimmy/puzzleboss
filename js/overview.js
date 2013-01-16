@@ -122,10 +122,6 @@ define([
 		
 		var puzzinfo = domconstruct.create("div", {class: "pi_container", id: "puzzleinfo_div_"+name});
 
-		//the answer 
-	        var answer_span = domconstruct.create("span", {id: "pi_answer_span_"+name, class: "pi_answer", innerHTML: puzzstore.getValue(item,"answer")});
-		puzzinfo.appendChild(answer_span);			
-
 		//the status image
 		var statusimg_span = domconstruct.create("span", {id: "pi_statusimg_span_"+name, 
 								  class: "pi_status",
@@ -161,6 +157,12 @@ define([
 	        links_span.appendChild(puzz_link);
 
 	        puzzinfo.appendChild(links_span);
+
+		//the answer 
+	        var answer_span = domconstruct.create("span", {id: "pi_answer_span_"+name, class: "pi_answer", innerHTML: puzzstore.getValue(item,"answer")});
+		puzzinfo.appendChild(answer_span);			
+
+
 	        set_status(puzzinfo, puzzstore.getValue(item,"status"));
 		roundboxes[puzzstore.getValue(item,"round")].appendChild(puzzinfo);
 	}
@@ -264,15 +266,18 @@ define([
 				content: new formbutton({
 					type: "submit",
 					label: "I'm working on "+puzz+"!", 
-					onClick: function(){		
+					onClick: function(){
 						solverstore.fetchItemByIdentity({
 							identity: remote_user,
 							onItem: function(item) {
 							    if(item != null) {
-								// disable_store_ui_handlers()
+					    pbmrc.pb_log(puzz+", "+remote_user);
+								 //disable_store_ui_handlers()
 								solverstore.setValue(item,"puzz",puzz);
 								solverstore.save({onError: error_cb});
-								//	enable_store_ui_handlers()
+								//enable_store_ui_handlers()
+							    }else{
+								//TODO: if can't find this should alert the user!
 							    }
 							}
 						});}, 

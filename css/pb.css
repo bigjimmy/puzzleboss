@@ -149,11 +149,10 @@
 
 .activesolverpuzzle .pi_answer {
     border: 2px dashed #777;
-    border-right: none;
+    border-left: none;
 }
 .activesolverpuzzle .pi_status {
     border: 2px dashed #777;
-    border-left: none;
     border-right: none;
 }
 .activesolverpuzzle .pi_name {
@@ -164,6 +163,7 @@
 .activesolverpuzzle .pi_links {
     border: 2px dashed #777;
     border-left: none;
+    border-right: none;
 }
 
 .pi_answer{
