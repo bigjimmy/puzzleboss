@@ -79,12 +79,18 @@
     font-weight: normal;
 }
 
-/*
-.activesolver {
+
+.activesolverpuzzle {
     border: 2px dashed #aaa;
 }
-*/
 
+.solver_active #take_a_break, .solver_active #current_puzzle, .solver_inactive #no_current_puzzle {
+    display: inline;
+}
+
+.solver_inactive #take_a_break, .solver_active #no_current_puzzle, .solver_inactive #current_puzzle {
+    display: none;
+}
 
 #poolcontainer .solver{
     display: inline-block;
@@ -137,22 +143,22 @@
     vertical-align: middle;
 }
 
-.activesolver .pi_answer {
-    border: 2px dashed #aaa;
+.activesolverpuzzle .pi_answer {
+    border: 2px dashed #777;
     border-right: none;
 }
-.activesolver .pi_status {
-    border: 2px dashed #aaa;
+.activesolverpuzzle .pi_status {
+    border: 2px dashed #777;
     border-left: none;
     border-right: none;
 }
-.activesolver .pi_name {
-    border: 2px dashed #aaa;
+.activesolverpuzzle .pi_name {
+    border: 2px dashed #777;
     border-left: none;
     border-right: none;
 }
-.activesolver .pi_links {
-    border: 2px dashed #aaa;
+.activesolverpuzzle .pi_links {
+    border: 2px dashed #777;
     border-left: none;
 }
 
@@ -172,6 +178,21 @@
 .pi_links{
     min-width: 40px;
 }
+
+.status_New, .status_Needs_eyes, .status_Being_worked {
+    opacity: 1.0;
+}
+.status_Solved > * {
+    opacity: 0.33;
+}
+.status_Solved > .pi_answer {
+    opacity: 1.0;
+}
+
+.missing_link {
+    opacity: 0.2;
+}
+
 
 /*PB main stuff*/
 .fixedwidthformat{

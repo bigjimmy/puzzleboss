@@ -69,11 +69,16 @@ Content-type: text/html
 <body class="tundra">
     <h1>$title - <a href="/twiki/bin/view" target="_twiki">TWiki</a></h1>
     <div id="adminDiv">Hello, $remote_user. 
-    <span id="current_puzzle"></span>
-    <span id="take_a_break"></span>
-      <p id="logout_span">Not $remote_user? 
-        <a href="https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo=$selfuri">Logout</a> (or close browser)
-      </p>
+      <span id="solver_active_p" class="solver_inactive">
+        <span id="no_current_puzzle">I don't think you are currently working on anything.</span>
+        <span id="current_puzzle">
+          <span>I think you are currently working on </span><span id="current_puzzle_name"></span><span>.</span>
+          <span id="take_a_break"></span>
+        </span>
+        <span id="logout_span">Not $remote_user? 
+          <a href="https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo=$selfuri">Logout</a> (or close browser)
+        </span>
+      </span>
     </div>
     
 	<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>

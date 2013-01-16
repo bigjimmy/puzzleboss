@@ -81,15 +81,11 @@ define([
 			headers: {"Content-Type":"text/x-json"}
 		}).then(function(jsondata) {
 			_pb_log("_pbrest_post: jsondata:"+jsondata, 10);
+			var data
 			try {
 				data = dojo.fromJson(jsondata);
-				if (data.status == "error"){
-					errcb(data);
-				}else{
-					loadcb(data);
-				}
 			} catch (x) {
-				_pb_log("_pbrest_post: caught exception converting toJson: "+x);
+				_pb_log("_pbrest_post: caught exception converting response fromJson: "+x);
 				// error converting to json - probably a login page or capture portal
 				if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
 					_pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
@@ -99,6 +95,11 @@ define([
 				} else {
 					_pb_comm_warn("Error retrieving "+path);
 				}
+			}
+			if (data.status == "error"){
+			    errcb(data);
+			}else{
+			    loadcb(data);
 			}
 		}, function(err) {
 			_pb_log("_pbrest_post: error:", 10);
@@ -117,11 +118,9 @@ define([
 			preventCache: true
 		    }).then(function(jsondata) {
 				 _pb_log("_pbrest_get: jsondata:"+jsondata, 10);
+				var data
 				try {
 				     data = dojo.fromJson(jsondata);  
-				     _pb_log("_pbrest_get: data:", 10);
-				     _pb_log(data, 10);
-				     loadcb(data);
 				 } catch (x) {
 				     _pb_log("_pbrest_get: caught exception converting toJson: "+x);
 				     // error converting to json - probably a login page or capture portal
@@ -134,6 +133,13 @@ define([
 					 _pb_comm_warn("Error retrieving "+path);
 				     }
 				 }
+				_pb_log("_pbrest_get: data:", 10);
+				_pb_log(data, 10);
+				if (data.status == "error"){
+				    errcb(data);
+				}else{
+				    loadcb(data);
+				}
 			    }, function(err) {
 				_pb_log("_pbrest_get: error:"+err, 10);
 				errcb(err);

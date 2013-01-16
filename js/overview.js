@@ -72,8 +72,14 @@ define([
 	    pbmrc.pb_log("init_complete_cb(): adding solver for remote_user: "+remote_user);
 	    solverstore.fetchItemByIdentity({
 						identity: remote_user,
-						onItem: function(item){
-						    add_solver_ui(item);
+						onItem: function(item) {
+						    pbmrc.pb_log("init_complete_cb: solverstore.fetchItemByIdentity:onItem: item="+item, 3);
+						    if(item != null) {
+							add_solver_ui(item);
+						    }
+						},
+						onError: function(error) {
+						    warning_cb("could not find solver "+remote_user+" error: "+error);
 						}
 					    });
 					    
@@ -116,7 +122,7 @@ define([
 		var name = puzzstore.getValue(item,"name");
 		
 		var puzzinfo = domconstruct.create("div", {class: "pi_container", id: "puzzleinfo_div_"+name});
-		
+
 		//the answer 
 	        var answer_span = domconstruct.create("span", {id: "pi_answer_span_"+name, class: "pi_answer", innerHTML: puzzstore.getValue(item,"answer")});
 		puzzinfo.appendChild(answer_span);			
@@ -130,22 +136,33 @@ define([
 			
 		//the Puzzle name
 		var namespan = domconstruct.create("span", {id: "pi_name_span_"+name, class: "pi_name", innerHTML: name});
-		if (puzzstore.getValue(item,"status") == "Solved"){
-		    domstyle.set(namespan,"color","#bbb");
-		}
 		puzzinfo.appendChild(namespan);
 		
 	        //links to spreadsheet and puzzle pages 
-  	        var links_span = domconstruct.create("span",{id: "pi_links_span_"+name,
-							     class: "pi_links",
-							     innerHTML:"<a href=\""+encodeURI(puzzstore.getValue(item,"gssuri"))+"\" target=\"_gss\"><img class=\"pi_icon\" src=\"../images/spreadsheet.png\" title=\"Spreadsheet\" alt=\"spreadsheet\"></a><a href=\""+encodeURI(puzzstore.getValue(item,"uri"))+"\" target=\"_puzz\"><img class=\"pi_icon\" src=\"../images/puzzle.png\" title=\"Puzzle\" alt=\"puzzle\"></a>"});
-	        if (puzzstore.getValue(item,"status") == "Solved") {
-		    domstyle.set(links_span,"opacity","0.3");
+  	        var links_span = domconstruct.create("span",{id: "pi_links_span_"+name, class: "pi_links"});
+
+	        // add google spreadsheets link if it is not null
+   	        var gss_uri = encodeURI(puzzstore.getValue(item,"gssuri"));
+	        var gss_link = domconstruct.create("a",{id: "pi_links_gss_"+name, class: "pi_gss_link", target: "_gss", innerHTML: "<img class=\"pi_icon\" src=\"../images/spreadsheet.png\" title=\"Spreadsheet\" alt=\"spreadsheet\">"});
+	        if(gss_uri != "") {
+		    gss_link.href = gss_uri;
 		} else {
-		    domstyle.set(links_span,"opacity","1.0");
+		    domclass.add(gss_link,"missing_link");
 		}
+	        links_span.appendChild(gss_link);
+
+	        // add puzzle link if it is not null
+ 	        var puzz_uri = encodeURI(puzzstore.getValue(item,"uri"));
+	        var puzz_link = domconstruct.create("a",{id: "pi_links_puzz_"+name, class: "pi_puzz_link", target: "_puzz", innerHTML: "<img class=\"pi_icon\" src=\"../images/puzzle.png\" title=\"Puzzle\" alt=\"puzzle\">"});
+	        if(puzz_uri != "") {
+		    puzz_link.href = puzz_uri;
+		} else {
+		    domclass.add(puzz_link,"missing_link");
+		}
+	        links_span.appendChild(puzz_link);
+
 	        puzzinfo.appendChild(links_span);
-	    
+	        set_status(puzzinfo, puzzstore.getValue(item,"status"));
 		roundboxes[puzzstore.getValue(item,"round")].appendChild(puzzinfo);
 	}
 	
@@ -162,16 +179,15 @@ define([
 		if (attribute == "status"){
 			pbmrc.pb_log("looking for pi_statusimg_span_"+name);
 			dom.byId("pi_statusimg_span_"+name).innerHTML=choose_status_image(item);
-			if (newValue == "Solved" && oldValue != "Solved"){
-				domstyle.set(dom.byId("pi_name_span_"+name),"color","#bbb");
-				domstyle.set(dom.byId("pi_links_span_"+name),"opacity","0.3");
-			}else if(newValue != "Solved" && oldValue == "Solved"){
-				domstyle.set(dom.byId("pi_name_span_"+name),"color","#000");
-				domstyle.set(dom.byId("pi_links_span_"+name),"opacity","1.0");
-			}
+		        set_status("puzzleinfo_div_"+name, puzzstore.getValue(item,"status"));
 		} else if ( attribute == "answer"){
 			dom.byId("pi_answer_span_"+name).innerHTML=newValue;
 		}
+	}
+	
+	function set_status(id_or_node, status) {
+	    statusclass = "status_"+status.replace(/\ /g,"_");
+  	    domclass.replace(id_or_node, statusclass, "status_New status_Being_worked status_Needs_eyes status_Solved");
 	}
 	
 	function add_solver_ui(item, parentinfo){
@@ -196,17 +212,30 @@ define([
 		// this is an update to the currently logged-in user
 		if (attribute == "puzz"){
 		    if (oldValue != "") {
-			pbmrc.pb_log("update_solver_ui: removing activesolver class from puzzleinfo_div_"+oldValue, 3);
-			domclass.remove("puzzleinfo_div_"+oldValue, "activesolver");
+			// solver was previously working, unset activesolverpuzzle from old puzzle
+			pbmrc.pb_log("update_solver_ui: removing activesolverpuzzle class from #puzzleinfo_div_"+oldValue, 3);
+			domclass.remove("puzzleinfo_div_"+oldValue, "activesolverpuzzle");
+		    } else {
+		        // solver was previously sleeping, activate him
+			pbmrc.pb_log("update_solver_ui: setting solver_active class on #solver_active_p",3);
+                	domclass.replace(dom.byId("solver_active_p"),"solver_active","solver_inactive");
 		    }
 		    if (newValue != "") {
-			dom.byId("current_puzzle").innerHTML="I think you are currently working on "+newValue+".";
-			domstyle.set(dom.byId("take_a_break"),"display","inline");
-			pbmrc.pb_log("update_solver_ui: adding activesolver class to puzzleinfo_div_"+newValue, 3);
-			domclass.add("puzzleinfo_div_"+newValue, "activesolver");
+			// solver is now solving
+			pbmrc.pb_log("update_solver_ui: setting solver_active class on #solver_active_p",3);
+                	domclass.replace(dom.byId("solver_active_p"),"solver_active","solver_inactive");
+
+			// set current puzzle name
+			pbmrc.pb_log("update_solver_ui: setting contents of #current_puzzle_name to "+newValue,3);
+			dom.byId("current_puzzle_name").innerHTML=newValue;
+
+			// setting puzzleinfo_div for puzzle to activesolverpuzzle
+			pbmrc.pb_log("update_solver_ui: adding activesolverpuzzle class to puzzleinfo_div_"+newValue, 3);
+			domclass.add("puzzleinfo_div_"+newValue, "activesolverpuzzle");
 		    } else {
-			dom.byId("current_puzzle").innerHTML="I don't think you are currently working on anything.";
-			domstyle.set(dom.byId("take_a_break"),"display","none");
+			// solver is now sleeping, set solver_inactive
+                	domclass.replace(dom.byId("solver_active_p"),"solver_inactive","solver_active");
+			dom.byId("current_puzzle_name").innerHTML="";
 		    }
 		} else {
 		    // don't care about other attributes
@@ -240,10 +269,12 @@ define([
 						solverstore.fetchItemByIdentity({
 							identity: remote_user,
 							onItem: function(item) {
-							    // disable_store_ui_handlers()
+							    if(item != null) {
+								// disable_store_ui_handlers()
 								solverstore.setValue(item,"puzz",puzz);
 								solverstore.save({onError: error_cb});
-							    //	enable_store_ui_handlers()
+								//	enable_store_ui_handlers()
+							    }
 							}
 						});}, 
 						showLabel: true,
