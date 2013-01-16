@@ -154,13 +154,28 @@ our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE = "$PB_GOOGLE_PATH/google-doc-template.odt"
 
 sub export_to_bash {
     foreach my $entry (keys %{PB::Config::}) { 
-	print "export $entry=\"".${$PB::Config::{$entry}}."\";\n";
+	if(defined(${$PB::Config::{$entry}})) {
+	    my $value = ${$PB::Config::{$entry}};
+	    print "export $entry=\"$value\";\n";
+	}
     }
 }
 
 sub export_to_tcsh {
     foreach my $entry (keys %{PB::Config::}) { 
-	print "setenv $entry \"".${$PB::Config::{$entry}}."\";\n";
+	if(defined(${$PB::Config::{$entry}})) {
+	    my $value = ${$PB::Config::{$entry}};
+	    print "setenv $entry \"$value\";\n";
+	}
+    }
+}
+
+sub export_to_sql {
+    foreach my $entry (keys %{PB::Config::}) { 
+	if(defined(${$PB::Config::{$entry}})) {
+	    my $value = ${$PB::Config::{$entry}};
+	    print "REPLACE INTO \`config\` (\`key\`,\`val\`) VALUES ('$entry','$value');\n";
+	}
     }
 }
 
