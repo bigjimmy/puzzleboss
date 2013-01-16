@@ -10,11 +10,10 @@ define([
 	   "dojo/topic",
 	   "dojo/dom",
 	   "dojo/dom-construct",
-	   "dojo/dom-style",
 	   "dojo/dom-class",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domstyle, domclass) {
+    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domclass) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -331,7 +330,7 @@ define([
 	    warning_dialog = new dialog({
 		    title: "Warning",
 		    content: msg,
-		    style: "width: 300px"
+		    id: "warning_dialog"
 		});
 		warning_dialog.show();
 	}
