@@ -136,10 +136,20 @@ our $PB_IMAGES_URI = "$PB_URI/images";
 
 our $PB_GOOGLE_PATH = "$PB_PATH/google";
 
-our $DOJO_ROOT = "$PB_REL/dojoroot";
-our $PBREST_ROOT = "$PB_BIN_REL/pbrest.pl";
-our $PBREST_URI = "$PB_BIN_URI/pbrest.pl";
+our $PB_DOJO_REL = "$PB_REL/dojoroot";
+our $PB_DOJO_PATH = "$PB_PATH/dojoroot";
+our $PB_DOJO_URI = "$PB_URI/dojoroot";
 
+our $PB_REST_REL = "$PB_BIN_REL/pbrest.pl";
+our $PB_REST_PATH = "$PB_BIN_PATH/pbrest.pl";
+our $PB_REST_URI = "$PB_BIN_URI/pbrest.pl";
+
+##############################################################################
+# The following are deprecated and should not be used
+##############################################################################
+our $PBREST_ROOT = $PB_REST_REL;
+our $PBREST_URI = $PB_REST_URI;
+our $DOJO_ROOT = $PB_DOJO_REL;
 our $TWIKI_USERS_FILE = "$TWIKI_DATA_PATH/.htpasswd";
 our $ROUNDS_FILE = "$PB_DATA_PATH/rounds.list";
 our $TEMPLATES_FILE = "$PB_DATA_PATH/templates.list";
