@@ -12,7 +12,7 @@ if [[ -n "${username}" ]]; then
 	if [[ -n "${newpass}" ]]; then
 	    echo "changed LDAP password to: ${newpass}"
 	    echo "attempting to change google apps password (for GTalk with external clients?)"
-	    (cd /canadia/puzzlebitch/google && ./ChangeUserPass.sh --domain "${GOOGLE_DOMAIN}" --username "${username}" --password "${newpass}" )
+	    (cd ${PB_GOOGLE_PATH} && ./ChangeUserPass.sh --adminuser "${GOOGLE_ADMIN_USER}" --adminpass "${GOOGLE_ADMIN_PASS}" --domain "${GOOGLE_DOMAIN}" --username "${username}" --password "${newpass}" )
 	else
 	    echo "could not change ldap password"
 	    exit 3

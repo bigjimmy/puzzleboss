@@ -16,6 +16,8 @@ our $PB_DOMAIN_NAME = "example.com";
 our $TEAM_NAME = "Example Team Name";
 our $INSTALL_PATH = "/canadia";
 our $BIGJIMMY_IP = "0.0.0.0"; # IP for bigjimmy (can access pbrest without auth)
+our $GOOGLE_ADMIN_USER = 'AdminUser@googleappsdomain.org';
+
 
 ##############################################################################
 # You may not need to edit this section
@@ -85,7 +87,6 @@ our $REGISTER_LDAP_O = $TEAM_NAME;
 our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
 
 our $GOOGLE_DOMAIN = "$PB_DOMAIN_NAME";
-our $GOOGLE_ADMIN_USER = lc($PB_USER);
 our $GOOGLE_ADMIN_PASS = $PB_PASS;
 our $GOOGLE_CLIENT_ID = "123456789012.apps.googleusercontent.com";
 our $GOOGLE_CLIENT_SECRET = "AAAAAAAAAAAA-AAAAAAAAAAA";
