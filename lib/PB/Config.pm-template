@@ -17,6 +17,8 @@ our $TEAM_NAME = "Example Team Name";
 our $INSTALL_PATH = "/canadia";
 our $BIGJIMMY_IP = "0.0.0.0"; # IP for bigjimmy (can access pbrest without auth)
 our $GOOGLE_ADMIN_USER = 'AdminUser@googleappsdomain.org';
+our $GOOGLE_CLIENT_ID = "123456789012.apps.googleusercontent.com";
+our $GOOGLE_CLIENT_SECRET = "AAAAAAAAAAAA-AAAAAAAAAAA";
 
 
 ##############################################################################
@@ -70,7 +72,7 @@ our $METEOR_CONTROL_PORT = "4671";
 our $METEOR_VERSION_CHANNEL = "version$PB_DEV_VERSION";
 our $METEOR_JS_URI = "https://$METEOR_HTTP_HOST/meteor.js";
 
-our $BIGJIMMY_CONTROL_PATH = "bigjimmy";
+our $BIGJIMMY_CONTROL_PATH = "bigjimmy$PB_DEV_VERSION";
 our $BIGJIMMY_CONTROL_USER = lc($PB_USER);
 our $BIGJIMMY_CONTROL_PASS = $PB_PASS;
 our $BIGJIMMY_BOT_CONTROL_URI = "http://".$BIGJIMMY_CONTROL_HOST.":".$BIGJIMMY_CONTROL_PORT."/".$BIGJIMMY_CONTROL_PATH;
@@ -88,8 +90,6 @@ our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
 
 our $GOOGLE_DOMAIN = "$PB_DOMAIN_NAME";
 our $GOOGLE_ADMIN_PASS = $PB_PASS;
-our $GOOGLE_CLIENT_ID = "123456789012.apps.googleusercontent.com";
-our $GOOGLE_CLIENT_SECRET = "AAAAAAAAAAAA-AAAAAAAAAAA";
 
 our $PB_DEV_VERSION_POSTPAREN = "";
 if($PB_DEV_VERSION ne "") {

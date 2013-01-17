@@ -30,10 +30,13 @@ before things will work:
 
 7. Run the following admin-tools:
  * ./admin-tools/init-db.sh  (initializes the mysql database)
- * ./admin-tools/set-db-config.sh (copies some data from Config.pm into database)
  * ./admin-tools/install-apache-conf.sh (sets up an apache config in ./apache-conf/sites/canadia-apache.conf)
  * ./admin-tools/add_all_ldap_users_as_solvers.pl (adds all users in LDAP to the PB database)
 
 8. Link the apache config in ./apache-conf/sites/canadia-apache.conf in to the apache2 sites-enabled conf dir, 
    and restart apache (currently support apache 2.2).
 
+---
+
+If you change Config.pm after initializing the database, you need to load that data into the database:
+ * ./admin-tools/set-db-config.sh (copies some data from Config.pm into database)

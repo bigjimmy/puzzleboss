@@ -17,11 +17,25 @@
 	
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
 	
-	RedirectMatch 301 ^/(.*)$ https://$DOMAIN_NAME/$1
-	
+	RedirectMatch 301 ^/(.*)$ https://$DOMAIN_NAME/$1	
     </VirtualHost>
     
-    
+    # https redirects
+    <VirtualHost *:443>
+	ServerName www.wind-up-birds.org
+	ServerAlias *.stormynight.org
+	ServerAdmin jcrandall@alum.mit.edu
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	LogLevel warn
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	RedirectMatch 301 ^/(.*)$ https://wind-up-birds.org/$1
+	SSLEngine on
+	SSLCertificateFile    /etc/ssl/certs/ssl-cert-startcom-series-of-tubes.wind-up-birds.org.cert
+	SSLCertificateKeyFile /etc/ssl/private/ssl-cert-startcom-series-of-tubes.wind-up-birds.org.key
+	SSLCertificateChainFile    /etc/ssl/certs/startcom-class1-root.chain.pem
+    </VirtualHost>	 
+
+    # actual https server
     <VirtualHost *:443>
 	# servername must match certificates
 	ServerName $DOMAIN_NAME
@@ -260,13 +274,14 @@
 	    # that makes Apache ask the browser to authenticate. It is correct that
 	    # scripts such as view are not authenticated, unless you want to restrict 
 	    # viewing only to logged-in users.
-	    <FilesMatch "(attach|edit|manage|rename|save|upload|mail|logon|rest|view|.*auth).*">
+	    <FilesMatch "(attach|edit|rename|save|upload|mail|logon|rest|view|.*auth).*">
 		require valid-user
 	    </FilesMatch>
 	    
-	    <FilesMatch "(register).*">
-		order deny,allow
-		allow from localhost
+	    <FilesMatch "(register|manage|resetpasswd).*">
+	    	Auth_memCookie_Authoritative off
+		Order Deny,Allow
+		Deny from all
 	    </FilesMatch>
 	    
 	    # Enable mod_perl for the bin scripts listed
