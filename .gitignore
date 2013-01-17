@@ -14,3 +14,5 @@ admin-tools/domain
 admin-tools/ldapdc
 lib/PB/Config.pm
 google-drive/bigjimmy-oauth-cache.json
+google-drive/index.html
+*.a
