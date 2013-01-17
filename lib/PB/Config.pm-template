@@ -135,6 +135,7 @@ our $PB_IMAGES_PATH = "$PB_PATH/images";
 our $PB_IMAGES_URI = "$PB_URI/images";
 
 our $PB_GOOGLE_PATH = "$PB_PATH/google";
+our $PB_BIGJIMMY_PATH = "$PB_PATH/bigjimmy";
 
 our $PB_DOJO_REL = "$PB_REL/dojoroot";
 our $PB_DOJO_PATH = "$PB_PATH/dojoroot";
