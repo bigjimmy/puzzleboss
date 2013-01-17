@@ -6,7 +6,7 @@ define([
     "dojo/parser", 
     "dojo/_base/connect",
     "dojo/_base/array",
-    "dojo/_base/xhr",
+    "dojo/request/xhr",
     "dojo/_base/json",
     "dojo/data/ItemFileWriteStore",
        ], 
@@ -15,7 +15,7 @@ define([
     /////////////////////////////////////////////////////////////////////////////////
     // Internal vars
     /////////////////////////////////////////////////////////////////////////////////
-	var debug_lvl = 1;
+	var debug_lvl = 100;
 	
 	var _pb_puzzstore_structure = {identifier: 'name', label: 'name', items: []};
 	var _pb_puzzstore = new ItemFileWriteStore({data: _pb_puzzstore_structure});
@@ -61,34 +61,93 @@ define([
 	/////////////////////////////////////////////////////////////////////////////////
     
 	function _pb_comm_warn(msg) {
-		console.warn(msg);
-		_pb_cb_warning(msg);
+	    _pb_log("_pb_comm_warn()",2);
+	    console.warn(msg);
+	    _pb_cb_warning(msg);
 	}
     
-	function _pbrest_post(path,data,loadcb) {
-		xhr.post({
-			url: _pb_config.pbrest_root+"/"+path,
-			sync: false,
-			handleAs: "json",
-			load: loadcb,
-			error: alert,
+	function _pb_comm_fail(msg) {
+	    _pb_log("_pb_comm_fail()",2);
+	    console.warn(msg);
+	    _pb_cb_warning(msg);
+	}
+    
+	function _pbrest_post(path, data, loadcb, errcb) {
+		xhr.post(_pb_config.pbrest_root+"/"+path, {
+			sync: false, 
+			handleAs: "text",
 			preventCache: true,
-			postData: dojo.toJson(data),
+			data: dojo.toJson(data),
 			headers: {"Content-Type":"text/x-json"}
+		}).then(function(jsondata) {
+			_pb_log("_pbrest_post: jsondata:"+jsondata, 10);
+			var data
+			try {
+				data = dojo.fromJson(jsondata);
+			} catch (x) {
+				_pb_log("_pbrest_post: caught exception converting response fromJson: "+x);
+				// error converting to json - probably a login page or capture portal
+				if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
+					_pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
+					setTimeout(function(){
+						window.location.reload( true );
+					}, 5000);
+				} else {
+					_pb_comm_warn("Error retrieving "+path);
+				}
+			}
+			if (data.status == "error"){
+			    errcb(data);
+			}else{
+			    loadcb(data);
+			}
+		}, function(err) {
+			_pb_log("_pbrest_post: error:", 10);
+			_pb_log(err, 10);
+			errcb(err);
+		}, function(evt) {
+			_pb_log("_pbrest_post: event:", 10);
+			_pb_log(evt, 10);
 		});
 	}
-    
-	function _pbrest_get(path,loadcb) {
-		xhr.get({
-			url: _pb_config.pbrest_root+"/"+path,
+	
+	function _pbrest_get(path, loadcb, errcb) {
+	    xhr.get(_pb_config.pbrest_root+"/"+path, {
 			sync: false,
-			handleAs: "json",
-			load: loadcb,
-			error: alert,
+			handleAs: "text",
 			preventCache: true
-		});
+		    }).then(function(jsondata) {
+				 _pb_log("_pbrest_get: jsondata:"+jsondata, 10);
+				var data
+				try {
+				     data = dojo.fromJson(jsondata);  
+				 } catch (x) {
+				     _pb_log("_pbrest_get: caught exception converting toJson: "+x);
+				     // error converting to json - probably a login page or capture portal
+		                     if(jsondata.match(/html/i) && jsondata.match(/login/i)) {
+					 _pb_comm_fail("Error retrieving "+path+". You may be logged out or behind a captive portal. The page should reload automatically in 5 seconds. If it does not, please reload it manually to continue.");
+					 setTimeout(function(){
+							window.location.reload( true );
+						    }, 5000);
+				     } else {
+					 _pb_comm_warn("Error retrieving "+path);
+				     }
+				 }
+				_pb_log("_pbrest_get: data:", 10);
+				_pb_log(data, 10);
+				if (data.status == "error"){
+				    errcb(data);
+				}else{
+				    loadcb(data);
+				}
+			    }, function(err) {
+				_pb_log("_pbrest_get: error:"+err, 10);
+				errcb(err);
+			    }, function(evt) {
+				_pb_log("_pbrest_get: event:"+evt, 10);
+			    });
 	}
-
+       
 	function _pb_puzzstore_data_set_handler(item, attribute, oldValue, newValue) {
 		_pb_log("_pb_puzzstore_data_handler("+item.id+","+attribute+","+oldValue+","+newValue+")",2);
 		// called when puzzle data store changes from our user
@@ -97,7 +156,7 @@ define([
 			wrapdata.data = newValue;
 			_pb_log("_pb_puzzstore_data_handler: posting change for puzzle["+item.id+"]="+_pb_puzzstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]",1);
 			_pbrest_post("puzzles/"+_pb_puzzstore.getLabel(item)+"/"+attribute,
-			wrapdata,_pb_post_puzzle_part_cb);
+			wrapdata,_pb_post_puzzle_part_cb, function(err) {_pb_log("_pb_puzzstore_data_set_handler: error from _pbrest_post:"+err,1)});
 		}
 	}
 	
@@ -109,7 +168,7 @@ define([
 			wrapdata.data = newValue;
 			_pb_log("_pb_solverstore_data_set_handler: posting change for solver["+item.id+"]="+_pb_solverstore.getLabel(item)+" for part "+attribute+" from ["+oldValue+"] to ["+newValue+"]",1);
 			_pbrest_post("solvers/"+_pb_solverstore.getLabel(item)+"/"+attribute,
-			wrapdata,_pb_post_solver_part_cb);
+			wrapdata,_pb_post_solver_part_cb, function(err) {_pb_log("_pb_solverstore_data_set_handler: error from _pbrest_post:"+err,1)});
 		}
 	}
     
@@ -234,11 +293,11 @@ define([
 	    //console.dir(data);
 	    _pb_dataversion = data.to;
 	    
-	    if(!_pb_meteor_dataversion_enabled && (_pb_dataversion_queued > _pb_dataversion)) {
+		if(!_pb_meteor_dataversion_enabled && (_pb_dataversion_queued > _pb_dataversion)) {
+			_pb_meteor_dataversion_enabled = true;
+			_pbrest_get("version/"+_pb_dataversion, _pb_get_version_diff_cb);
+		}
 		_pb_meteor_dataversion_enabled = true;
-		_pbrest_get("version/"+_pb_dataversion, _pb_get_version_diff_cb);
-	    }
-	    _pb_meteor_dataversion_enabled = true;
 	    
 	    _pb_log("_pb_get_version_diff_cb: before filtering, we have "+data.diff.length+" items in diff",1);
 	    var diff = _pb_filter_version_diff(data.diff);
@@ -266,8 +325,8 @@ define([
 						//_pbrest_get(path, _pb_get_round_part_cb);
 						_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
 					} else {
-						//_pbrest_get(path, _path_get_round_cb);
 						//_pb_cb_warning("_pb_get_version_diff_cb: no handler defined for path "+path+" starting with "+splitpath[0]);
+						//Should we be warning that we can't get an individual round?
 						_pbrest_get("rounds", _pb_get_roundlist_cb);
 					}
 				} else {
@@ -418,13 +477,13 @@ define([
 		}
 	}
     
-	function _pb_create_round_cb(response, ioArgs) {
-		_pb_log("_pb_create_round_cb() (UNIMPLEMENTED)",2);
-		// could pass along to a registered handler?
+	function _pb_create_round_cb(roundid, ioArgs) {
+		//could alert user that round has been created, but dialog is too in-your-face
+		//First time PB might be confused, but afterwards they'll just be annoyed by it.
+		//maybe we should have a little log box somewhere?
+		_pb_log("_pb_create_round_cb: UNIMPLEMENTED",3);
 	}
-    
-    
-    
+   
     
     
     /////////////////////////////////////////////////////////////////////////////////
@@ -658,13 +717,11 @@ define([
 	pb_solverstore: _pb_solverstore,
 	
 	pb_create_round: function(roundid) {
-		if(array.some(_pb_roundlist, function (item) { return item==roundid; })) {
-			return("ERROR: "+roundid+" already exists");
-		} else {
-			_pbrest_post("rounds/"+roundid, _pb_create_round_cb);
-			//_pbrest_post("rounds/"+roundid, callback);
-			return("Please wait, attempting to create round "+roundid+"...");
-		}
+			var nodata = new Object();
+			_pbrest_post("rounds/"+roundid, 
+				nodata, 
+				_pb_create_round_cb, 
+				function(returndata){_pb_cb_warning(returndata.error)});
 	},
 	
 	pb_meteor_reconnect_stream: function() {

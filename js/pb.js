@@ -3,7 +3,8 @@ define([
      "../js/pb-meteor-rest-client.js",
      "dojo/parser", 
      "dojo/_base/connect",
-	 "dojo/_base/array",
+     "dojo/_base/array",
+     "dojo/_base/window",
      "dijit/TitlePane", 
      "dojox/grid/EnhancedGrid", 
      "dojox/grid/cells",
@@ -11,13 +12,12 @@ define([
      "dijit/form/Button", 
      "dijit/form/TextBox",
      "dojo/dom",
-     "dojo/domReady!",
      "dojo/dnd/Source",
+     "dojo/domReady!"
        ], 
-    function(pbmrc, parser, connect, array, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, domready, dndsource) {
+    function(pbmrc, parser, connect, array, win, titlepane, enhancedgrid, cells, dialog, formbutton, formtextbox, dom, dndsource) {
 
 	var puzzstore; // will be returned from pbmrc.pb_init()
-	var waitDiv;
 	var status_button;
 	var meteor_status;
 	var meteor_mode;
@@ -34,7 +34,7 @@ define([
 	var tpdivs = new Array();
 	
 	function fixedwidthFormatter(value){
-	    return "<span style='font-family: monospace'>"+value+"</span>";
+	    return "<span class='fixedwidthformat'>"+value+"</span>";
 	}
 	
 	function smallfontFormatter(value){
@@ -53,18 +53,18 @@ define([
 	}
 	
 	function statusFormatter(value){
-	    switch(value){
-	    case "New":
-		return "<span style='font-size: 12'>NEW</span>";
-	    case "Being worked":
-		return "<span style='font-size: 12'>WORK</span>";
-	    case "Needs eyes":
-		return "<span style='font-size: 12'>EYES</span>";
-	    case "Solved":
-		return "<span style='font-size: 12'>SOLVED</span>";
-	    default:
-		return "<span style='font-size: 12'>ERROR</span>";
-	    };
+		switch(value){
+			case "New":
+			return "<span style='font-size: 12'>NEW</span>";
+			case "Being worked":
+			return "<span style='font-size: 12'>WORK</span>";
+			case "Needs eyes":
+			return "<span style='font-size: 12'>EYES</span>";
+			case "Solved":
+			return "<span style='font-size: 12'>SOLVED</span>";
+			default:
+			return "<span style='font-size: 12'>ERROR</span>";
+		};
 	}
 	
 	function create_new_round_ui(roundname) {
@@ -73,13 +73,13 @@ define([
 	
 		var puzzlayout = [
 				     { field: 'round', hidden: true },
-				     { field: 'linkid', width: "150px", name: "Puzzle", formatter: smallfontFormatter},
-				     { field: 'status', width: "75px", name: "Status", editable: my_editable, formatter: statusFormatter,
+				     { field: 'linkid', width: "12%", name: "Puzzle", formatter: smallfontFormatter},
+				     { field: 'status', width: "6%", name: "Status", editable: my_editable, formatter: statusFormatter,
 				       type: cells.Select, options: ['New', 'Being worked', 'Needs eyes', 'Solved']},
-				     { field: 'answer', width: "150px", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
-				     { field: 'xyzloc', width: "125px", name: "Location", editable: my_editable, formatter: smallfontFormatter },
-				     { field: 'cursolvers', width: "250px", name:"Solvers", formatter:smallfontFormatter},
-				     { field: 'comments', width: "400px", name: "Comments", editable: my_editable, formatter: smallfontFormatter}
+				     { field: 'answer', width: "12%", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
+				     { field: 'xyzloc', width: "10%", name: "Location", editable: my_editable, formatter: smallfontFormatter },
+				     { field: 'cursolvers', width: "20%", name:"Solvers", formatter:smallfontFormatter},
+				     { field: 'comments', width: "40%", name: "PB Notes", editable: my_editable, formatter: smallfontFormatter}
 				     ];
 	
 	    grid[roundname] = new enhancedgrid({
@@ -133,12 +133,13 @@ define([
 
 	
 	function init_complete_cb() {
-	    pbmrc.pb_log("init_complete_cb()");	
+	    pbmrc.pb_log("init_complete_cb()",2);	
 	    //apply_round_filters();
 	    // remove the little waitDiv notice
-	    dom.byId("puzzlecontainer").removeChild(waitDiv); 
+	    win.body().removeChild(dom.byId("waitDiv")); 
 	    _updateHideSolved();
-		_updateRoundsVsAll();
+	    _updateRoundsVsAll();
+	    pbmrc.pb_log("init_complete_cb(): init complete");
 	}
 	
 	function add_round_cb(roundname) {
@@ -155,7 +156,7 @@ define([
 	}
 	
 	function solver_update_cb(){
-		pbmrc.pb_log("solver_update_cb(): does nothing.");
+		pbmrc.pb_log("solver_update_cb(): does nothing.",2);
 	}
 	
 	function received_updated_part_cb(store, appid, key, value) {
@@ -163,10 +164,10 @@ define([
 	}
 	
 	function error_cb(msg) {
-	    dom.byId("puzzlecontainer").removeChild(waitDiv);
-		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
-		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: msg}));
-		dom.byId("puzzlecontainer").appendChild(domConstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
+	    win.body().removeChild(dom.byId("waitDiv"));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: msg}));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
 	}
 
 	
@@ -313,10 +314,6 @@ define([
 	my_init: function(editable) {
 		my_editable = editable;
 	    pbmrc.pb_log("my_init()");
-	    //please wait
-	    waitDiv = document.createElement("div")
-		waitDiv.innerHTML="<b>Please wait, while data loads. (This could take a while!)</b></br>";
-	    dom.byId("puzzlecontainer").appendChild(waitDiv);
 	    
 	    pbmrc.pb_log("my_init: creating status indicator / button");
 	    status_button = new formbutton({

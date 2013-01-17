@@ -1,0 +1,336 @@
+<IfModule mod_ssl.c>
+    # Redirect insecure HTTP connections to canonical HTTPS site
+    <VirtualHost *:80>
+	ServerName $DOMAIN_NAME
+	ServerName www.$DOMAIN_NAME
+	ServerName stormynight.org
+	ServerName www.stormynight.org
+	ServerName the-internet.stormynight.org
+	
+	ServerAdmin jcrandall@alum.mit.edu
+	
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+	
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	
+	RedirectMatch 301 ^/(.*)$ https://$DOMAIN_NAME/$1	
+    </VirtualHost>
+    
+    # https redirects
+    <VirtualHost *:443>
+	ServerName www.wind-up-birds.org
+	ServerAlias *.stormynight.org
+	ServerAdmin jcrandall@alum.mit.edu
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	LogLevel warn
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	RedirectMatch 301 ^/(.*)$ https://wind-up-birds.org/$1
+	SSLEngine on
+	SSLCertificateFile    /etc/ssl/certs/ssl-cert-startcom-series-of-tubes.wind-up-birds.org.cert
+	SSLCertificateKeyFile /etc/ssl/private/ssl-cert-startcom-series-of-tubes.wind-up-birds.org.key
+	SSLCertificateChainFile    /etc/ssl/certs/startcom-class1-root.chain.pem
+    </VirtualHost>	 
+
+    # actual https server
+    <VirtualHost *:443>
+	# servername must match certificates
+	ServerName $DOMAIN_NAME
+	ServerAdmin jcrandall@alum.mit.edu
+	
+	DocumentRoot $INSTALL_PATH
+	<Directory "/">
+	    AllowOverride None
+	    Options FollowSymLinks
+	    Order Deny,Allow
+	    Deny from all
+	</Directory>
+	
+	Alias /stats /var/www/webalizer
+	
+	# redirect / to landing page
+	RewriteEngine on
+	RewriteRule ^/$ /twiki/bin/view/MH2013/WebHome [R,L]
+	#RewriteRule ^/$ /eastwest.html [R,L]
+	#RewriteRule ^/$ /puzzlebitch/bin/overview.pl [R,L]
+	#RewriteRule ^/east$ /puzzlebitch-east/bin/overview.pl [R,L]
+	#RewriteRule ^/west$ /puzzlebitch-west/bin/overview.pl [R,L]
+	
+	LogLevel warn
+	
+	CustomLog ${APACHE_LOG_DIR}/the-internet-ssl_access.log combined
+	
+	SSLEngine on
+	SSLCertificateFile    /etc/ssl/certs/ssl-cert-startcom-series-of-tubes.$DOMAIN_NAME.cert
+	SSLCertificateKeyFile /etc/ssl/private/ssl-cert-startcom-series-of-tubes.$DOMAIN_NAME.key
+	SSLCertificateChainFile    /etc/ssl/certs/startcom-class1-root.chain.pem
+	
+	<FilesMatch "\.(cgi|shtml|phtml|php)$">
+	    SSLOptions +StdEnvVars
+	</FilesMatch>
+
+	BrowserMatch "MSIE [2-6]" \
+	nokeepalive ssl-unclean-shutdown \
+	downgrade-1.0 force-response-1.0
+	# MSIE 7 and newer should be able to use keepalive
+	BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+
+
+
+	######################################################################
+	# All parts of site protected by valid-user login by default
+	######################################################################
+	<Directory "$INSTALL_PATH">
+	    Options Indexes FollowSymLinks MultiViews
+	    AllowOverride None
+	    Order Allow,Deny
+	    Allow from all
+
+	    Auth_memCookie_Memcached_AddrPort "127.0.0.1:11211"
+	    Auth_memCookie_Authoritative on
+	    AuthName "$DOMAIN_NAME login"
+	    
+	    Auth_memCookie_Memcached_SessionObject_ExpireTime "288000"
+	    Auth_memCookie_Memcached_SessionObject_ExpiryReset on
+	    Auth_memCookie_SetSessionHTTPHeader on
+	    
+	    Auth_memCookie_SessionTableSize "500"
+	    
+	    Auth_memCookie_CookieName "the-internet-authcookie"
+	    
+	    AuthType Cookie
+	    
+	    # to redirect unauthorized user to the login page
+	    ErrorDocument 401 "/saml/authmemcookie.php"
+	    Require valid-user
+	</Directory>
+	
+
+	######################################################################
+	# SAML2 (shibboleth) SP/IDP must be available to everyone
+	######################################################################
+	<Directory "$INSTALL_PATH/saml">
+	    Auth_memCookie_Authoritative off
+	    AllowOverride None
+	    Satisfy Any
+	    Order Allow,Deny
+	    Allow from all
+	    AuthType None
+	</Directory>
+
+
+	######################################################################
+	# New user registration is allowed with a basic auth password
+	######################################################################
+	<Directory "$INSTALL_PATH/register">
+	    Auth_memCookie_Authoritative off
+	    ErrorDocument 401 default
+	    AllowOverride None
+	    Options +ExecCGI
+	    AddHandler cgi-script pl
+	    DirectoryIndex index.pl
+	    Order Allow,Deny
+	    Allow from all
+	    AuthType Basic
+	    AuthName 'Say the magic word.'
+	    AuthUserFile $INSTALL_PATH/register/.htpasswd
+	    Require valid-user
+	</Directory>
+
+
+	######################################################################
+	# Server status
+	######################################################################
+	<Location /server-info>
+	    Order Allow,Deny
+	    Allow from all
+	    SetHandler server-info
+	</Location>
+
+
+	######################################################################
+	# PB configuration
+	######################################################################
+	<Perl>
+	    $Apache2::PerlSections::Save = 1;
+
+	    foreach my $pbdir (<$INSTALL_PATH/puzzlebitch*>) {
+	      $pbdir =~ m/^\$INSTALL_PATH(.*)$/;
+	      my $pbloc = $1;
+	      if($pbloc =~ m/\./) {
+	        next;
+	      }
+	      $Location{$pbloc} = {
+		SetEnv => "PERL5LIB $pbdir/lib",
+		PerlSetEnv => "PERL5LIB $pbdir/lib",
+	      };
+	      $Directory{$pbdir} = {
+		Files => {
+	          'pbrest.pl' => {
+		    Order => 'Deny,Allow',
+		    Deny => 'from all',
+		    Allow => 'from $BIGJIMMY_IP',
+		    Require => 'valid-user',
+		    Satisfy => 'Any',
+		  },
+		},
+              };
+	    }
+	</Perl>
+
+	# puzzlebitch/bin run under mod_perl
+	<IfModule mod_perl.c>
+	    PerlModule Apache::DBI
+	    PerlRequire $INSTALL_PATH/puzzlebitch/bin/mod_perl_startup.pl
+	</IfModule>
+	<Directory "$INSTALL_PATH/puzzlebitch/bin">
+	    Options -Indexes +ExecCGI
+	    <IfModule mod_perl.c>
+		<FilesMatch "^.+\.pl$">
+		    SetHandler perl-script
+		    PerlResponseHandler ModPerl::Registry
+		    PerlSendHeader On
+		    PerlOptions +ParseHeaders
+		</FilesMatch>
+	    </IfModule>
+	</Directory>
+	
+	# puzzlebitch-dev dirs run as CGI instead of mod_perl (because otherwise PB:: namespace conflicts and is shared with production!)
+	<Directory "$INSTALL_PATH/puzzlebitch-*/bin">
+	    Options -Indexes +ExecCGI
+	    <FilesMatch "^.+\.pl$">
+		SetHandler cgi-script
+	    </FilesMatch>
+	</Directory>
+	
+
+	
+	######################################################################
+	# TWIKI Configuration
+	######################################################################
+	<IfModule mod_perl.c>
+	    # Mod_perl preloading
+	    PerlRequire $INSTALL_PATH/twiki/tools/mod_perl_startup.pl
+	</IfModule>
+	
+	# The ScriptAlias defines the bin directory as a directory where CGI
+	# scripts are allowed.
+	# The first parameter will be part of the URL to your installation e.g.
+	# http://example.com/twiki/bin/view/...
+	# The second parameter must point to the physical path on your disc.
+	ScriptAlias /twiki/bin "$INSTALL_PATH/twiki/bin"
+	
+	# The Alias defines a url that points to the twiki pub directory, which
+	# is the root of file attachments.
+	Alias /twiki/pub "$INSTALL_PATH/twiki/pub"
+
+	# <Location ~ "^/(twiki|test)">
+	#     Auth_memCookie_Memcached_AddrPort "127.0.0.1:11211"
+	#     Auth_memCookie_Authoritative on
+	#     AuthName "$DOMAIN_NAME login"
+	    
+	#     Auth_memCookie_Memcached_SessionObject_ExpireTime "288000"
+	#     Auth_memCookie_Memcached_SessionObject_ExpiryReset on
+	#     Auth_memCookie_SetSessionHTTPHeader on
+	    
+	#     Auth_memCookie_SessionTableSize "500"
+	    
+	#     Auth_memCookie_CookieName "the-internet-authcookie"
+	    
+	#     AuthType Cookie
+	    
+	#     # to redirect unauthorized user to the login page
+	#     ErrorDocument 401 "/saml/authmemcookie.php"
+	# </Location>
+	
+	# This specifies the options on the TWiki scripts directory. The ExecCGI
+	# and SetHandler tell apache that it contains scripts. "Allow from all"
+	# lets any IP address access this URL.
+	<Directory "$INSTALL_PATH/twiki/bin">
+	    AllowOverride None
+	    Order Allow,Deny
+	    Allow from all
+	    Deny from env=blockAccess
+	    
+	    Options ExecCGI FollowSymLinks
+	    SetHandler cgi-script
+	    
+	    # File to return on access control error (e.g. wrong password)
+	    #    ErrorDocument 401 /twiki/bin/view/TWiki/TWikiRegistration
+	    #ErrorDocument 401 /register
+	    
+	    # Limit access to configure to specific IP addresses and or users.
+	    # Make sure configure is not open to the general public.
+	    # It exposes system details that can help attackers.
+	    <FilesMatch "^(configure)$">
+		SetHandler cgi-script
+		Require user JoshuaRandall 
+	    </FilesMatch>
+	    
+	    # When using Apache type login the following defines the TWiki scripts
+	    # that makes Apache ask the browser to authenticate. It is correct that
+	    # scripts such as view are not authenticated, unless you want to restrict 
+	    # viewing only to logged-in users.
+	    <FilesMatch "(attach|edit|rename|save|upload|mail|logon|rest|view|.*auth).*">
+		require valid-user
+	    </FilesMatch>
+	    
+	    <FilesMatch "(register|manage|resetpasswd).*">
+	    	Auth_memCookie_Authoritative off
+		Order Deny,Allow
+		Deny from all
+	    </FilesMatch>
+	    
+	    # Enable mod_perl for the bin scripts listed
+	    <IfModule mod_perl.c>
+		<FilesMatch "(attach|edit|manage|rename|save|upload|view|rest|.*auth).*">
+		    SetHandler perl-script
+		    PerlResponseHandler ModPerl::Registry
+		    PerlSendHeader On
+		    PerlOptions +ParseHeaders
+		</FilesMatch>
+	    </IfModule>
+	</Directory>
+	
+	# This sets the options on the pub directory, which contains attachments and
+	# other files like CSS stylesheets and icons. AllowOverride None stops a
+	# user installing a .htaccess file that overrides these options.
+	# Note that files in pub are *not* protected by TWiki Access Controls,
+	# so if you want to control access to files attached to topics you need to
+	# block access to the specific directories same way as the ApacheConfigGenerator
+	# blocks access to the pub directory of the Trash web
+	<Directory "$INSTALL_PATH/twiki/pub">
+	    Options None
+	    AllowOverride None
+	    Order Allow,Deny
+	    Allow from all
+	    Deny from env=blockAccess
+	    Satisfy Any
+
+	    # Disable execution of PHP scripts
+	    php_admin_flag engine off
+	    
+	    # This line will redefine the mime type for the most common types of scripts
+	    AddType text/plain .shtml .php .php3 .phtml .phtm .pl .py .cgi
+
+	    #add an Expires header that is sufficiently in the future that the browser does not even ask if its uptodate
+	    # reducing the load on the server significantly
+	    #IF you can, you should enable this - it _will_ improve your twiki experience, even if you set it to under one day.
+	    # you may need to enable expires_module in your main apache config
+	    #LoadModule expires_module libexec/httpd/mod_expires.so
+	    #AddModule mod_expires.c
+	    <ifmodule mod_expires.c>
+		<filesmatch "\.(jpg|gif|png|css|js)$">
+	            ExpiresActive on
+	            ExpiresDefault "access plus 11 days"
+		</filesmatch>
+	    </ifmodule>
+	</Directory>
+
+
+    </VirtualHost>
+</IfModule>
+

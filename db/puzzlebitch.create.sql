@@ -1,6 +1,7 @@
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0; SET
+@OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE,
+SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
 DROP SCHEMA IF EXISTS `$PB_DEV_VERSION` ;
 CREATE SCHEMA IF NOT EXISTS `$PB_DEV_VERSION` DEFAULT CHARACTER SET latin1 ;
@@ -14,9 +15,13 @@ DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`round` ;
 CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`round` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(500) NOT NULL ,
-  `round_uri` VARCHAR(2000) NULL ,
+  `round_uri` TEXT NULL ,
+  `drive_uri` VARCHAR(300) NULL ,
+  `drive_id` VARCHAR(100) NULL ,
   PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC) )
+  UNIQUE INDEX `name_UNIQUE` (`name` ASC) ,
+  UNIQUE INDEX `drive_uri_UNIQUE` (`drive_uri` ASC) ,
+  UNIQUE INDEX `drive_id_UNIQUE` (`drive_id` ASC) )
 ENGINE = InnoDB;
 
 
@@ -28,15 +33,19 @@ DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle` ;
 CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(500) NOT NULL ,
-  `puzzle_uri` VARCHAR(2000) NULL ,
-  `drive_uri` VARCHAR(2000) NULL ,
-  `pb_comments` VARCHAR(1000) NULL ,
+  `puzzle_uri` TEXT NULL ,
+  `drive_uri` VARCHAR(300) NULL ,
+  `pb_comments` TEXT NULL ,
   `status` ENUM('New','Being worked','Needs eyes','Solved') NOT NULL ,
   `answer` VARCHAR(500) NULL ,
   `round_id` INT NOT NULL ,
+  `drive_id` VARCHAR(100) NULL ,
+  `round_meta_p` TINYINT(1) NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_puzzles_rounds1_idx` (`round_id` ASC) ,
   UNIQUE INDEX `name_UNIQUE` (`name` ASC) ,
+  UNIQUE INDEX `drive_id_UNIQUE` (`drive_id` ASC) ,
+  UNIQUE INDEX `drive_uri_UNIQUE` (`drive_uri` ASC) ,
   CONSTRAINT `fk_puzzle_round1`
     FOREIGN KEY (`round_id` )
     REFERENCES `$PB_DEV_VERSION`.`round` (`id` )
@@ -133,7 +142,7 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`answerattempt` (
   `answer` VARCHAR(500) NOT NULL ,
   `time` TIMESTAMP NOT NULL ,
   `puzzle_id` INT NOT NULL ,
-  `correct` TINYINT(1) NULL DEFAULT NULL ,
+  `status` ENUM('PENDING','WRONG','CORRECT') NOT NULL DEFAULT 'PENDING' ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_answerattempts_puzzles1_idx` (`puzzle_id` ASC) ,
   CONSTRAINT `fk_answerattempt_puzzle1`
@@ -168,14 +177,18 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`audit_puzzle` (
   `puzzle_id` INT NOT NULL ,
   `old_name` VARCHAR(500) NULL ,
   `new_name` VARCHAR(500) NULL ,
-  `old_puzzle_uri` VARCHAR(2000) NULL ,
-  `new_puzzle_uri` VARCHAR(2000) NULL ,
+  `old_puzzle_uri` TEXT NULL ,
+  `new_puzzle_uri` TEXT NULL ,
   `old_answer` VARCHAR(500) NULL ,
   `new_answer` VARCHAR(500) NULL ,
-  `old_pb_comments` VARCHAR(1000) NULL ,
-  `new_pb_comments` VARCHAR(1000) NULL ,
-  `old_drive_uri` VARCHAR(2000) NULL ,
-  `new_drive_uri` VARCHAR(2000) NULL ,
+  `old_pb_comments` TEXT NULL ,
+  `new_pb_comments` TEXT NULL ,
+  `old_drive_uri` VARCHAR(300) NULL ,
+  `new_drive_uri` VARCHAR(300) NULL ,
+  `old_drive_id` VARCHAR(100) NULL ,
+  `new_drive_id` VARCHAR(100) NULL ,
+  `old_round_meta_p` TINYINT(1) NULL ,
+  `new_round_meta_p` TINYINT(1) NULL ,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
   INDEX `fk_audit_puzzle_puzzle1_idx` (`puzzle_id` ASC) ,
@@ -228,12 +241,55 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_location` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+-- -----------------------------------------------------
+-- Table `$PB_DEV_VERSION`.`config`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`config` ;
+
+CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`config` (
+  `key` VARCHAR(100) NOT NULL ,
+  `val` VARCHAR(100) NULL ,
+  UNIQUE INDEX `key_UNIQUE` (`key` ASC) ,
+  PRIMARY KEY (`key`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `$PB_DEV_VERSION`.`activity`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`activity` ;
+
+CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`activity` (
+  `id` INT NOT NULL AUTO_INCREMENT ,
+  `time` TIMESTAMP NOT NULL ,
+  `solver_id` INT NOT NULL ,
+  `puzzle_id` INT NULL ,
+  `source` ENUM('google','pb_auto','pb_manual','bigjimmy','twiki','squid','apache','xmpp') NULL ,
+  `type` ENUM('create','open','revise','comment','interact') NULL ,
+  `uri` TEXT NULL ,
+  `source_version` INT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_google_activity_solver1_idx` (`solver_id` ASC) ,
+  INDEX `fk_google_activity_puzzle1_idx` (`puzzle_id` ASC) ,
+  CONSTRAINT `fk_google_activity_solver1`
+    FOREIGN KEY (`solver_id` )
+    REFERENCES `$PB_DEV_VERSION`.`solver` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_google_activity_puzzle1`
+    FOREIGN KEY (`puzzle_id` )
+    REFERENCES `$PB_DEV_VERSION`.`puzzle` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
 USE `$PB_DEV_VERSION` ;
 
 -- -----------------------------------------------------
 -- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_view`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_view` (`id` INT, `name` INT, `status` INT, `answer` INT, `round` INT, `comments` INT, `gssuri` INT, `linkid` INT, `uri` INT, `solvers` INT, `locations` INT, `cursolvers` INT, `xyzloc` INT, `wrong_answers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_view` (`id` INT, `name` INT, `status` INT, `answer` INT, `round` INT, `comments` INT, `gssuri` INT, `drive_id` INT, `round_meta_p` INT, `linkid` INT, `uri` INT, `solvers` INT, `locations` INT, `cursolvers` INT, `xyzloc` INT, `wrong_answers` INT);
 
 -- -----------------------------------------------------
 -- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_solvers`
@@ -369,6 +425,8 @@ SELECT 	`puzzle`.`id` AS `id`,
 		`round`.`name` AS `round`, 
 		`puzzle`.`pb_comments` AS `comments`, 
 		`puzzle`.`drive_uri` AS `gssuri`, 
+		`puzzle`.`drive_id` AS `drive_id`,
+		`puzzle`.`round_meta_p` AS `round_meta_p`,
 		CONCAT('<a href="',`puzzle`.`puzzle_uri`,'" target="',`puzzle`.`name`,'">',`puzzle`.`name`,'</a>') AS `linkid`, 
 		`puzzle`.`puzzle_uri` AS `uri`,
 		`ps`.`solvers`,
@@ -506,7 +564,7 @@ DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct` ;
 DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct`;
 USE `$PB_DEV_VERSION`;
 CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct` AS
-SELECT DISTINCT `answer`,`puzzle_id` FROM `answerattempt` WHERE `answerattempt`.`correct`<>TRUE;
+SELECT DISTINCT `answer`,`puzzle_id` FROM `answerattempt` WHERE `answerattempt`.`status`='WRONG';
 
 -- -----------------------------------------------------
 -- View `$PB_DEV_VERSION`.`location_cursolver_distinct`
@@ -729,7 +787,9 @@ INSERT INTO `audit_puzzle`
 		`old_puzzle_uri`,
 		`old_drive_uri`,
 		`old_pb_comments`,
-		`old_answer`
+		`old_answer`,
+		`old_drive_id`,
+		`old_round_meta_p`
 	) 
 	VALUES 
 	(
@@ -740,9 +800,12 @@ INSERT INTO `audit_puzzle`
 		OLD.puzzle_uri,
 		OLD.drive_uri,
 		OLD.pb_comments,
-		OLD.answer
+		OLD.answer,
+		OLD.drive_id,
+		OLD.round_meta_p
 	);
-END$$
+END
+$$
 
 
 USE `$PB_DEV_VERSION`$$
@@ -763,7 +826,9 @@ INSERT INTO `audit_puzzle`
 		`new_puzzle_uri`,
 		`new_drive_uri`,
 		`new_pb_comments`,
-		`new_answer`
+		`new_answer`,
+		`new_drive_id`,
+		`new_round_meta_p`
 	)
 	VALUES
 	(
@@ -774,7 +839,9 @@ INSERT INTO `audit_puzzle`
 		NEW.puzzle_uri,
 		NEW.drive_uri,
 		NEW.pb_comments,
-		NEW.answer
+		NEW.answer,
+		NEW.drive_id,
+		NEW.round_meta_p
 	);
 END
 $$
@@ -820,7 +887,11 @@ INSERT INTO `audit_puzzle`
 		`old_pb_comments`,
 		`new_pb_comments`,
 		`old_answer`,
-		`new_answer`
+		`new_answer`,
+		`old_drive_id`,
+		`new_drive_id`,
+		`old_round_meta_p`,
+		`new_round_meta_p`
 	)
 	VALUES
 	(
@@ -836,7 +907,11 @@ INSERT INTO `audit_puzzle`
 		OLD.pb_comments,
 		NEW.pb_comments,
 		OLD.answer,
-		NEW.answer
+		NEW.answer,
+		OLD.drive_id,
+		NEW.drive_id,
+		OLD.round_meta_p,
+		NEW.round_meta_p
 	);
 END
 $$

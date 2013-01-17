@@ -45,7 +45,8 @@ public class ChangeUserPass {
 	opt.addOption(OptionBuilder.withLongOpt("domain").withArgName("DOMAIN").hasArg().isRequired().withDescription("Domain in which to create user.").create("d"));
 	opt.addOption(OptionBuilder.withLongOpt("password").withArgName("PASSWORD").hasArg().withDescription("Initial password for user.").create("p"));
 	opt.addOption(OptionBuilder.withLongOpt("passwordhash").withArgName("PASSWORD_HASH").hasArg().withDescription("Initial password for user (SHA-1 hash).").create("ph"));
-	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("a"));
+	opt.addOption(OptionBuilder.withLongOpt("adminuser").withArgName("ADMINUSER").hasArg().isRequired().withDescription("Administrator username (with @domain).").create("au"));
+	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("ap"));
 	try {
 	    BasicParser parser = new BasicParser();
 	    CommandLine cl = parser.parse(opt, args);
@@ -53,7 +54,8 @@ public class ChangeUserPass {
 	    domainString = cl.getOptionValue('d');
 	    passwordString = cl.getOptionValue('p');
 	    hashedPasswordString = cl.getOptionValue("ph");
-	    adminPassString = cl.getOptionValue("a");
+	    adminUserString = cl.getOptionValue("au");
+	    adminPassString = cl.getOptionValue("ap");
 	} catch (MissingOptionException moe) {
 	    HelpFormatter formatter = new HelpFormatter();
 	    formatter.printHelp( commandlineString, opt );

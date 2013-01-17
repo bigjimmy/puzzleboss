@@ -33,10 +33,10 @@ my $editable;
 my $title;
 if (param('edit')){
 	$editable = "true";
-	$title = "$PB::Config::TEAM_NAME -- Puzzlebitch Central$PB::Config::PB_DEV_VERSION_POSTPAREN";
+	$title = "Puzzlebitch Central$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }else{
 	$editable = "false";
-	$title = "$PB::Config::TEAM_NAME -- Hunt Status$PB::Config::PB_DEV_VERSION_POSTPAREN";
+	$title = "Hunt Status$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }
 
 my $html = <<"EOF";
@@ -47,10 +47,10 @@ Content-type: text/html
 <head>
 <title>$title</title>
     <style type="text/css">
-        \@import "$PB::Config::PB_CSS_REL/pb.css";
         \@import "$PB::Config::DOJO_ROOT/dijit/themes/tundra/tundra.css";
         \@import "$PB::Config::DOJO_ROOT/dojox/grid/resources/Grid.css";
         \@import "$PB::Config::DOJO_ROOT/dojox/grid/resources/tundraGrid.css";
+        \@import "$PB::Config::PB_CSS_REL/pb.css";
     </style>
     <script type="text/javascript" src="$PB::Config::METEOR_JS_URI"></script>
     <script type="text/javascript" src="$PB::Config::DOJO_ROOT/dojo/dojo.js" 
@@ -70,28 +70,11 @@ Content-type: text/html
 		my_pb = pb;
 		pb.my_init($editable);
 	    });
-
-	function create_round_cb(data, ioArgs) {
-	    //    alert("round creation completed");
-	    //alert("round creation callback: "+dojo.toJson(data));
-	    //TODO handle errors
-	    //createnewrounddialogStandby.hide();
-	    //dijit.byId('createnewrounddialog').hide();
-	}
-	
-	function create_wait(msg) {
-	    //TODO: implement (and have create_round_cb tear it down)
-	    //alert(msg);
-	    //createnewrounddialogStandby.show();
-	    //dijit.byId('createnewrounddialog').show();
-	}
-	
-
     </script>
 </head>
 <body class="tundra">
 <h1>$title</h1>
-
+<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
 <!--<div id="gridMessages">grid messages</div>-->
 
 <div id="puzzlecontainer"></div>
@@ -107,7 +90,7 @@ if ($editable eq "true"){
 $html .= <<"EOF"	
 <!-- new round -->
 <button dojoType="dijit.form.Button" onclick="dijit.byId('createnewrounddialog').show()">Create New Round</button>
-<div dojoType="dijit.Dialog" id="createnewrounddialog" title="Enter new round information" execute="msg=my_pbmrc.pb_create_round(arguments[0].newroundid); if(msg.indexOf('ERROR') > -1) {error_cb(msg)} else { create_wait(msg); }">
+<div dojoType="dijit.Dialog" id="createnewrounddialog" title="Enter new round information" execute="my_pbmrc.pb_create_round(arguments[0].newroundid);">
     <table>
       <tr>
 	<td><label for="newroundid">Round Name:</label></td>
@@ -123,20 +106,8 @@ $html .= <<"EOF"
 <!-- <div jsId="createnewrounddialogStandby" dojoType="dojox.widget.Standby" target="createnewrounddialog"></div> -->
 
 <!--administrative stuff below here-->
-<table border=1>
 
-<!-- ghetto interface for solver removal -->
-<tr><td><table>
-<tr><td>Unassign a solver from his current puzzle:
-<table><tr><th>Solver</td></tr>
-<tr><form action="solver_resting.pl" method="post">
-<td><INPUT TYPE="text" NAME="solver" VALUE=""/>
-<INPUT TYPE="hidden" NAME="returnurl" VALUE="$PB::Config::PB_BIN_REL/pb.pl"</td>
-<td><INPUT TYPE="submit" NAME="Unassign!" VALUE="Unassign!"/></td>
-</form>
-</tr></table>
-</td></tr></table></td>
-
+<p>To move solvers among puzzles, open <a href="puzzsolvers">this page</a> in a separate tab.</p>
 
 <!-- new puzzle -->
 <table>
@@ -156,6 +127,9 @@ To add a new puzzle:
 </html>
 
 EOF
+
+}else{
+$html .= "</body></html>\n";
 }
 
 print $html;
