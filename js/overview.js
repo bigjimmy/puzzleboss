@@ -261,32 +261,49 @@ define([
 				content: goodnight_div
 			});
 		}else{
-			puzzDialog = new dialog({
-				title: "Hello "+remote_user+"!",
-				content: new formbutton({
-					type: "submit",
-					label: "I'm working on "+puzz+"!", 
-					onClick: function(){
-						solverstore.fetchItemByIdentity({
-							identity: remote_user,
-							onItem: function(item) {
-							    if(item != null) {
-					    pbmrc.pb_log(puzz+", "+remote_user);
-								 //disable_store_ui_handlers()
+			var puzzinfo_div = domconstruct.create("div");
+				
+			puzzinfo_div.appendChild(new formbutton({
+				type: "submit",
+				label: remote_user+" is working on "+puzz+"!", 
+				onClick: function(){
+					solverstore.fetchItemByIdentity({
+						identity: remote_user,
+						onItem: function(item) {
+							if(item != null) {
+								pbmrc.pb_log(puzz+", "+remote_user);
+								//disable_store_ui_handlers()
 								solverstore.setValue(item,"puzz",puzz);
 								solverstore.save({onError: error_cb});
 								//enable_store_ui_handlers()
-							    }else{
+							}else{
 								//TODO: if can't find this should alert the user!
-							    }
 							}
-						});}, 
-						showLabel: true,
-					})
+						}
+					});}, 
+					showLabel: true
+				}).domNode);
+				puzzstore.fetchItemByIdentity({
+					identity: puzz,
+					onItem: function(item){
+						//put spaces between solver names to wrap in dialog
+						puzzinfo_div.appendChild(domconstruct.create("p",
+							{innerHTML: "Current solvers: "+ puzzstore.getValue(item,"cursolvers").split(",").join(", ")}
+						));
+						puzzinfo_div.appendChild(domconstruct.create("p",
+							{innerHTML: "All historical solvers: "+ puzzstore.getValue(item,"solvers").split(",").join(", ")}
+						));
+					}
+				})
+				
+				puzzDialog = new dialog({
+					title: puzz,
+					content: puzzinfo_div,
+					class: "puzzle_popup_dialog"
 				});
-			}
-			puzzDialog.show();
 		}
+		puzzDialog.show();
+	}
 
 	function roundlist_update_cb(my_roundlist) {
 		//don't care.
@@ -296,14 +313,14 @@ define([
 		pbmrc.pb_log("add_round_cb(): adding round "+roundname);
 		roundboxes[roundname] = domconstruct.create("div", {class: "round_container", id: "round_div_"+roundname});
 	        var meta_container = domconstruct.create("div", {class: "meta_container", id: "meta_container_"+roundname});
-	        var meta_answer = domconstruct.create("div", {class: "meta_answer", id: "meta_answer_"+roundname});
-	        meta_container.appendChild(meta_answer);
 	        var meta_status = domconstruct.create("div", {class: "meta_status", id: "meta_status_"+roundname});
 	        meta_container.appendChild(meta_status);
   	        var meta_name = domconstruct.create("div", {class: "meta_name", id: "meta_name_"+roundname, innerHTML: roundname});
 	        meta_container.appendChild(meta_name);
 	        var meta_links = domconstruct.create("div", {class: "meta_links", id: "meta_links_"+roundname});
 	        meta_container.appendChild(meta_links);
+	        var meta_answer = domconstruct.create("div", {class: "meta_answer", id: "meta_answer_"+roundname});
+	        meta_container.appendChild(meta_answer);
 	        roundboxes[roundname].appendChild(meta_container);
 		summary.appendChild(roundboxes[roundname]);	
 	}
@@ -407,7 +424,7 @@ define([
 	
 	var is_addpuzzle_patt = /^puzzles\/[^\/]*\/$/;
 	var is_any_rounds_patt = /^rounds/;
-	var is_answerstatus_patt = /^puzzles\/[^\/]*\/(answer|status)$/;
+	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers)$/;
 	var is_any_version_patt = /^version/;
 	function version_diff_filter(diff){
 	    // N.B. all pbmrcs must listen to version!
@@ -415,11 +432,11 @@ define([
 	    return array.filter(diff, function(item){
 				    remote_user_regex_string = "^solvers\/"+remote_user;
 				    is_solver_remote_user = new RegExp(remote_user_regex_string);
-				    pbmrc.pb_log("version_diff_filter: item="+item+" is_solver_remote_user.test(item)="+is_solver_remote_user.test(item)+" regex string="+remote_user_regex_string);
+				    pbmrc.pb_log("version_diff_filter: item="+item+" is_solver_remote_user.test(item)="+is_solver_remote_user.test(item)+" regex string="+remote_user_regex_string,10);
 				    return (is_any_version_patt.test(item) ||
 					    is_addpuzzle_patt.test(item) || 
 					    is_any_rounds_patt.test(item) || 
-					    is_answerstatus_patt.test(item) || 
+					    is_puzzleinteresting_patt.test(item) || 
 					    is_solver_remote_user.test(item));
 				});
 	}

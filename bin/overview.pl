@@ -89,7 +89,7 @@ Content-type: text/html
 	
 	<h2>Help:</h2>
         <p>Click on the spreadsheet icon (<img class="pi_icon" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img class="pi_icon" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
-        <p>Click on the status icon (e.g. <img class="pi_icon" src="../images/new.png" alt="new">) of a puzzle to let us know that you are working on it.</p>
+        <p>Click on the status icon (e.g. <img class="pi_icon" src="../images/new.png" alt="new">) of a puzzle to learn more about who's working on the puzzle, or to let us know that you are working on it.</p>
 	<span id="overview_legend">
 	<b>Status icons: </b>
 	New (<img class="pi_icon" src="../images/new.png" alt="new">),
