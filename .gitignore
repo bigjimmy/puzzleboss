@@ -13,5 +13,12 @@ Jit
 .#*
 *.orig
 *.rej
+admin-tools/pw
+admin-tools/domain
+admin-tools/ldapdc
+lib/PB/Config.pm
+google-drive/bigjimmy-oauth-cache.json
+google-drive/index.html
+*.a
 *.class
 *.tgz
