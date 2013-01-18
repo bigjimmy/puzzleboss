@@ -2,7 +2,6 @@ apache-conf/sites/canadia-apache.conf
 bin/mod_perl_startup.pl
 bin/pblib.cfg
 lib/PB/Config.pm
-google-drive/bigjimmy-oauth-cache.json
 data
 test-data
 bin/junk/
@@ -17,8 +16,8 @@ admin-tools/pw
 admin-tools/domain
 admin-tools/ldapdc
 lib/PB/Config.pm
-google-drive/bigjimmy-oauth-cache.json
-google-drive/index.html
+bigjimmy/bigjimmy-oauth-cache.json
 *.a
 *.class
 *.tgz
+bigjimmy/bin
