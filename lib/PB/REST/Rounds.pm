@@ -16,6 +16,20 @@ sub list_GET : Runmode {
 	return($json);
 }
 
+sub full_GET : Runmode {
+	my $self = shift;
+	my $id = $self->param('id');
+	$roundref = PB::API::get_round($id);
+	if(!defined($roundref) || (ref($roundref) eq 'ARRAY' && @$roundref == 0) || (ref($roundref) eq 'HASH' && (keys %$roundref) == 0)) {
+	    my $errmsg = "PB::REST::Rounds::full_GET: could not find round $id";
+	    print STDERR $errmsg;
+	    $error_status = 404;
+	    die $errmsg;
+	}
+	my $json = $self->json_body($roundref);
+	return($json);
+}
+
 sub full_POST : Runmode {
 	my $self = shift;
 	my $roundid = $self->param('id');
@@ -41,6 +55,56 @@ sub full_POST : Runmode {
 		die $errmsg;
 	}
 }
+
+sub part_GET : Runmode {
+    my $self = shift;
+    my $id = $self->param('id');
+    my $part = $self->param('part');
+    my $roundref = PB::API::get_round($id);
+    if(!defined($roundref) || (ref($roundref) eq 'ARRAY' && @$roundref == 0) || (ref($roundref) eq 'HASH' && (keys %$roundref) == 0)) {
+	my $errmsg = "PB::REST::Rounds::part_GET: could not find round $id";
+	print STDERR $errmsg;
+	$error_status = 404;
+	die $errmsg;
+    }
+    if(exists($roundref->{$part})) {
+	my $partdata = $roundref->{$part};
+	my $json = $self->json_body( {
+	    'id' => $id,
+	    'part' => $part,
+	    'data' => $partdata,
+				     });
+	return($json);
+    } else {
+	my $errmsg = "PB::REST::Rounds::part_GET: could not find part $part in round $id";
+	print STDERR $errmsg;
+	$error_status = 404;
+	die $errmsg;
+    }
+}
+
+sub part_POST : Runmode {
+    my $self = shift;
+    my $id = $self->param('id');
+    my $part = $self->param('part');
+    my $json = $self->query->param('POSTDATA');
+    my $partref = $self->from_json($json);
+    if(exists($partref->{'data'})) {
+	if(PB::API::update_round_part($id,$part,$partref->{'data'}) < 0) {
+	    my $errmsg = "PB::REST::Rounds::part_POST: could not update $part for $id";
+	    print STDERR $errmsg;
+	    $error_status = 404;
+	    die $errmsg;
+	}
+    } else {
+	my $errmsg = "PB::REST::Rounds::part_POST: did not specify data for round $id part $part in json $json";
+	print STDERR $errmsg;
+	$error_status = 400;
+	die $errmsg;
+    }
+    return $self->json_body({'status'=>'ok'});
+}
+
 
 sub error : ErrorRunmode {
     my $self = shift;

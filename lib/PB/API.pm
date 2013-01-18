@@ -23,8 +23,8 @@ my $UNLOCK = 8;
 
 my %PUZZDATA = (
     round => 1,
-    uri => 2,
-    gssuri => 3,
+    puzzle_uri => 2,
+    drive_uri => 3,
     comments => 4,
     status => 5,
     xyzloc => 6,
@@ -134,8 +134,8 @@ sub _add_puzzle_to_puzzlelist_file {
 sub _add_puzzle_files {
     my $id = shift;
     my $round = shift;
-    my $uri = shift;
-    my $gssuri = shift;
+    my $puzzle_uri = shift;
+    my $drive_uri = shift;
  
     # Add to puzzle list
     _add_puzzle_to_puzzlelist_file($id);
@@ -145,8 +145,8 @@ sub _add_puzzle_files {
     push @output, "$PB::Config::PB_DATA_PATH/$id.dat";
     push @output, "$id\n";
     push @output, "$round\n";
-    push @output, "$uri\n";
-    push @output, "$gssuri\n";
+    push @output, "$puzzle_uri\n";
+    push @output, "$drive_uri\n";
     push @output, "\n"; #comments
     push @output, "New\n"; #status
     push @output, "\n"; #working location
@@ -160,15 +160,16 @@ sub _add_puzzle_files {
 sub _add_puzzle_db {
     my $id = shift;
     my $round = shift;
-    my $uri = shift;
-    my $gssuri = shift;
+    my $puzzle_uri = shift;
+    my $drive_uri = shift;
 
-    # convert gssuri to null (undef) if not set
-    if($gssuri eq '') {
-	$gssuri = undef;
+    # convert drive_uri to null (undef) if not set
+    if($drive_uri eq '') {
+	$drive_uri = undef;
     }
+
     my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, 'New');";
-    my $c = $dbh->do($sql, undef, $id, $round, $uri, $gssuri);
+    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri);
     
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
@@ -183,15 +184,15 @@ sub _add_puzzle_db {
 sub _add_puzzle_google {
     my $id = shift;
     my $round = shift;
-    my $uri = shift;
+    my $puzzle_uri = shift;
     my $templatetopic = shift;
     my $puzzletopic = shift;
 
     # create google spreadsheet for this puzzle
     debug_log("add_puzzle: creating google spreadsheet\n",0);
-    my $google = _google_create_spreadsheet($id, $round, $PB::Config::TWIKI_WEB, $PB::Config::TWIKI_URI."/twiki/bin/view/".$PB::Config::TWIKI_WEB."/".$puzzletopic, $uri);
-    my $gssuri = $google->{'spreadsheet'};
-    debug_log("add_puzzle: have google spreadsheet $gssuri\n",0);
+    my $google = _google_create_spreadsheet($id, $round, $PB::Config::TWIKI_WEB, $PB::Config::TWIKI_URI."/twiki/bin/view/".$PB::Config::TWIKI_WEB."/".$puzzletopic, $puzzle_uri);
+    my $drive_uri = $google->{'spreadsheet'};
+    debug_log("add_puzzle: have google spreadsheet $drive_uri\n",0);
     my $folderuri = $google->{'subfolder'};
     debug_log("add_puzzle: have google folder $folderuri\n",0);
     
@@ -204,17 +205,17 @@ sub _add_puzzle_google {
     #debug_log("add_puzzle: have google folder $gdfolderuri\n",0);
 
     # TODO update URI in data store
-    return $gssuri;
+    return $drive_uri;
 }
 
 sub _add_puzzle_twiki {
     my $id = shift;
     my $round = shift;
-    my $uri = shift;
+    my $puzzle_uri = shift;
     my $templatetopic = shift;
     my $puzzletopic = shift;
     my $roundtopic = shift;
-    my $gssuri = shift;
+    my $drive_uri = shift;
     my $gduri = shift;
     my $folderuri = shift;
 
@@ -225,8 +226,8 @@ sub _add_puzzle_twiki {
 	parenttopic => $roundtopic,
 	templatetopic => $templatetopic,
 	prname => $id,
-	puzurl => $uri,
-	gssurl => $gssuri,
+	puzurl => $puzzle_uri,
+	gssurl => $drive_uri,
 	gdurl => $gduri,
 	googlepuzzleurl => $folderuri,
 				 }) >= 0) {
@@ -249,7 +250,7 @@ sub _add_puzzle_twiki {
 sub add_puzzle {
     my $id = shift;
     my $round = shift;
-    my $uri = shift;
+    my $puzzle_uri = shift;
     my $templatetopic = shift;
 
     #clean up id
@@ -268,13 +269,13 @@ sub add_puzzle {
 	$templatetopic = "GenericPuzzleTopicTemplate";
     }
     
-    #_add_puzzle_twiki($id, $round, $uri, $templatetopic, $puzzletopic, $roundtopic);
-    my $gssuri = _add_puzzle_google($id, $round, $uri, $templatetopic, $puzzletopic);
-
+    #_add_puzzle_twiki($id, $round, $puzzle_uri, $templatetopic, $puzzletopic, $roundtopic);
+    #my $drive_uri = _add_puzzle_google($id, $round, $puzzle_uri, $templatetopic, $puzzletopic);
+    my $drive_uri = "";
 
     # Add to backend data store files
     if($PB::Config::PB_DATA_WRITE_FILES > 0) {
-	if(_add_puzzle_files($id, $round, $uri, $gssuri) <= 0) {
+	if(_add_puzzle_files($id, $round, $puzzle_uri, $drive_uri) <= 0) {
 	    debug_log("add_puzzle: Can't write fields for puzzle data!!\n",0);
 	    return(-1);
 	}
@@ -282,7 +283,7 @@ sub add_puzzle {
     
     # Add to database
     if($PB::Config::PB_DATA_WRITE_DB > 0) {
-	if(_add_puzzle_db($id, $round, $uri, $gssuri) <= 0) {
+	if(_add_puzzle_db($id, $round, $puzzle_uri, $drive_uri) <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
 	    return(-101);
 	}
@@ -457,8 +458,8 @@ sub _get_puzzles_files {
     my $id="";
     my $linkid="";
     my $round="";
-    my $uri="";
-    my $gssuri="";
+    my $puzzle_uri="";
+    my $drive_uri="";
     my $comments="";
     my $status="";
     my $xyzloc="";
@@ -480,13 +481,12 @@ sub _get_puzzles_files {
 		if($idin eq $id) {
 		    $round = <FILE>;
 		    chomp $round;
-		    #$uri = <FILE>;
+		    $puzzle_uri = <FILE>;
 		    #people asked for PB links to be to wiki
-		    $uri = "$PB::Config::TWIKI_URI/twiki/bin/view/$PB::Config::TWIKI_WEB/$id"."Puzzle";
-		    <FILE>;
-		    chomp $uri;
-		    $gssuri = <FILE>;
-		    chomp $gssuri;
+		    #$puzzle_uri = "$PB::Config::TWIKI_URI/twiki/bin/view/$PB::Config::TWIKI_WEB/$id"."Puzzle";
+		    chomp $puzzle_uri;
+		    $drive_uri = <FILE>;
+		    chomp $drive_uri;
 		    $comments = <FILE>;
 		    chomp $comments;
 		    $status = <FILE>;
@@ -517,11 +517,11 @@ sub _get_puzzles_files {
 	    if(!$round) {
 		$round="";
 	    }
-	    if(!$uri) {
-		$uri="";
+	    if(!$puzzle_uri) {
+		$puzzle_uri="";
 	    }
-	    if(!$gssuri) {
-		$gssuri="";
+	    if(!$drive_uri) {
+		$drive_uri="";
 	    }
 	    if(!$comments) {
 		$comments="";
@@ -547,10 +547,10 @@ sub _get_puzzles_files {
 	    my %puzzle = (
 		id => $id,
 		name => $id,
-		linkid => "<a href=\"$uri\" target=\"$id\">$id</a>",
+		linkid => "<a href=\"$puzzle_uri\" target=\"$id\">$id</a>",
 		round => $round,
-		uri => $uri,
-		gssuri => $gssuri,
+		puzzle_uri => $puzzle_uri,
+		drive_uri => $drive_uri,
 		comments => $comments,
 		status => $status,
 		xyzloc => $xyzloc,
@@ -682,6 +682,7 @@ sub _update_puzzle_part_db {
     my $id = shift;
     my $part = shift;
     my $val = shift;
+    my $retries = shift || 10;
 
     # TODO: fix SQL injection attack vector through $part
     my $sql = 'UPDATE `puzzle_view` SET `'.$part.'` = ? WHERE `name` LIKE ? LIMIT 1';
@@ -693,6 +694,10 @@ sub _update_puzzle_part_db {
 	return(1);
     } else {
 	debug_log("_update_puzzle_part_db: id=$id part=$part val=$val dbh->do returned error: ".$dbh->errstr."\n",0);
+	if($dbh->errstr =~ m/deadlock/i) {
+	    sleep 5;
+	    return _update_puzzle_part_db($id, $part, $val, $retries);
+	}
 	return(-1);
     }
 }
@@ -741,6 +746,7 @@ sub _update_puzzle_record_files {
 #ROUNDS
 #######
     
+
 sub _twiki_update_roundlist {
     my $roundtopic = shift;
 
@@ -1054,6 +1060,61 @@ sub add_round {
 	#return($rval);
 	return 0; # success
 }
+
+sub get_round {
+    # Only implemented in DB
+    my $idin = shift;
+
+    my $res;
+    my $sql = 'SELECT * FROM `round`';
+    my $sth;
+    my $always_return_array = 0;
+    #This fixes problem with type error when there is exactly one round in the DB.
+    if ($idin eq '*') {
+	$always_return_array = 1;
+	$sth  = $dbh->prepare($sql);
+	$sth->execute() or die $dbh->errstr;;
+    } else {
+        $sql .= ' WHERE (`name` REGEXP ?)';
+	$sth = $dbh->prepare($sql);
+	$sth->execute('^'.$idin.'$');
+    }
+    my @rows;
+    while ( my $res = $sth->fetchrow_hashref() ) {
+	foreach my $key (keys %{$res}) {
+	    if(!defined($res->{$key})) {
+		$res->{$key} = "";
+	    }
+	}
+	push @rows, $res;
+    }
+    if($always_return_array > 0 || @rows > 1) {
+	return \@rows;
+    } else {
+	return \%{$rows[0]};
+    }
+}
+
+sub update_round_part {
+    # Only implemented in DB
+    my $id = shift;
+    my $part = shift;
+    my $val = shift;
+
+    # TODO: fix SQL injection attack vector through $part
+    my $sql = 'UPDATE `round` SET `'.$part.'` = ? WHERE `name` LIKE ? LIMIT 1';
+    my $c = $dbh->do($sql, undef, $val, $id);
+    
+    if(defined($c)) {
+	debug_log("_update_round_part_db: id=$id part=$part val=$val dbh->do returned $c\n",2);
+	_send_data_version();
+	return(1);
+    } else {
+	debug_log("_update_round_part_db: id=$id part=$part val=$val dbh->do returned error: ".$dbh->errstr."\n",0);
+	return(-1);
+    }
+}
+
 
 ##########
 #TEMPLATES
