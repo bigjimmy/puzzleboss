@@ -42,6 +42,6 @@ func BigJimmyDriveMonitor(puzzle *Puzzle) {
 
 
 func updateDrivePuzzleActivity(puzzle *Puzzle) {
-	log.Logf(l4g.DEBUG, "updateDrivePuzzleActivity: %v drive_id: %v\n", puzzle.Name, puzzle.Drive_id)
+	log.Logf(l4g.TRACE, "updateDrivePuzzleActivity: %v drive_id: %v\n", puzzle.Name, puzzle.Drive_id)
 }
 

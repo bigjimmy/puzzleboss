@@ -11,6 +11,7 @@ var httpControlPort, httpControlPath string
 var googleClientId, googleClientSecret, cacheFile string
 var dbProtocol, dbHost, dbPort, dbName, dbUser, dbPassword string
 var huntFolderTitle, huntFolderId string
+var googleDomain string
 var pbRestUri string
 var maxConcHttpRestReqs int
 
@@ -42,6 +43,9 @@ func init() {
 	// hunt config (optional, will be read from DB)
 	flag.StringVar(&huntFolderTitle, "pb_hunt_title", "", "Hunt Folder Title")
 	flag.StringVar(&huntFolderId, "hunt_drive_id", "", "Hunt Folder Drive ID")
+
+	// Google domain (otional, will be read from DB)
+	flag.StringVar(&googleDomain, "google_domain", "", "Google Apps Domain")
 	
 	// PB settings (otional, will be read from DB)
 	flag.StringVar(&pbRestUri, "pb_rest_uri", "", "Puzzlebitch REST interface URI")
@@ -49,7 +53,8 @@ func init() {
 
 	
 	// Initialize logger TODO: set from flags
-	log = l4g.NewDefaultLogger(l4g.DEBUG)
+	log = l4g.NewDefaultLogger(l4g.TRACE)
+	//log = l4g.NewDefaultLogger(l4g.DEBUG)
 	//log = l4g.NewDefaultLogger(l4g.INFO)
 	//log.AddFilter("log", l4g.FINE, l4g.NewFileLogWriter("example.log", true))
 	bigjimmybot.SetLog(log)
@@ -97,7 +102,14 @@ func main() {
 	} else {
 		log.Logf(l4g.INFO, "Using google_client_id=%v and google_client_secret=%v\n", googleClientId, googleClientSecret)
 	}
-	bigjimmybot.OpenDrive(googleClientId, googleClientSecret, cacheFile)
+	// Try to get google_domain (for permissions) from DB
+	if googleDomain == "" {
+		googleDomain, err = bigjimmybot.DbGetConfig("GOOGLE_DOMAIN")
+		if err != nil {
+			l4g.Crashf("Could not get pb_rest_uri from DB: %v\n", err)
+		}
+	}
+	bigjimmybot.OpenDrive(googleClientId, googleClientSecret, googleDomain, cacheFile)
 
 
 	// Setup PB REST client
@@ -134,14 +146,14 @@ func main() {
 				if err.Found > 1 {
 					l4g.Crashf("more than one document matches %v\n", huntFolderTitle)
 				} else if err.Found == 0 {
-				        l4g.Crashf("no hunt folder found for %v\n", huntFolderTitle)
-					//log.Logf(l4g.INFO, "no hunt folder found for %v, creating it\n", huntFolderTitle)
-					//var cferr error
-					//huntFolderId, cferr = bigjimmybot.CreateFolder(huntFolderTitle)
-					//if cferr != nil {
-					//	l4g.Crashf("could not create hunt folder for %v: %v\n", huntFolderTitle, cferr)
-					//}
-					//log.Logf(l4g.INFO, "hunt folder created\n")
+				        //l4g.Crashf("no hunt folder found for %v\n", huntFolderTitle)
+					log.Logf(l4g.INFO, "no hunt folder found for %v, creating it\n", huntFolderTitle)
+					var cferr error
+					huntFolderId, _, cferr = bigjimmybot.CreateHunt(huntFolderTitle)
+					if cferr != nil {
+						l4g.Crashf("could not create hunt folder for title [%v]: %v\n", huntFolderTitle, cferr)
+					}
+					log.Logf(l4g.INFO, "hunt folder created\n")
 				}
 			} else {
 				l4g.Crashf("an error occurred getting hunt folder ID: %v\n", err)
@@ -156,7 +168,11 @@ func main() {
 			}
 		}
 	}
+	// set huntFolderId in bigjimmybot
+	bigjimmybot.SetHuntFolderId(huntFolderId)
 
+	// get initial version diff
+	bigjimmybot.PbGetInitialVersionDiff()
 
 	// Start ControlServer main loop
 	// Ensure we have httpControlPort and httpControlPath
