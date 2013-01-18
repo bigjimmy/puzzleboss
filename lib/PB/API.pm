@@ -269,8 +269,7 @@ sub add_puzzle {
     }
     
     #_add_puzzle_twiki($id, $round, $uri, $templatetopic, $puzzletopic, $roundtopic);
-    #my $gssuri = _add_puzzle_google($id, $round, $uri, $templatetopic, $puzzletopic);
-    my $gssuri = "";
+    my $gssuri = _add_puzzle_google($id, $round, $uri, $templatetopic, $puzzletopic);
 
 
     # Add to backend data store files

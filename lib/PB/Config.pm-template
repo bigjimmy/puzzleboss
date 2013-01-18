@@ -29,7 +29,6 @@ our $PB_DATA_DB_HOST = "localhost";
 our $PB_DATA_DB_PORT = "3306";
 our $PB_DATA_DB_USER = lc($PB_USER);
 our $PB_DATA_DB_PASS = $PB_PASS;
-our $PB_DATA_DB_NAME = "puzzlebitch$PB_DEV_VERSION";
 our $METEOR_HTTP_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
 our $METEOR_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
 our $BIGJIMMY_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
@@ -81,6 +80,7 @@ our $BIGJIMMY_BOT_CONTROL_URI = "http://".$BIGJIMMY_CONTROL_HOST.":".$BIGJIMMY_C
 our $PB_DATA_WRITE_FILES = 0;
 our $PB_DATA_WRITE_DB = 1;
 our $PB_DATA_READ_DB_OR_FILES = "DB";
+our $PB_DATA_DB_NAME = "puzzlebitch$PB_DEV_VERSION";
 
 our $REGISTER_LDAP_HOST = "ldap.$PB_DOMAIN_NAME";
 our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $PB_DOMAIN_NAME));
