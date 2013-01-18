@@ -29,6 +29,7 @@ our $PB_DATA_DB_HOST = "localhost";
 our $PB_DATA_DB_PORT = "3306";
 our $PB_DATA_DB_USER = lc($PB_USER);
 our $PB_DATA_DB_PASS = $PB_PASS;
+our $PB_DATA_DB_NAME = "puzzlebitch$PB_DEV_VERSION";
 our $METEOR_HTTP_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
 our $METEOR_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
 our $BIGJIMMY_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";

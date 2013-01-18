@@ -22,3 +22,5 @@ google-drive/index.html
 *.a
 *.class
 *.tgz
+db/puzzlebitch-jrandall.create.sql
+*.bak

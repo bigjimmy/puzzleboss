@@ -1,18 +1,17 @@
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0; SET
-@OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE,
-SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
-DROP SCHEMA IF EXISTS `$PB_DEV_VERSION` ;
-CREATE SCHEMA IF NOT EXISTS `$PB_DEV_VERSION` DEFAULT CHARACTER SET latin1 ;
-USE `$PB_DEV_VERSION` ;
+DROP SCHEMA IF EXISTS `$PB_DATA_DB_NAME` ;
+CREATE SCHEMA IF NOT EXISTS `$PB_DATA_DB_NAME` DEFAULT CHARACTER SET latin1 ;
+USE `$PB_DATA_DB_NAME` ;
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`round`
+-- Table `$PB_DATA_DB_NAME`.`round`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`round` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`round` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`round` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`round` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(500) NOT NULL ,
   `round_uri` TEXT NULL ,
@@ -26,11 +25,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`puzzle`
+-- Table `$PB_DATA_DB_NAME`.`puzzle`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(500) NOT NULL ,
   `puzzle_uri` TEXT NULL ,
@@ -45,21 +44,20 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle` (
   INDEX `fk_puzzles_rounds1_idx` (`round_id` ASC) ,
   UNIQUE INDEX `name_UNIQUE` (`name` ASC) ,
   UNIQUE INDEX `drive_id_UNIQUE` (`drive_id` ASC) ,
-  UNIQUE INDEX `drive_uri_UNIQUE` (`drive_uri` ASC) ,
   CONSTRAINT `fk_puzzle_round1`
     FOREIGN KEY (`round_id` )
-    REFERENCES `$PB_DEV_VERSION`.`round` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`round` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`solver`
+-- Table `$PB_DATA_DB_NAME`.`solver`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`solver` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`solver` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`solver` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`solver` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(500) NOT NULL ,
   PRIMARY KEY (`id`) ,
@@ -68,11 +66,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`location`
+-- Table `$PB_DATA_DB_NAME`.`location`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(500) NULL ,
   PRIMARY KEY (`id`) ,
@@ -81,11 +79,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`puzzle_solver`
+-- Table `$PB_DATA_DB_NAME`.`puzzle_solver`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_solver` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_solver` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `time` TIMESTAMP NOT NULL ,
   `puzzle_id` INT NULL ,
@@ -95,23 +93,23 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_solver` (
   INDEX `fk_puzzles_solvers_solvers1_idx` (`solver_id` ASC) ,
   CONSTRAINT `fk_puzzle_solver_puzzle1`
     FOREIGN KEY (`puzzle_id` )
-    REFERENCES `$PB_DEV_VERSION`.`puzzle` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`puzzle` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_puzzle_solver_solver1`
     FOREIGN KEY (`solver_id` )
-    REFERENCES `$PB_DEV_VERSION`.`solver` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`solver` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`location_solver`
+-- Table `$PB_DATA_DB_NAME`.`location_solver`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_solver` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_solver` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_solver` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_solver` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `time` TIMESTAMP NOT NULL ,
   `solver_id` INT NOT NULL ,
@@ -121,23 +119,23 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_solver` (
   PRIMARY KEY (`id`) ,
   CONSTRAINT `fk_location_solver_solver1`
     FOREIGN KEY (`solver_id` )
-    REFERENCES `$PB_DEV_VERSION`.`solver` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`solver` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_location_solver_location1`
     FOREIGN KEY (`location_id` )
-    REFERENCES `$PB_DEV_VERSION`.`location` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`location` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`answerattempt`
+-- Table `$PB_DATA_DB_NAME`.`answerattempt`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`answerattempt` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`answerattempt` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`answerattempt` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`answerattempt` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `answer` VARCHAR(500) NOT NULL ,
   `time` TIMESTAMP NOT NULL ,
@@ -147,29 +145,29 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`answerattempt` (
   INDEX `fk_answerattempts_puzzles1_idx` (`puzzle_id` ASC) ,
   CONSTRAINT `fk_answerattempt_puzzle1`
     FOREIGN KEY (`puzzle_id` )
-    REFERENCES `$PB_DEV_VERSION`.`puzzle` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`puzzle` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`clientindex`
+-- Table `$PB_DATA_DB_NAME`.`clientindex`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`clientindex` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`clientindex` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`clientindex` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`clientindex` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`audit_puzzle`
+-- Table `$PB_DATA_DB_NAME`.`audit_puzzle`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`audit_puzzle` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`audit_puzzle` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`audit_puzzle` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`audit_puzzle` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `time` TIMESTAMP NOT NULL ,
   `action` ENUM('INSERT','UPDATE','DELETE') NOT NULL ,
@@ -194,34 +192,34 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`audit_puzzle` (
   INDEX `fk_audit_puzzle_puzzle1_idx` (`puzzle_id` ASC) ,
   CONSTRAINT `fk_audit_puzzle_puzzle1`
     FOREIGN KEY (`puzzle_id` )
-    REFERENCES `$PB_DEV_VERSION`.`puzzle` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`puzzle` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`log`
+-- Table `$PB_DATA_DB_NAME`.`log`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`log` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`log` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`log` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`log` (
   `version` INT NOT NULL AUTO_INCREMENT ,
   `time` TIMESTAMP NOT NULL ,
   `user` VARCHAR(500) NULL ,
   `module` ENUM('puzzles','rounds','solvers','locations') NOT NULL ,
   `name` VARCHAR(500) NULL ,
-  `part` ENUM('answer','answerattempts','comments','cursolvers','name','solvers','status','xyzloc','puzzles') NULL ,
+  `part` VARCHAR(30) NULL ,
   PRIMARY KEY (`version`) )
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`puzzle_location`
+-- Table `$PB_DATA_DB_NAME`.`puzzle_location`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_location` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_location` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_location` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_location` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `time` TIMESTAMP NOT NULL ,
   `puzzle_id` INT NULL ,
@@ -231,23 +229,23 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_location` (
   INDEX `fk_puzzle_location_location1_idx` (`location_id` ASC) ,
   CONSTRAINT `fk_puzzle_location_puzzle1`
     FOREIGN KEY (`puzzle_id` )
-    REFERENCES `$PB_DEV_VERSION`.`puzzle` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`puzzle` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_puzzle_location_location1`
     FOREIGN KEY (`location_id` )
-    REFERENCES `$PB_DEV_VERSION`.`location` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`location` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`config`
+-- Table `$PB_DATA_DB_NAME`.`config`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`config` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`config` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`config` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`config` (
   `key` VARCHAR(100) NOT NULL ,
   `val` VARCHAR(100) NULL ,
   UNIQUE INDEX `key_UNIQUE` (`key` ASC) ,
@@ -256,11 +254,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `$PB_DEV_VERSION`.`activity`
+-- Table `$PB_DATA_DB_NAME`.`activity`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`activity` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`activity` ;
 
-CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`activity` (
+CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`activity` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `time` TIMESTAMP NOT NULL ,
   `solver_id` INT NOT NULL ,
@@ -274,150 +272,150 @@ CREATE  TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`activity` (
   INDEX `fk_google_activity_puzzle1_idx` (`puzzle_id` ASC) ,
   CONSTRAINT `fk_google_activity_solver1`
     FOREIGN KEY (`solver_id` )
-    REFERENCES `$PB_DEV_VERSION`.`solver` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`solver` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_google_activity_puzzle1`
     FOREIGN KEY (`puzzle_id` )
-    REFERENCES `$PB_DEV_VERSION`.`puzzle` (`id` )
+    REFERENCES `$PB_DATA_DB_NAME`.`puzzle` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-USE `$PB_DEV_VERSION` ;
+USE `$PB_DATA_DB_NAME` ;
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_view`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_view`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_view` (`id` INT, `name` INT, `status` INT, `answer` INT, `round` INT, `comments` INT, `gssuri` INT, `drive_id` INT, `round_meta_p` INT, `linkid` INT, `uri` INT, `solvers` INT, `locations` INT, `cursolvers` INT, `xyzloc` INT, `wrong_answers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_view` (`id` INT, `name` INT, `status` INT, `answer` INT, `round` INT, `comments` INT, `gssuri` INT, `drive_id` INT, `round_meta_p` INT, `linkid` INT, `uri` INT, `solvers` INT, `locations` INT, `cursolvers` INT, `xyzloc` INT, `wrong_answers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_solvers`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_solvers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_solvers` (`puzzle_id` INT, `solvers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_solvers` (`puzzle_id` INT, `solvers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_locations`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_locations`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_locations` (`puzzle_id` INT, `locations` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_locations` (`puzzle_id` INT, `locations` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_cursolvers`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_cursolvers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_cursolvers` (`puzzle_id` INT, `cursolvers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_cursolvers` (`puzzle_id` INT, `cursolvers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_curlocations`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_curlocations`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_curlocations` (`puzzle_id` INT, `curlocations` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_curlocations` (`puzzle_id` INT, `curlocations` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_wrong_answers`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_wrong_answers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answers` (`puzzle_id` INT, `wrong_answers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_wrong_answers` (`puzzle_id` INT, `wrong_answers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_solver_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_solver_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_solver_distinct` (`puzzle_id` INT, `solver_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver_distinct` (`puzzle_id` INT, `solver_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_location_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_location_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_location_distinct` (`puzzle_id` INT, `location_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_location_distinct` (`puzzle_id` INT, `location_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_cursolver_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_cursolver_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_cursolver_distinct` (`solver_id` INT, `puzzle_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_cursolver_distinct` (`solver_id` INT, `puzzle_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_curlocation_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_curlocation_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_curlocation_distinct` (`location_id` INT, `puzzle_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_curlocation_distinct` (`location_id` INT, `puzzle_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_wrong_answer_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct` (`answer` INT, `puzzle_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_wrong_answer_distinct` (`answer` INT, `puzzle_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_cursolver_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_cursolver_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_cursolver_distinct` (`solver_id` INT, `location_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_cursolver_distinct` (`solver_id` INT, `location_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_solver_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_solver_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_solver_distinct` (`location_id` INT, `solver_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_solver_distinct` (`location_id` INT, `solver_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_puzzle_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_puzzle_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_puzzle_distinct` (`location_id` INT, `puzzle_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_puzzle_distinct` (`location_id` INT, `puzzle_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_curpuzzle_distinct`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_curpuzzle_distinct`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_curpuzzle_distinct` (`puzzle_id` INT, `location_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_curpuzzle_distinct` (`puzzle_id` INT, `location_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_solvers`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_solvers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_solvers` (`location_id` INT, `solvers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_solvers` (`location_id` INT, `solvers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_cursolvers`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_cursolvers`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_cursolvers` (`location_id` INT, `cursolvers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_cursolvers` (`location_id` INT, `cursolvers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_puzzles`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_puzzles`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_puzzles` (`location_id` INT, `puzzles` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_puzzles` (`location_id` INT, `puzzles` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_curpuzzles`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_curpuzzles`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_curpuzzles` (`location_id` INT, `curpuzzles` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_curpuzzles` (`location_id` INT, `curpuzzles` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`location_view`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`location_view`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`location_view` (`id` INT, `name` INT, `solvers` INT, `puzzles` INT, `cursolvers` INT, `curpuzzles` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`location_view` (`id` INT, `name` INT, `solvers` INT, `puzzles` INT, `cursolvers` INT, `curpuzzles` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`solver_puzzles`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`solver_puzzles`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`solver_puzzles` (`solver_id` INT, `puzzles` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`solver_puzzles` (`solver_id` INT, `puzzles` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`solver_locations`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`solver_locations`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`solver_locations` (`solver_id` INT, `locations` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`solver_locations` (`solver_id` INT, `locations` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`solver_view`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`solver_view`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`solver_view` (`id` INT, `name` INT, `locations` INT, `puzzles` INT, `xyzloc` INT, `puzz` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`solver_view` (`id` INT, `name` INT, `locations` INT, `puzzles` INT, `xyzloc` INT, `puzz` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`solver_curlocation`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`solver_curlocation`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`solver_curlocation` (`solver_id` INT, `curlocation` INT, `curlocation_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`solver_curlocation` (`solver_id` INT, `curlocation` INT, `curlocation_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `$PB_DEV_VERSION`.`solver_curpuzzle`
+-- Placeholder table for view `$PB_DATA_DB_NAME`.`solver_curpuzzle`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DEV_VERSION`.`solver_curpuzzle` (`solver_id` INT, `curpuzzle` INT, `curpuzzle_id` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`solver_curpuzzle` (`solver_id` INT, `curpuzzle` INT, `curpuzzle_id` INT);
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_view`
+-- View `$PB_DATA_DB_NAME`.`puzzle_view`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_view` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_view`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_view` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_view` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_view`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_view` AS
 SELECT 	`puzzle`.`id` AS `id`,
 		`puzzle`.`name` AS `name`,
 		`puzzle`.`status` AS `status`, 
@@ -443,12 +441,12 @@ LEFT JOIN `puzzle_curlocations` AS `cpl` ON `cpl`.`puzzle_id`=`puzzle`.`id`
 LEFT JOIN `puzzle_wrong_answers` AS `aa` ON `aa`.`puzzle_id`=`puzzle`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_solvers`
+-- View `$PB_DATA_DB_NAME`.`puzzle_solvers`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_solvers` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_solvers`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_solvers` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solvers` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solvers`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_solvers` AS
 SELECT `puzzle`.`id` as `puzzle_id`, 
 		GROUP_CONCAT(`solver`.`name`) AS `solvers`
 		FROM `puzzle` 
@@ -458,12 +456,12 @@ SELECT `puzzle`.`id` as `puzzle_id`,
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_locations`
+-- View `$PB_DATA_DB_NAME`.`puzzle_locations`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_locations` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_locations`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_locations` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_locations` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_locations`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_locations` AS
 SELECT `puzzle`.`id` as `puzzle_id`, 
 			GROUP_CONCAT(`location`.`name`) AS `locations`
 			FROM `puzzle` 
@@ -472,12 +470,12 @@ SELECT `puzzle`.`id` as `puzzle_id`,
 			GROUP BY `puzzle`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_cursolvers`
+-- View `$PB_DATA_DB_NAME`.`puzzle_cursolvers`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_cursolvers` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_cursolvers`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_cursolvers` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_cursolvers` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_cursolvers`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_cursolvers` AS
 SELECT `puzzle`.`id` as `puzzle_id`, 
 			GROUP_CONCAT(`solver`.`name`) AS `cursolvers`
 			FROM `puzzle` 
@@ -486,12 +484,12 @@ SELECT `puzzle`.`id` as `puzzle_id`,
 			GROUP BY `puzzle`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_curlocations`
+-- View `$PB_DATA_DB_NAME`.`puzzle_curlocations`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_curlocations` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_curlocations`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_curlocations` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_curlocations` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_curlocations`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_curlocations` AS
 SELECT `puzzle`.`id` as `puzzle_id`, 
 			GROUP_CONCAT(`location`.`name`) AS `curlocations`
 			FROM `puzzle` 
@@ -501,12 +499,12 @@ SELECT `puzzle`.`id` as `puzzle_id`,
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_wrong_answers`
+-- View `$PB_DATA_DB_NAME`.`puzzle_wrong_answers`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answers` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answers`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_wrong_answers` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_wrong_answers` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_wrong_answers`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_wrong_answers` AS
 SELECT `puzzle`.`id` as `puzzle_id`, 
 			GROUP_CONCAT(`aa`.`answer`) AS `wrong_answers` 
 			FROM `puzzle` 
@@ -515,108 +513,108 @@ SELECT `puzzle`.`id` as `puzzle_id`,
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_solver_distinct`
+-- View `$PB_DATA_DB_NAME`.`puzzle_solver_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_solver_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_solver_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_solver_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_solver_distinct` AS
 SELECT DISTINCT `puzzle_id`, `solver_id` FROM `puzzle_solver`
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_location_distinct`
+-- View `$PB_DATA_DB_NAME`.`puzzle_location_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_location_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_location_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_location_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_location_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_location_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_location_distinct` AS
 SELECT DISTINCT `puzzle_id`, `location_id` FROM `puzzle_location`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_cursolver_distinct`
+-- View `$PB_DATA_DB_NAME`.`puzzle_cursolver_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_cursolver_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_cursolver_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_cursolver_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_cursolver_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_cursolver_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_cursolver_distinct` AS
 SELECT DISTINCT `solver`.`id` AS `solver_id`, `ps`.`puzzle_id` AS `puzzle_id` FROM `solver` 
 LEFT JOIN `puzzle_solver` AS `ps` ON `ps`.`solver_id`=`solver`.`id` 
 AND `ps`.`puzzle_id` = (SELECT `subps`.`puzzle_id` FROM `puzzle_solver` AS `subps` WHERE `subps`.`solver_id`=`ps`.`solver_id` ORDER BY `subps`.`id` DESC LIMIT 1)
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_curlocation_distinct`
+-- View `$PB_DATA_DB_NAME`.`puzzle_curlocation_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_curlocation_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_curlocation_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_curlocation_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_curlocation_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_curlocation_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_curlocation_distinct` AS
 SELECT DISTINCT `location`.`id` AS `location_id`, `pl`.`puzzle_id` AS `puzzle_id` FROM `location` 
 LEFT JOIN `puzzle_location` AS `pl` ON `pl`.`location_id`=`location`.`id` 
 AND `pl`.`puzzle_id` = (SELECT `subpl`.`puzzle_id` FROM `puzzle_location` AS `subpl` WHERE `subpl`.`location_id`=`pl`.`location_id` ORDER BY `subpl`.`id` DESC LIMIT 1)
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct`
+-- View `$PB_DATA_DB_NAME`.`puzzle_wrong_answer_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`puzzle_wrong_answer_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_wrong_answer_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_wrong_answer_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`puzzle_wrong_answer_distinct` AS
 SELECT DISTINCT `answer`,`puzzle_id` FROM `answerattempt` WHERE `answerattempt`.`status`='WRONG';
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_cursolver_distinct`
+-- View `$PB_DATA_DB_NAME`.`location_cursolver_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_cursolver_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_cursolver_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_cursolver_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_cursolver_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_cursolver_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_cursolver_distinct` AS
 SELECT DISTINCT `solver`.`id` AS `solver_id`, `ls`.`location_id` AS `location_id` FROM `solver` 
 LEFT JOIN `location_solver` AS `ls` ON `ls`.`solver_id`=`solver`.`id` 
 AND `ls`.`location_id` = (SELECT `subls`.`location_id` FROM `location_solver` AS `subls` WHERE `subls`.`solver_id`=`ls`.`solver_id` ORDER BY `subls`.`id` DESC LIMIT 1)
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_solver_distinct`
+-- View `$PB_DATA_DB_NAME`.`location_solver_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_solver_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_solver_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_solver_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_solver_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_solver_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_solver_distinct` AS
 SELECT DISTINCT `location_id`, `solver_id` FROM `location_solver`
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_puzzle_distinct`
+-- View `$PB_DATA_DB_NAME`.`location_puzzle_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_puzzle_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_puzzle_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_puzzle_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_puzzle_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_puzzle_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_puzzle_distinct` AS
 SELECT DISTINCT `location_id`, `puzzle_id` FROM `puzzle_location`
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_curpuzzle_distinct`
+-- View `$PB_DATA_DB_NAME`.`location_curpuzzle_distinct`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_curpuzzle_distinct` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_curpuzzle_distinct`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_curpuzzle_distinct` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_curpuzzle_distinct` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_curpuzzle_distinct`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_curpuzzle_distinct` AS
 SELECT DISTINCT `puzzle`.`id` AS `puzzle_id`, `pl`.`location_id` AS `location_id` FROM `puzzle` 
 LEFT JOIN `puzzle_location` AS `pl` ON `pl`.`puzzle_id`=`puzzle`.`id` 
 AND `pl`.`location_id` = (SELECT `subpl`.`location_id` FROM `puzzle_location` AS `subpl` WHERE `subpl`.`puzzle_id`=`pl`.`puzzle_id` ORDER BY `subpl`.`id` DESC LIMIT 1)
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_solvers`
+-- View `$PB_DATA_DB_NAME`.`location_solvers`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_solvers` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_solvers`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_solvers` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_solvers` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_solvers`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_solvers` AS
 SELECT `location`.`id` as `location_id`, 
 		GROUP_CONCAT(`solver`.`name`) AS `solvers`
 		FROM `location` 
@@ -625,12 +623,12 @@ SELECT `location`.`id` as `location_id`,
 		GROUP BY `location`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_cursolvers`
+-- View `$PB_DATA_DB_NAME`.`location_cursolvers`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_cursolvers` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_cursolvers`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_cursolvers` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_cursolvers` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_cursolvers`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_cursolvers` AS
 SELECT `location`.`id` as `location_id`, 
 			GROUP_CONCAT(`solver`.`name`) AS `cursolvers`
 			FROM `location` 
@@ -639,12 +637,12 @@ SELECT `location`.`id` as `location_id`,
 			GROUP BY `location`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_puzzles`
+-- View `$PB_DATA_DB_NAME`.`location_puzzles`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_puzzles` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_puzzles`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_puzzles` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_puzzles` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_puzzles`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_puzzles` AS
 SELECT `location`.`id` as `location_id`, 
 		GROUP_CONCAT(`puzzle`.`name`) AS `puzzles`
 		FROM `location` 
@@ -653,12 +651,12 @@ SELECT `location`.`id` as `location_id`,
 		GROUP BY `location`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_curpuzzles`
+-- View `$PB_DATA_DB_NAME`.`location_curpuzzles`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_curpuzzles` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_curpuzzles`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_curpuzzles` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_curpuzzles` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_curpuzzles`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_curpuzzles` AS
 SELECT `location`.`id` as `location_id`, 
 			GROUP_CONCAT(`puzzle`.`name`) AS `curpuzzles`
 			FROM `location` 
@@ -667,12 +665,12 @@ SELECT `location`.`id` as `location_id`,
 			GROUP BY `location`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`location_view`
+-- View `$PB_DATA_DB_NAME`.`location_view`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`location_view` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`location_view`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`location_view` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`location_view` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`location_view`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`location_view` AS
 SELECT 	
 		`location`.`id` AS `id`,
 		`location`.`name` AS `name`,
@@ -688,12 +686,12 @@ LEFT JOIN `location_curpuzzles` AS `cpl` ON `cpl`.`location_id`=`location`.`id`
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`solver_puzzles`
+-- View `$PB_DATA_DB_NAME`.`solver_puzzles`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`solver_puzzles` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`solver_puzzles`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`solver_puzzles` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`solver_puzzles` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`solver_puzzles`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`solver_puzzles` AS
 SELECT `solver`.`id` as `solver_id`, 
 		GROUP_CONCAT(`puzzle`.`name`) AS `puzzles`
 		FROM `solver` 
@@ -702,12 +700,12 @@ SELECT `solver`.`id` as `solver_id`,
 		GROUP BY `solver`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`solver_locations`
+-- View `$PB_DATA_DB_NAME`.`solver_locations`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`solver_locations` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`solver_locations`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`solver_locations` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`solver_locations` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`solver_locations`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`solver_locations` AS
 SELECT `solver`.`id` as `solver_id`, 
 		GROUP_CONCAT(`location`.`name`) AS `locations`
 		FROM `solver` 
@@ -716,12 +714,12 @@ SELECT `solver`.`id` as `solver_id`,
 		GROUP BY `solver`.`id`;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`solver_view`
+-- View `$PB_DATA_DB_NAME`.`solver_view`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`solver_view` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`solver_view`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`solver_view` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`solver_view` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`solver_view`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`solver_view` AS
 SELECT 		
 	`solver`.`id` AS `id`,
 	`solver`.`name` AS `name`,
@@ -737,12 +735,12 @@ LEFT JOIN `solver_curpuzzle` AS `csp` ON `csp`.`solver_id`=`solver`.`id`
 ;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`solver_curlocation`
+-- View `$PB_DATA_DB_NAME`.`solver_curlocation`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`solver_curlocation` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`solver_curlocation`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`solver_curlocation` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`solver_curlocation` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`solver_curlocation`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`solver_curlocation` AS
 SELECT `solver`.`id` as `solver_id`, 
 			`location`.`name` AS `curlocation`,
 			`location`.`id` AS `curlocation_id`
@@ -752,12 +750,12 @@ SELECT `solver`.`id` as `solver_id`,
 			;
 
 -- -----------------------------------------------------
--- View `$PB_DEV_VERSION`.`solver_curpuzzle`
+-- View `$PB_DATA_DB_NAME`.`solver_curpuzzle`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `$PB_DEV_VERSION`.`solver_curpuzzle` ;
-DROP TABLE IF EXISTS `$PB_DEV_VERSION`.`solver_curpuzzle`;
-USE `$PB_DEV_VERSION`;
-CREATE  OR REPLACE VIEW `$PB_DEV_VERSION`.`solver_curpuzzle` AS
+DROP VIEW IF EXISTS `$PB_DATA_DB_NAME`.`solver_curpuzzle` ;
+DROP TABLE IF EXISTS `$PB_DATA_DB_NAME`.`solver_curpuzzle`;
+USE `$PB_DATA_DB_NAME`;
+CREATE  OR REPLACE VIEW `$PB_DATA_DB_NAME`.`solver_curpuzzle` AS
 SELECT `solver`.`id` as `solver_id`, 
 			`puzzle`.`name` AS `curpuzzle`,
 			`puzzle`.`id` AS `curpuzzle_id`
@@ -765,13 +763,13 @@ SELECT `solver`.`id` as `solver_id`,
 			LEFT JOIN `puzzle_cursolver_distinct` AS `sp` ON `sp`.`solver_id`=`solver`.`id` 
 			LEFT JOIN `puzzle` ON `puzzle`.`id`=`sp`.`puzzle_id`
 ;
-USE `$PB_DEV_VERSION`;
+USE `$PB_DATA_DB_NAME`;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_ADEL` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_ADEL` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_ADEL` AFTER DELETE ON puzzle FOR EACH ROW
@@ -808,9 +806,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_AINS` AFTER INSERT ON puzzle FOR EACH ROW
@@ -847,9 +845,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_AUPD` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_AUPD` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_AUPD` AFTER UPDATE ON puzzle FOR EACH ROW
@@ -921,9 +919,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`round_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`round_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `round_AINS` AFTER INSERT ON round FOR EACH ROW
@@ -935,9 +933,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`round_AUPD` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`round_AUPD` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `round_AUPD` AFTER UPDATE ON round FOR EACH ROW
@@ -953,9 +951,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`round_ADEL` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`round_ADEL` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `round_ADEL` AFTER DELETE ON round FOR EACH ROW
@@ -970,9 +968,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`solver_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`solver_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `solver_AINS` AFTER INSERT ON solver FOR EACH ROW
@@ -983,9 +981,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`solver_AUPD` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`solver_AUPD` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `solver_AUPD` AFTER UPDATE ON solver FOR EACH ROW
@@ -998,9 +996,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`solver_ADEL` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`solver_ADEL` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `solver_ADEL` AFTER DELETE ON solver FOR EACH ROW
@@ -1015,9 +1013,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`location_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`location_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `location_AINS` AFTER INSERT ON location FOR EACH ROW
@@ -1028,9 +1026,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`location_ADEL` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`location_ADEL` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `location_ADEL` AFTER DELETE ON location FOR EACH ROW
@@ -1041,9 +1039,9 @@ BEGIN
 END$$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`location_AUPD` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`location_AUPD` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `location_AUPD` AFTER UPDATE ON location FOR EACH ROW
@@ -1061,9 +1059,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_solver_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_solver_AINS` AFTER INSERT ON puzzle_solver FOR EACH ROW
@@ -1083,9 +1081,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_solver_BINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_solver_BINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_solver_BINS` BEFORE INSERT ON puzzle_solver FOR EACH ROW
@@ -1108,9 +1106,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`location_solver_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`location_solver_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `location_solver_AINS` AFTER INSERT ON location_solver FOR EACH ROW
@@ -1130,9 +1128,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`location_solver_BINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`location_solver_BINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `location_solver_BINS` BEFORE INSERT ON location_solver FOR EACH ROW
@@ -1155,9 +1153,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`answerattempt_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`answerattempt_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `answerattempt_AINS` AFTER INSERT ON answerattempt FOR EACH ROW
@@ -1174,9 +1172,9 @@ DELIMITER ;
 
 DELIMITER $$
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_location_AINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_location_AINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_location_AINS` AFTER INSERT ON puzzle_location FOR EACH ROW
@@ -1193,9 +1191,9 @@ END
 $$
 
 
-USE `$PB_DEV_VERSION`$$
-DROP TRIGGER IF EXISTS `$PB_DEV_VERSION`.`puzzle_location_BINS` $$
-USE `$PB_DEV_VERSION`$$
+USE `$PB_DATA_DB_NAME`$$
+DROP TRIGGER IF EXISTS `$PB_DATA_DB_NAME`.`puzzle_location_BINS` $$
+USE `$PB_DATA_DB_NAME`$$
 
 
 CREATE TRIGGER `puzzle_location_BINS` BEFORE INSERT ON puzzle_location FOR EACH ROW
