@@ -80,6 +80,7 @@ our $BIGJIMMY_BOT_CONTROL_URI = "http://".$BIGJIMMY_CONTROL_HOST.":".$BIGJIMMY_C
 our $PB_DATA_WRITE_FILES = 0;
 our $PB_DATA_WRITE_DB = 1;
 our $PB_DATA_READ_DB_OR_FILES = "DB";
+our $PB_DATA_DB_NAME = "puzzlebitch$PB_DEV_VERSION";
 
 our $REGISTER_LDAP_HOST = "ldap.$PB_DOMAIN_NAME";
 our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $PB_DOMAIN_NAME));
