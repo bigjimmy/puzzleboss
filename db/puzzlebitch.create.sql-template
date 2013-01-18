@@ -287,7 +287,7 @@ USE `$PB_DATA_DB_NAME` ;
 -- -----------------------------------------------------
 -- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_view`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_view` (`id` INT, `name` INT, `status` INT, `answer` INT, `round` INT, `comments` INT, `gssuri` INT, `drive_id` INT, `round_meta_p` INT, `linkid` INT, `uri` INT, `solvers` INT, `locations` INT, `cursolvers` INT, `xyzloc` INT, `wrong_answers` INT);
+CREATE TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle_view` (`id` INT, `name` INT, `status` INT, `answer` INT, `round` INT, `comments` INT, `drive_uri` INT, `drive_id` INT, `round_meta_p` INT, `linkid` INT, `puzzle_uri` INT, `solvers` INT, `locations` INT, `cursolvers` INT, `xyzloc` INT, `wrong_answers` INT);
 
 -- -----------------------------------------------------
 -- Placeholder table for view `$PB_DATA_DB_NAME`.`puzzle_solvers`
@@ -422,11 +422,11 @@ SELECT 	`puzzle`.`id` AS `id`,
 		`puzzle`.`answer` AS `answer`, 
 		`round`.`name` AS `round`, 
 		`puzzle`.`pb_comments` AS `comments`, 
-		`puzzle`.`drive_uri` AS `gssuri`, 
+		`puzzle`.`drive_uri` AS `drive_uri`, 
 		`puzzle`.`drive_id` AS `drive_id`,
 		`puzzle`.`round_meta_p` AS `round_meta_p`,
 		CONCAT('<a href="',`puzzle`.`puzzle_uri`,'" target="',`puzzle`.`name`,'">',`puzzle`.`name`,'</a>') AS `linkid`, 
-		`puzzle`.`puzzle_uri` AS `uri`,
+		`puzzle`.`puzzle_uri` AS `puzzle_uri`,
 		`ps`.`solvers`,
 		`pl`.`locations`,
 		`cps`.`cursolvers`,
