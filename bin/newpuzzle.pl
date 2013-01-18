@@ -43,7 +43,7 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
     print header;
     print start_html(-title=>"Add Puzzle");
     # fix puzzle id from title
-    $puzzid =~ s/^.+\:\ //g;
+    $puzzid =~ s/[[:space:]][-][-][[:space:]].+$//g;
     $puzzid =~ s/\W//g;
     $puzzid =~ s/\_//g;
     $puzzid =~ s/\-//g;
