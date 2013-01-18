@@ -54,18 +54,19 @@ func PbGetVersionDiff(haveVersion int64) (versionDiff *PBVersionDiff, err error)
 					log.Logf(l4g.INFO, "pbGetVersionDiff: have new round name=[%v]\n", name)
 					RoundCount++
 					roundsAddedP = true
+					go RestGetRound(name)
 				}
 			case "puzzles": {
 					log.Logf(l4g.INFO, "pbGetVersionDiff: have new puzzle name=[%v]\n", name)
 					PuzzleCount++
 					puzzlesAddedP = true
 					go RestGetPuzzle(name)
-					
 				}
 			case "solvers": {
 					log.Logf(l4g.INFO, "pbGetVersionDiff: have new solver name=[%v]\n", name)
 					SolverCount++
 					solversAddedP = true
+					go RestGetSolver(name)
 				}
 			}
 		}
@@ -79,25 +80,25 @@ func PbGetVersionDiff(haveVersion int64) (versionDiff *PBVersionDiff, err error)
 
 	// wait for everything to arrive
 	if roundsAddedP {
-		//log.Logf(l4g.INFO, "pbGetVersionDiff: waiting for all rounds to arrive")
+		//log.Logf(l4g.INFO, "pbGetVersionDiff: waiting for all added rounds to arrive")
 		//<- restGetRoundsDone
 	}
 	if puzzlesAddedP {
-		log.Logf(l4g.INFO, "pbGetVersionDiff: waiting for all puzzles to arrive")
+		log.Logf(l4g.INFO, "pbGetVersionDiff: waiting for all added puzzles to arrive")
 		<- restGetPuzzlesDone
 	}
 	if solversAddedP {
-		//log.Logf(l4g.INFO, "pbGetVersionDiff: waiting for all solvers to arrive")
+		//log.Logf(l4g.INFO, "pbGetVersionDiff: waiting for all added solvers to arrive")
 
 		//<- restGetSolversDone
 	}
 	
 	// diff processing complete
 	log.Logf(l4g.INFO, "pbGetVersionDiff: Version now %v", Version)
+
 	//log.Logf(l4g.DEBUG, "pbGetVersionDiff: have rounds %+v", rounds)
 	log.Logf(l4g.DEBUG, "pbGetVersionDiff: have puzzles %+v", puzzles)
 	//log.Logf(l4g.DEBUG, "pbGetVersionDiff: have solvers %+v", solvers)
-
 	
 	return
 }

@@ -34,7 +34,7 @@ func init() {
 	restGetPuzzlesDone = make(chan int) // must not be buffered!
 	puzzles = make(map[string] *Puzzle, 500) 
 
-	// get puzzles from puzzleChan
+	// get puzzles from puzzleChan and shovel them into puzzles map
 	go func(){
 		for true {
 			puzzle := <-puzzleChan // this will block waiting for new puzzles
@@ -65,7 +65,7 @@ func RestGetPuzzle(name string) {
 	httpRestReqLimiter<-1 // put a token in the limiting channel
 	defer func() {
 		log.Logf(l4g.DEBUG, "RestGetPuzzle: releasing token from fetching %v", name)
-		<-httpRestReqLimiter // take a token out of the limiting channel
+		<-httpRestReqLimiter // release a token from the limiting channel
 	}()
 
 	log.Logf(l4g.DEBUG, "RestGetPuzzle: preparing request for %v", name)

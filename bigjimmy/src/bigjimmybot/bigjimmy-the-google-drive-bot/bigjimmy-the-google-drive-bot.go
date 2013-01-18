@@ -75,6 +75,8 @@ func main() {
 	defer bigjimmybot.CloseDB()
 
 	var err error
+
+	// Connect to Drive
 	// Ensure we have googleClientId and googleClientSecret (from command-line args or DB)
 	if googleClientId == "" {
 		googleClientId, err = bigjimmybot.DbGetConfig("GOOGLE_CLIENT_ID")	
@@ -98,6 +100,7 @@ func main() {
 	bigjimmybot.OpenDrive(googleClientId, googleClientSecret, cacheFile)
 
 
+	// Setup PB REST client
 	// Get pbRestUri if we don't have it
 	if pbRestUri == "" {
 		pbRestUri, err = bigjimmybot.DbGetConfig("PB_REST_URI")
@@ -107,6 +110,7 @@ func main() {
 	}
 	bigjimmybot.SetPbRestUri(pbRestUri)
 
+	// Get huntFolderId (either from command-line, from database, or from Google Drive if we have title)
 	// Ensure we can get huntFolderId (from command-line arg, DB, or via huntFolderTitle)
 	if huntFolderId == "" {
 		huntFolderId, _ = bigjimmybot.DbGetConfig("google_hunt_folder_id")
@@ -130,13 +134,14 @@ func main() {
 				if err.Found > 1 {
 					l4g.Crashf("more than one document matches %v\n", huntFolderTitle)
 				} else if err.Found == 0 {
-					log.Logf(l4g.INFO, "no hunt folder found for %v, creating it\n", huntFolderTitle)
-					var cferr error
-					huntFolderId, cferr = bigjimmybot.CreateFolder(huntFolderTitle)
-					if cferr != nil {
-						l4g.Crashf("could not create hunt folder for %v: %v\n", huntFolderTitle, cferr)
-					}
-					log.Logf(l4g.INFO, "hunt folder created\n")
+				        l4g.Crashf("no hunt folder found for %v\n", huntFolderTitle)
+					//log.Logf(l4g.INFO, "no hunt folder found for %v, creating it\n", huntFolderTitle)
+					//var cferr error
+					//huntFolderId, cferr = bigjimmybot.CreateFolder(huntFolderTitle)
+					//if cferr != nil {
+					//	l4g.Crashf("could not create hunt folder for %v: %v\n", huntFolderTitle, cferr)
+					//}
+					//log.Logf(l4g.INFO, "hunt folder created\n")
 				}
 			} else {
 				l4g.Crashf("an error occurred getting hunt folder ID: %v\n", err)
@@ -153,6 +158,7 @@ func main() {
 	}
 
 
+	// Start ControlServer main loop
 	// Ensure we have httpControlPort and httpControlPath
 	if httpControlPort == "" {
 		httpControlPort, err = bigjimmybot.DbGetConfig("BIGJIMMY_CONTROL_PORT")	
@@ -173,7 +179,6 @@ func main() {
 	} else {
 		log.Logf(l4g.INFO, "Using http_control_port=%v and http_control_path=%v\n", httpControlPort, httpControlPath)
 	}
-
 	bigjimmybot.ControlServer(httpControlPort, httpControlPath)
 }
 
