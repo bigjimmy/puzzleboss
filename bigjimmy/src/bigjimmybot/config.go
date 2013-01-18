@@ -18,16 +18,24 @@ func init() {
 
 var log l4g.Logger
 func SetLog(extLog l4g.Logger) {
+        extLog.Logf(l4g.TRACE, "SetLog(extLog=%v)\n", extLog)
 	log = extLog
 }
 
 var httpRestReqLimiter chan int
 func SetRestReqLimiter(extRestReqLimiter chan int) {
+        log.Logf(l4g.TRACE, "SetRestReqLimiter(extRestReqLimiter=%v)\n", extRestReqLimiter)
 	httpRestReqLimiter = extRestReqLimiter
 }
 
 var pbRestUri string
 func SetPbRestUri(extPbRestUri string) {
+        log.Logf(l4g.TRACE, "SetPbRestUri(extPbRestUri=%v)\n", extPbRestUri)
 	pbRestUri = extPbRestUri
 }
 
+var huntFolderId string
+func SetHuntFolderId (extHuntFolderId string) {
+        log.Logf(l4g.TRACE, "SetHuntFolderId(extHuntFolderId=%v)\n", extHuntFolderId)
+	huntFolderId = extHuntFolderId
+}

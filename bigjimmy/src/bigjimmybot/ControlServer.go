@@ -50,9 +50,10 @@ func startHttpControl() {
 					}
 					
 					if newVersion > Version {
-						// get and process version diff
-						PbGetVersionDiff(Version)
-						
+						// get and process version diff 
+						//go PbGetVersionDiff(Version)
+						// send the version down the channel for processing
+						versionChan <- newVersion
 					}
 					w.WriteHeader(http.StatusOK)
 					fmt.Fprintf(w, "Processed version POST: %+v\n", data)

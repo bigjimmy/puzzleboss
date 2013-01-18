@@ -2,7 +2,7 @@ package bigjimmybot
 
 import (
 	l4g "code.google.com/p/log4go"
-	"github.com/jmcvetta/restclient"
+	"time"
 )
 
 type Puzzle struct {
@@ -16,10 +16,10 @@ type Puzzle struct {
 	Solvers string
 	Cursolvers string
 	Comments string
-	Gssuri string
 	Uri string
-	Wrong_answers string
+	Drive_uri string
 	Drive_id string
+	Wrong_answers string
 }
 
 var puzzles map[string] *Puzzle
@@ -37,20 +37,53 @@ func init() {
 	// get puzzles from puzzleChan and shovel them into puzzles map
 	go func(){
 		for true {
+			log.Logf(l4g.TRACE, "puzzleChan listener: waiting for new puzzle\n")
 			puzzle := <-puzzleChan // this will block waiting for new puzzles
+			log.Logf(l4g.INFO, "puzzleChan listener: got new puzzle %+v\n", puzzle)
+
+			// check if we have a google drive id
+			if puzzle.Drive_id == "" {
+				// don't have Drive_id already
+				
+				// create spreadsheet in Google Drive 
+				// TODO: could be asynchronous?
+				round, ok := rounds[puzzle.Round]
+				if !ok {
+					// perhaps puzzle was added to a non-existant round, or round folder creation is still pending
+					// TODO: what to do?  for now, just wait forever for it, blocking the puzzle creation loop
+					log.Logf(l4g.ERROR, "puzzleChan listener: don't have round for round [%v], delaying creation of puzzle [%v]\n", puzzle.Round, puzzle.Name)
+					for !ok {
+						// set timer
+						roundWaitTimer := time.NewTimer(1 * time.Second)
+						// block on timer channel
+						<-roundWaitTimer.C
+						log.Logf(l4g.INFO, "puzzleChan listener: retrying search for round [%v] in rounds map\n", puzzle.Round)
+						
+						// retry the rounds map
+						round, ok = rounds[puzzle.Round]
+					}
+					// now we should have a round with a Drive_id
+				}
+				roundFolderId := round.Drive_id
+				ssId, ssUri, err := CreatePuzzle(puzzle.Name, roundFolderId)
+				if err != nil {
+					log.Logf(l4g.ERROR, "puzzleChan listener: could not create puzzle [%v] in roundFolderId [%v]: %v\n", puzzle.Name, roundFolderId, err)
+				}
+				log.Logf(l4g.INFO, "puzzleChan listener: created puzzle [%v] with ssId=[%v] ssUri[%v]\n", puzzle.Name, ssId, ssUri)
+				
+				// update local and remote drive_id and drive_uri
+				puzzle.Drive_id = ssId
+				go PbRestPost("puzzles/"+puzzle.Name+"/drive_id", PartPost{Data: ssId})
+				puzzle.Drive_uri = ssUri
+				go PbRestPost("puzzles/"+puzzle.Name+"/drive_uri", PartPost{Data: ssUri})
+			}
+			
+
 			puzzles[puzzle.Name] = puzzle
 			puzzlesArrived++
 			log.Logf(l4g.DEBUG, "puzzleChan listener: %v >= %v ?", puzzlesArrived, PuzzleCount)
 			if puzzlesArrived >= PuzzleCount {
 				restGetPuzzlesDone<-1
-			}
-			
-			// check if we have a google drive id
-			if puzzle.Drive_id == "" {
-				// don't have Drive_id 
-				// TODO: could look it up by name and ensure that it is in the root hunt folder
-				log.Logf(l4g.ERROR, "puzzleChan listener: don't have drive ID for puzzle %v\n", puzzle.Name)
-				continue // skip handlking this pzuzle for now
 			}
 			
 			// start a bigjimmy google drive monitor for this puzzle
@@ -60,35 +93,4 @@ func init() {
 }
 
 
-func RestGetPuzzle(name string) {
-	log.Logf(l4g.DEBUG, "RestGetPuzzle: requesting token to fetch %v", name)
-	httpRestReqLimiter<-1 // put a token in the limiting channel
-	defer func() {
-		log.Logf(l4g.DEBUG, "RestGetPuzzle: releasing token from fetching %v", name)
-		<-httpRestReqLimiter // release a token from the limiting channel
-	}()
-
-	log.Logf(l4g.DEBUG, "RestGetPuzzle: preparing request for %v", name)
-	client := restclient.New()
-	req := restclient.RestRequest{
-		Url:    pbRestUri+"/puzzles/"+name,
-		Method: restclient.GET,
-		Result: new(Puzzle),
-	}
-	log.Logf(l4g.DEBUG, "RestGetPuzzle: sending request for %v", name)
-	status, err := client.Do(&req)
-	if err != nil {
-		log.Logf(l4g.ERROR, "restGetPuzzle: error %v\n", err)
-		// TODO: do something... retry?
-	}
-	log.Logf(l4g.DEBUG, "RestGetPuzzle: received response for %v", name)
-	if status == 200 {
-		// send result on puzzleChan
-		log.Logf(l4g.DEBUG, "RestGetPuzzle: sending puzzle on puzzleChan for %v", name)
-		puzzleChan<-req.Result.(*Puzzle)
-	} else {
-		log.Logf(l4g.ERROR, "RestGetPuzzle: got status %v\n", status)
-		// TODO: do something... retry?
-	}
-}
 

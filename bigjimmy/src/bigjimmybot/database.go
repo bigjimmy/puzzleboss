@@ -30,7 +30,7 @@ func DbGetConfig(key string) (val string, err error) {
 	var valNS sql.NullString
 	err = dbCon.QueryRow("SELECT `val` FROM `config` WHERE `key` = '"+key+"'").Scan(&valNS)
 	if err != nil {
-		log.Logf(l4g.ERROR, "dbGetConfig: SELECT unsuccessful for [key=%v]: %v", key, err)
+		log.Logf(l4g.INFO, "dbGetConfig: SELECT unsuccessful for [key=%v]: %v", key, err)
 		return
 	}
 	if valNS.Valid {
