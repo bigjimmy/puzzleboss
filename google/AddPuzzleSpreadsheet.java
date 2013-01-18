@@ -535,10 +535,8 @@ public class AddPuzzleSpreadsheet {
 		ssService.insert(cellFeedUrl, new CellEntry(1,2,roundString));	
 		ssService.insert(cellFeedUrl, new CellEntry(2,1,"Puzzle:"));
 		ssService.insert(cellFeedUrl, new CellEntry(2,2,puzzleString));	
-		ssService.insert(cellFeedUrl, new CellEntry(3,1,"Puzzle page on TWiki:"));
-		ssService.insert(cellFeedUrl, new CellEntry(3,2,puzzleTwikiUrlString));
-		ssService.insert(cellFeedUrl, new CellEntry(4,1,"Actual Puzzle URL:"));
-		ssService.insert(cellFeedUrl, new CellEntry(4,2,puzzleUrlString));
+		ssService.insert(cellFeedUrl, new CellEntry(3,1,"Actual Puzzle URL:"));
+		ssService.insert(cellFeedUrl, new CellEntry(3,2,puzzleUrlString));
 		ssService.insert(cellFeedUrl, new CellEntry(6,1,"N.B. - This sheet just has links to the puzzle -- please use the other worksheet for work (see below), and feel free to create as many more sheets as you need! (using \"Add Sheet\" button, which is the + symbol below)"));
 		//ssService.insert(cellFeedUrl, new CellEntry(6,4,"If possible, please login to google with your own account before editing this spreadsheet so that we can tell who did what in case we need to ask questions later on!"));
 	    } catch (IOException ioe) {

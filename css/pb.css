@@ -145,15 +145,15 @@
 .pi_answer, .pi_status, .pi_name, .pi_links {
     display: table-cell;
     vertical-align: middle;
+	padding: 0.25ex;
 }
 
 .activesolverpuzzle .pi_answer {
     border: 2px dashed #777;
-    border-right: none;
+    border-left: none;
 }
 .activesolverpuzzle .pi_status {
     border: 2px dashed #777;
-    border-left: none;
     border-right: none;
 }
 .activesolverpuzzle .pi_name {
@@ -164,6 +164,7 @@
 .activesolverpuzzle .pi_links {
     border: 2px dashed #777;
     border-left: none;
+    border-right: none;
 }
 
 .pi_answer{
@@ -195,6 +196,10 @@
 
 .missing_link {
     opacity: 0.2;
+}
+
+.puzzle_popup_dialog{
+	width: 350px;
 }
 
 
