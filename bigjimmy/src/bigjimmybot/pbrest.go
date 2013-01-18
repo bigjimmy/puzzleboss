@@ -2,8 +2,14 @@ package bigjimmybot
 
 import (
 	l4g "code.google.com/p/log4go"
-	"github.com/jmcvetta/restclient"
+	"github.com/bigjimmy/restclient"
 )
+
+var client *restclient.Client
+
+func init() {
+	client = restclient.New()
+}
 
 type PartPost struct {
 	Data string `json:"data"`
@@ -28,7 +34,7 @@ func PbRestPost(path string, data interface{}) {
 	
 	log.Logf(l4g.DEBUG, "PbRestPost: preparing POST to %v\n", path)
 	uri := pbRestUri+"/"+path
-	client := restclient.New()
+	//client := restclient.New()
 	req := restclient.RestRequest{
 		Url:    uri,
 		Method: restclient.POST,
@@ -65,7 +71,7 @@ func RestGetRound(name string) {
 	}()
 
 	log.Logf(l4g.DEBUG, "RestGetRound: preparing request for %v\n", name)
-	client := restclient.New()
+	//client := restclient.New()
 	req := restclient.RestRequest{
 		Url:    pbRestUri+"/rounds/"+name,
 		Method: restclient.GET,
@@ -101,7 +107,7 @@ func RestGetPuzzle(name string) {
 	}()
 
 	log.Logf(l4g.DEBUG, "RestGetPuzzle: preparing request for %v", name)
-	client := restclient.New()
+	//client := restclient.New()
 	req := restclient.RestRequest{
 		Url:    pbRestUri+"/puzzles/"+name,
 		Method: restclient.GET,
@@ -135,7 +141,7 @@ func RestGetSolver(name string) {
 	}()
 
 	log.Logf(l4g.DEBUG, "RestGetSolver: preparing request for %v", name)
-	client := restclient.New()
+	//client := restclient.New()
 	req := restclient.RestRequest{
 		Url:    pbRestUri+"/solvers/"+name,
 		Method: restclient.GET,

@@ -28,7 +28,9 @@ func CloseDB() {
 // Get/Set Config
 func DbGetConfig(key string) (val string, err error) {
 	var valNS sql.NullString
-	err = dbCon.QueryRow("SELECT `val` FROM `config` WHERE `key` = '"+key+"'").Scan(&valNS)
+	row := dbCon.QueryRow("SELECT `val` FROM `config` WHERE `key` = '"+key+"'")
+	//defer row.Close()
+	err = row.Scan(&valNS)
 	if err != nil {
 		log.Logf(l4g.INFO, "dbGetConfig: SELECT unsuccessful for [key=%v]: %v", key, err)
 		return
@@ -50,10 +52,36 @@ func DbSetConfig(key string, val string) (err error) {
 }
 
 
-// Get/Set Activity
-func DbGetActivity(key string) (val string, err error) {
+// Query/Report Activity
+func DbQueryActivity(key string) (val string, err error) {
 	var valNS sql.NullString
-	err = dbCon.QueryRow("SELECT `val` FROM `activity` WHERE `key` = '"+key+"'").Scan(&valNS)
+	row := dbCon.QueryRow("SELECT `val` FROM `activity` WHERE `key` = '"+key+"'")
+	//defer row.Close()
+	err = row.Scan(&valNS)
+	if err != nil {
+		log.Logf(l4g.ERROR, "dbGetActivity: SELECT unsuccessful for [key=%v]: %v", key, err)
+		return
+	}
+	if valNS.Valid {
+		val = valNS.String
+	} else {
+		// null string
+		err = fmt.Errorf("dbGetActivity got NULL value for key %v", key)
+	}
+	return
+}
+func ReportSolverPuzzleActivity(solverName string, puzzleName string, modifiedDate string, revisionId int64) {
+	_, err := dbCon.Exec("INSERT INTO `activity` (`time`, `solver_id`, `puzzle_id`, `source`, `type`, `source_version`) VALUES (?, (SELECT `id` FROM `solver` WHERE `solver`.`name` LIKE ?), (SELECT `id` FROM `puzzle` WHERE `puzzle`.`name` LIKE ?), 'google', 'revise', ?)", modifiedDate, solverName, puzzleName, revisionId)
+	if err != nil {
+		log.Logf(l4g.ERROR, "ReportSolverPuzzleActivity: INSERT unsuccessful for solverName=[%v] puzzleName=[%v] modifiedDate=[%v] revisionId=[%v]: %v", solverName, puzzleName, modifiedDate, revisionId, err)
+	}
+	return
+}
+func DbReportActivity(key string) (val string, err error) {
+	var valNS sql.NullString
+	row := dbCon.QueryRow("SELECT `val` FROM `activity` WHERE `key` = '"+key+"'")
+	//defer row.Close()
+	row.Scan(&valNS)
 	if err != nil {
 		log.Logf(l4g.ERROR, "dbGetActivity: SELECT unsuccessful for [key=%v]: %v", key, err)
 		return
