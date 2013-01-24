@@ -5,15 +5,15 @@ define([
 	   "dojo/_base/array",
 	   "dojo/_base/window",
 	   "dijit/Dialog", 
-	   "dijit/form/Button", 
-	   "dojo/dnd/Source",
+	   "dijit/form/Button",
+	   "dijit/form/Select", 
 	   "dojo/topic",
 	   "dojo/dom",
 	   "dojo/dom-construct",
 	   "dojo/dom-class",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, win, dialog, formbutton, Source, topic, dom, domconstruct, domclass) {
+    function(pbmrc, parser, connect, array, win, dialog, formbutton, formselect, topic, dom, domconstruct, domclass) {
 
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -32,6 +32,8 @@ define([
 	var roundboxes = new Array();
 
 	var solved_answer_filter='*';
+	
+	var puzzle_popup_dialog = new dialog({class: "puzzle_popup_dialog", id: "puzzle_popup_dialog"});
 
 	function init_complete_cb() {
 	    // remove the little waitDiv notice
@@ -137,20 +139,20 @@ define([
   	        var links_span = domconstruct.create("span",{id: "pi_links_span_"+name, class: "pi_links"});
 
 	        // add google spreadsheets link if it is not null
-   	        var gss_uri = encodeURI(puzzstore.getValue(item,"gssuri"));
-	        var gss_link = domconstruct.create("a",{id: "pi_links_gss_"+name, class: "pi_gss_link", target: "_gss", innerHTML: "<img class=\"pi_icon\" src=\"../images/spreadsheet.png\" title=\"Spreadsheet\" alt=\"spreadsheet\">"});
-	        if(gss_uri != "") {
-		    gss_link.href = gss_uri;
+   	        var drive_uri = encodeURI(puzzstore.getValue(item,"drive_uri"));
+	        var drive_link = domconstruct.create("a",{id: "pi_links_drive_"+name, class: "pi_drive_link", target: "_drive", innerHTML: "<img class=\"pi_icon\" src=\"../images/spreadsheet.png\" title=\"Spreadsheet\" alt=\"spreadsheet\">"});
+	        if(drive_uri != "") {
+		    drive_link.href = drive_uri;
 		} else {
-		    domclass.add(gss_link,"missing_link");
+		    domclass.add(drive_link,"missing_link");
 		}
-	        links_span.appendChild(gss_link);
+	        links_span.appendChild(drive_link);
 
 	        // add puzzle link if it is not null
- 	        var puzz_uri = encodeURI(puzzstore.getValue(item,"uri"));
+ 	        var puzzle_uri = encodeURI(puzzstore.getValue(item,"puzzle_uri"));
 	        var puzz_link = domconstruct.create("a",{id: "pi_links_puzz_"+name, class: "pi_puzz_link", target: "_puzz", innerHTML: "<img class=\"pi_icon\" src=\"../images/puzzle.png\" title=\"Puzzle\" alt=\"puzzle\">"});
-	        if(puzz_uri != "") {
-		    puzz_link.href = puzz_uri;
+	        if(puzzle_uri != "") {
+		    puzz_link.href = puzzle_uri;
 		} else {
 		    domclass.add(puzz_link,"missing_link");
 		}
@@ -183,6 +185,24 @@ define([
 		        set_status("puzzleinfo_div_"+name, puzzstore.getValue(item,"status"));
 		} else if ( attribute == "answer"){
 			dom.byId("pi_answer_span_"+name).innerHTML=newValue;
+		} else if ( attribute == "drive_uri"){
+		    drive_link = dom.byId("pi_links_drive_"+name);
+		    drive_uri = newValue;
+	            if(drive_uri != "") {
+			drive_link.href = drive_uri;
+			domclass.remove(drive_link,"missing_link");
+		    } else {
+			domclass.add(drive_link,"missing_link");
+		    }
+		} else if ( attribute == "puzzle_uri"){
+		    puzz_link = dom.byId("pi_links_puzz_"+name);
+		    puzzle_uri = newValue;
+	            if(puzzle_uri != "") {
+			puzz_link.href = puzzle_uri;
+			domclass.remove(puzz_link,"missing_link");
+		    } else {
+			domclass.add(puzz_link,"missing_link");
+		    }
 		}
 	}
 	
@@ -246,9 +266,7 @@ define([
 	    }
 	}
 	
-	function show_puzzle_dialog(puzz){
-		var puzzDialog;
-		
+	function show_puzzle_dialog(puzz){		
 		if (puzz == ""){
 			var goodnight_div = domconstruct.create("div", {innerHTML: "Enjoy your well-earned rest, "+remote_user+"!<br>"});
 			goodnight_div.appendChild(new formbutton({
@@ -256,10 +274,8 @@ define([
 				type: "submit",
 				onClick: function (){location.href=encodeURI("https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo="+location.href);}}).domNode
 			);
-			puzzDialog = new dialog({
-				title: "Sleep well.",
-				content: goodnight_div
-			});
+			puzzle_popup_dialog.set("title", "Sleep well.");
+			puzzle_popup_dialog.set("content", goodnight_div);
 		}else{
 			var puzzinfo_div = domconstruct.create("div");
 				
@@ -283,9 +299,32 @@ define([
 					});}, 
 					showLabel: true
 				}).domNode);
-				puzzstore.fetchItemByIdentity({
+			
+			var status_dd_div = domconstruct.create("div", {innerHTML: "Update status: "});		
+			puzzinfo_div.appendChild(status_dd_div);
+				
+			//puzzle specific jazz slurped out from the store:	
+			puzzstore.fetchItemByIdentity({
 					identity: puzz,
 					onItem: function(item){
+						var status_dd_select = new formselect({
+							options: [
+							{value: 'New', label: 'New'},
+							{value: 'Being worked', label: 'Being worked'},
+							{value: 'Needs eyes', label: 'Needs eyes'},
+							{value: 'Solved', label:'Solved'}
+							],
+							onChange: function (){
+									puzzstore.setValue(item,"status",status_dd_select.get("value"));
+									//this would be nice, but it gets called immediately below
+									//and closes the popup right away, so need some additional logic
+									//puzzle_popup_dialog.hide();
+							}
+						});	
+						status_dd_div.appendChild(status_dd_select.domNode);
+						
+						status_dd_select.set("value",puzzstore.getValue(item,"status"));
+
 						//put spaces between solver names to wrap in dialog
 						puzzinfo_div.appendChild(domconstruct.create("p",
 							{innerHTML: "Current solvers: "+ puzzstore.getValue(item,"cursolvers").split(",").join(", ")}
@@ -294,15 +333,12 @@ define([
 							{innerHTML: "All historical solvers: "+ puzzstore.getValue(item,"solvers").split(",").join(", ")}
 						));
 					}
-				})
+			})
 				
-				puzzDialog = new dialog({
-					title: puzz,
-					content: puzzinfo_div,
-					class: "puzzle_popup_dialog"
-				});
+			puzzle_popup_dialog.set("title", puzz);
+			puzzle_popup_dialog.set("content", puzzinfo_div);
 		}
-		puzzDialog.show();
+		puzzle_popup_dialog.show();
 	}
 
 	function roundlist_update_cb(my_roundlist) {
@@ -424,21 +460,25 @@ define([
 	
 	var is_addpuzzle_patt = /^puzzles\/[^\/]*\/$/;
 	var is_any_rounds_patt = /^rounds/;
-	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers)$/;
+	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers|puzzle_uri|drive_uri)$/;
 	var is_any_version_patt = /^version/;
 	function version_diff_filter(diff){
 	    // N.B. all pbmrcs must listen to version!
-	    pbmrc.pb_log("version_diff_filter()")
-	    return array.filter(diff, function(item){
+	    pbmrc.pb_log("version_diff_filter()", 2);
+ 	    pbmrc.pb_log("version_diff_filter: before filtering: diff = ", 3);
+	    pbmrc.pb_log(diff, 3);
+	    filtered_diff = array.filter(diff, function(item){
 				    remote_user_regex_string = "^solvers\/"+remote_user;
 				    is_solver_remote_user = new RegExp(remote_user_regex_string);
-				    pbmrc.pb_log("version_diff_filter: item="+item+" is_solver_remote_user.test(item)="+is_solver_remote_user.test(item)+" regex string="+remote_user_regex_string,10);
 				    return (is_any_version_patt.test(item) ||
 					    is_addpuzzle_patt.test(item) || 
 					    is_any_rounds_patt.test(item) || 
 					    is_puzzleinteresting_patt.test(item) || 
 					    is_solver_remote_user.test(item));
 				});
+ 	    pbmrc.pb_log("version_diff_filter: after filtering: filtered_diff = ", 3);
+	    pbmrc.pb_log(filtered_diff, 3);
+	    return filtered_diff;
 	}
 	
 	return {
