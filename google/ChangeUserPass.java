@@ -34,18 +34,18 @@ public class ChangeUserPass {
     static String domainString = "stormynight.org";
     static String versionString = "canadia-ChangeUserPass-0.2";
     static String commandlineString = "java ChangeUserPass";
-    static String usernameString = "BigJimmy";
-    static String passwordString = "sexfantasy";
+    static String usernameString = "";
+    static String passwordString = "";
     static String hashedPasswordString = "";
 
     public static void main(String[] args) {
 	// Get command-line arguments
 	Options opt = new Options();
-	opt.addOption(OptionBuilder.withLongOpt("username").withArgName("USERNAME").hasArg().isRequired().withDescription("Username to create.").create("u"));
-	opt.addOption(OptionBuilder.withLongOpt("domain").withArgName("DOMAIN").hasArg().isRequired().withDescription("Domain in which to create user.").create("d"));
-	opt.addOption(OptionBuilder.withLongOpt("password").withArgName("PASSWORD").hasArg().withDescription("Initial password for user.").create("p"));
-	opt.addOption(OptionBuilder.withLongOpt("passwordhash").withArgName("PASSWORD_HASH").hasArg().withDescription("Initial password for user (SHA-1 hash).").create("ph"));
-	opt.addOption(OptionBuilder.withLongOpt("adminuser").withArgName("ADMINUSER").hasArg().isRequired().withDescription("Administrator username (with @domain).").create("au"));
+	opt.addOption(OptionBuilder.withLongOpt("username").withArgName("USERNAME").hasArg().isRequired().withDescription("Username for password change.").create("u"));
+	opt.addOption(OptionBuilder.withLongOpt("domain").withArgName("DOMAIN").hasArg().isRequired().withDescription("Domain to which the user belongs.").create("d"));
+	opt.addOption(OptionBuilder.withLongOpt("password").withArgName("PASSWORD").hasArg().withDescription("Password for user.").create("p"));
+	opt.addOption(OptionBuilder.withLongOpt("passwordhash").withArgName("PASSWORD_HASH").hasArg().withDescription("Password for user (SHA-1 hash).").create("ph"));
+	opt.addOption(OptionBuilder.withLongOpt("adminuser").withArgName("ADMINUSER").hasArg().isRequired().withDescription("Administrator username (including @domain).").create("au"));
 	opt.addOption(OptionBuilder.withLongOpt("adminpass").withArgName("ADMINPASS").hasArg().isRequired().withDescription("Administrator password.").create("ap"));
 	try {
 	    BasicParser parser = new BasicParser();
@@ -64,21 +64,9 @@ public class ChangeUserPass {
 	    System.err.println( "Parsing failed.  Reason: " + pe.getMessage() );
 	    System.exit(2);
 	}
-	
-	/*
-	Logger httpLogger = Logger.getLogger("com.google.gdata.client.http.HttpGDataRequest");
-	httpLogger.setLevel(Level.ALL);
-	Logger xmlLogger = Logger.getLogger("com.google.gdata.util.XmlParser");
-	xmlLogger.setLevel(Level.ALL);
-	ConsoleHandler logHandler = new ConsoleHandler();
-	logHandler.setLevel(Level.ALL);
-	httpLogger.addHandler(logHandler);
-	xmlLogger.addHandler (logHandler);
-	*/
-	
 
-	// Authenticate
-	System.out.println("Attempting to authenticate as user " + adminUserString);
+	// Authenticate as admin user
+	System.out.println("Attempting to authenticate as admin user " + adminUserString);
 	AppsForYourDomainClient client = null;
 	try {
 	    client = new AppsForYourDomainClient(adminUserString, adminPassString, domainString);
@@ -112,14 +100,19 @@ public class ChangeUserPass {
 
 	// change user password
 	if(hashedPasswordString == null || hashedPasswordString.length() == 0) { 
-	    System.out.println("Using plaintext password.");
-	    existingUserEntry.getLogin().setPassword(passwordString);
+	    if(passwordString.length() > 0) {
+		System.out.println("Using plaintext password.");
+		existingUserEntry.getLogin().setPassword(passwordString);
+	    } else {
+		// password not specified in any form, refuse to set
+		System.err.println( "Password was not specified, refusing to change to null password.");
+		System.exit(24);
+	    }
 	} else {
 	    System.out.println("Using password hash.");
 	    existingUserEntry.getLogin().setPassword(hashedPasswordString);
 	    existingUserEntry.getLogin().setHashFunctionName("SHA-1");
 	}
-	
         UserEntry updatedUserEntry = null;
 	try {
 	    updatedUserEntry = client.updateUser(usernameString, existingUserEntry);
@@ -133,7 +126,6 @@ public class ChangeUserPass {
 	    se.printStackTrace();
             System.exit(33);
 	}
-	
 	System.out.println("User password changed.");
 	System.exit(0);
     }
