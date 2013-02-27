@@ -5,16 +5,49 @@ import (
 	"code.google.com/p/google-api-go-client/drive/v2"
 	"fmt"
 	"net/http"
+	"time"
 	l4g "code.google.com/p/log4go"
 )
 
+var oauthConfig *oauth.Config
+var oauthTransport *oauth.Transport
+var oauthClient *http.Client
 var driveSvc *drive.Service
+
 var googleWriterDomain string
+var GcacheFile string
+var GgoogleClientId string
+var GgoogleClientSecret string
+
+var resetSingleton chan int
+
+func init() {
+        resetSingleton = make(chan int, 1)
+}
+
+func resetOauthClient() {
+	log.Logf(l4g.INFO, "resetOauthClient()\n")
+	select {
+	case resetSingleton <- 1: {
+			log.Logf(l4g.INFO, "resetOauthClient: attempting to reopen drive client\n")
+			OpenDrive(GgoogleClientId, GgoogleClientSecret, googleWriterDomain, GcacheFile)
+			time.Sleep(5 * time.Second)
+			<- resetSingleton
+		}
+	default : {
+			
+		}
+	}
+}
 
 func OpenDrive(googleClientId string, googleClientSecret string, googleDomain string, cacheFile string) {
 	googleWriterDomain = googleDomain
+	GcacheFile = cacheFile
+	GgoogleClientId = googleClientId
+	GgoogleClientSecret = googleClientSecret
+	
 	// Settings for Google authorization.
-	config := &oauth.Config{
+	oauthConfig := &oauth.Config{
 		ClientId:     googleClientId,
 		ClientSecret: googleClientSecret,
 		Scope:        "https://www.googleapis.com/auth/drive",
@@ -24,34 +57,36 @@ func OpenDrive(googleClientId string, googleClientSecret string, googleDomain st
 		TokenCache:   oauth.CacheFile(cacheFile),
 	}
 
-	// Set up a Transport using the config.
-	transport := &oauth.Transport{
-		Config:    config,
+	// Set up a Transport using the oauthConfig.
+	oauthTransport = &oauth.Transport{
+		Config:    oauthConfig,
 		Transport: http.DefaultTransport,
 	}
 
 	// Try to pull the token from the cache; if this fails, we need to get one.
-	token, err := config.TokenCache.Token()
+	token, err := oauthConfig.TokenCache.Token()
 	if err != nil {
 		// Get an authorization code from the user
-		authUrl := config.AuthCodeURL("state")
+		authUrl := oauthConfig.AuthCodeURL("state")
 		log.Logf(l4g.INFO, "Go to the following link in your browser: %v\n", authUrl)
 
 		// Read the code, and exchange it for a token.
 		log.Logf(l4g.INFO, "Enter verification code: ")
 		var code string
 		fmt.Scanln(&code)
-		token, err = transport.Exchange(code)
+		token, err = oauthTransport.Exchange(code)
 		if err != nil {
 			l4g.Crashf("An error occurred exchanging the code: %v\n", err)
 		}
-		log.Logf(l4g.INFO, "Token is cached in %v\n", config.TokenCache)
+		log.Logf(l4g.INFO, "Token is cached in %v\n", oauthConfig.TokenCache)
 	}
 
-	transport.Token = token
+	oauthTransport.Token = token
+
+	oauthClient = oauthTransport.Client()
 
 	// Create a new authorized Drive client.
-	driveSvc, err = drive.New(transport.Client())
+	driveSvc, err = drive.New(oauthClient)
 	if err != nil {
 		l4g.Crashf("An error occurred creating Drive client: %v\n", err)
 	}
@@ -87,6 +122,45 @@ func GetChildFolderIdByTitle(folderTitle string) (parentFolderId string, folderI
 	}
 	folderId = filelist.Items[0].Id
 	return 
+}
+
+type Revision struct {
+	Id string
+	LastModifyingUserName string
+	ModifiedDate string
+}
+
+func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
+	// fields := "items/id,items/modifiedDate,items/lastModifyingUserName"
+
+	// FIXME: this call seems to leak goroutines!!!!
+	revisionList, err := driveSvc.Revisions.List(puzzleId).Do()
+
+	if err != nil {
+		log.Logf(l4g.ERROR, "GetPuzzleRevisions: an error occurred getting revisions list for puzzleId [%v]: %v\n", puzzleId, err)
+//		resetOauthClient()
+		return
+	}
+	revisions = make([]Revision, 0, 100)
+	for _, rev := range revisionList.Items { 
+		var revision Revision
+		revision.Id = rev.Id
+		revision.LastModifyingUserName = rev.LastModifyingUserName
+		revision.ModifiedDate = rev.ModifiedDate
+		revisions = append(revisions, revision)
+	}
+	revisionList = nil
+	return revisions, err
+}
+
+func GetNewPuzzleComments(puzzleId string) (commentList *drive.CommentList, err error) {
+	commentList, err = driveSvc.Comments.List(puzzleId).Do()
+	if err != nil {
+		log.Logf(l4g.ERROR, "GetPuzzleComments: an error occurred getting comments list for puzzleId [%v]\n", puzzleId)
+		return
+	}
+	
+	return
 }
 
 func CreateHunt(huntTitle string) (huntFolderId string, huntFolderUri string, err error) {
@@ -199,3 +273,4 @@ type ListError struct {
 func (nfe *ListError) Error() string {
 	return fmt.Sprintf("filelist query for [%v] returned %v items\n", nfe.Query, nfe.Found)
 }
+
