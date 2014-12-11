@@ -9,6 +9,9 @@ if [ -z "$deleteuser" ]; then
     echo "please specify user to delete"
 else
 
+    echo "removing user $deleteuser from HuntTeam LDAP group"
+    /canadia/puzzlebitch/admin-tools/ldapdeleteuserfromgroup $deleteuser HuntTeam
+
     echo "deleting user $deleteuser"
     deletedn=`ldapsearch -xLLL -b "${REGISTER_LDAP_DC}" uid=$deleteuser dn|cut -d':' -f2|head -n 1|perl -pi -e 's/[[:space:]*]//g'`
     if [ -z "$deletedn" ]; then
@@ -23,10 +26,10 @@ else
     (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${GOOGLE_DOMAIN} -a ${GOOGLE_ADMIN_PASS})
 
 
-    twikitopic=/canadia/twiki/data/Main/$deleteuser.txt
-    echo "deleting twiki topic file $twikitopic"
-    rm $twikitopic
-    rm $twikitopic,v
+#    twikitopic=/canadia/twiki/data/Main/$deleteuser.txt
+#    echo "deleting twiki topic file $twikitopic"
+#    rm -rf $twikitopic
+#    rm -rf $twikitopic,v
 
 fi
 
