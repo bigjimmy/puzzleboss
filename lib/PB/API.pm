@@ -14,7 +14,8 @@ use Net::LDAP;
 use DBI;
 use SQL::Yapp;
 
-my $dbh = DBI->connect('DBI:mysql:database=puzzlebitch'.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
+my $dbh;
+#my $dbh = DBI->connect('DBI:mysql:database=puzzlebitch'.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
 
 my $remoteuser = $ENV{'REMOTE_USER'} || "unknown user";
 
@@ -176,7 +177,7 @@ sub _add_puzzle_db {
 	_send_data_version();
 	return(1);
     } else {
-	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr."\n",0);
+	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri\n",0);
 	return(-1);
     }
 }
@@ -254,9 +255,9 @@ sub add_puzzle {
     my $templatetopic = shift;
 
     #clean up id
-    $id =~ s/^.+\:\ //g;
+    $id =~ s/[[:space:]][-][-][[:space:]].+$//g;
     $id =~ s/\W//g;
-    $id =~ s/\-//g;
+#    $id =~ s/\-//g;
     $id =~ s/\_//g;
     $id =~ s/\ //g;
 
@@ -1280,7 +1281,14 @@ sub ldap_add_user {
     
 	if($result->code() != 0 && !($result->error_desc() =~ m/Already exists/)) {
 		return -1;
-	} 
+	}
+
+        my $resultgrp => $ldap->modify( "cn=HuntTeam,ou=groups,$PB::Config::REGISTER_LDAP_DC", 
+	add => {
+        	memberUid	=> $username
+		}
+	);
+
 	return 0;
 }
 
