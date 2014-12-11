@@ -39,7 +39,7 @@ sub registration : StartRunmode {
     }
     
     my $entriesok = 1;
-    if(! ($q->param('firstname') && $q->param('lastname') && $q->param('email') && $q->param('password') && $q->param('password2')) ) {
+    if(! ($q->param('firstname') && $q->param('lastname') && $q->param('email') && $q->param('password') && $q->param('password2') && $q->param('username') )) {
 	$entriesok = 0;
     }
     
@@ -55,9 +55,9 @@ sub registration : StartRunmode {
     }
     
     # set username
-    if($q->param('firstname') && $q->param('lastname')) {
-	$q->param('username', $q->param('firstname').$q->param('lastname'));
-    }
+    #if($q->param('firstname') && $q->param('lastname')) {
+    #	$q->param('username', $q->param('firstname').$q->param('lastname'));
+    #    }
     
     if($entriesok) {
 	$nextrm = "validation";
@@ -67,9 +67,9 @@ sub registration : StartRunmode {
 	    $q->dt."First Name:".$q->dd.$q->textfield(-name=>'firstname', -readonly => 'readonly').
 	    $q->dt."Last Name:".$q->dd.$q->textfield(-name=>'lastname', -readonly => 'readonly').
 	    $q->dt."E-mail Address:".$q->dd.$q->textfield(-name=>'email', -size=>50, -readonly => 'readonly').
+	    $q->dt."Username:".$q->dd.$q->textfield(-name => 'username', -readonly => 'readonly').
 	    $q->dt."Password:".$q->dd.$q->password_field(-name=>'password', -readonly => 'readonly').
 	    $q->dt."Re-enter Password:".$q->dd.$q->password_field(-name=>'password2', -readonly => 'readonly').
-	    $q->dt."Username (read-only):".$q->dd.$q->textfield(-name => 'username', -readonly => 'readonly').
 	    $q->p.$q->submit(-name=>'verifyregister', value=>'Everything looks good. Proceed with registration.').
 	    $q->p.$q->submit(-name=>'changes', value=>'I want to make changes, please!').
 	    $q->hidden(-name => 'rm', -value => $nextrm, -override=>1).
@@ -81,10 +81,10 @@ sub registration : StartRunmode {
 	    $q->dt."First Name:".$q->dd.$q->textfield(-name=>'firstname').
 	    $q->dt."Last Name:".$q->dd.$q->textfield(-name=>'lastname').
 	    $q->dt."E-mail Address:".$q->dd.$q->textfield(-name=>'email').
+	    $q->dt."Username:".$q->dd.$q->textfield(-name=>'username').
 	    $q->dt."Password:".$q->dd.$q->password_field(-name=>'password').
 	    $q->dt."Re-enter Password:".$q->dd.$q->password_field(-name=>'password2').
-	    $q->p.$q->submit(-name=>'register', -value=>'Register for an account').
-	    $q->hidden(-name => 'username').
+	    $q->p.$q->submit(-name=>'register', -value=>'Register new account').
 	    $q->hidden(-name => 'rm', -value => $nextrm, -override=>1).
 	    $q->end_form;
     }
@@ -114,11 +114,11 @@ sub validation : Runmode {
 	# good data, ready to go!
 	# except first we should untaint the data and protect ourselves one more time
 	my $errmsg = "";
-	$q->param('firstname') =~ m/^([A-Z][a-zA-Z]+)$/ or $errmsg.="Bad firstname. ";
+	$q->param('firstname') =~ m/^([a-zA-Z]+)$/ or $errmsg.="Bad firstname. ";
 	my $firstname = $1;
-	$q->param('lastname') =~ m/^([A-Z][a-zA-Z]*)$/ or $errmsg.="Bad lastname. ";
+	$q->param('lastname') =~ m/^([a-zA-Z]+)$/ or $errmsg.="Bad lastname. ";
 	my $lastname = $1;
-	$q->param('username') =~ m/^([A-Z][a-zA-Z]+[A-Z][a-zA-Z]*)$/ or $errmsg.="Bad username. ";
+	$q->param('username') =~ m/^([a-zA-Z0-9]+)$/ or $errmsg.="Bad username. ";
 	my $username = $1;
 	# email address first part chars: http://www.remote.org/jochen/mail/info/chars.html
 	# hostname chars RFC1123
@@ -133,9 +133,9 @@ sub validation : Runmode {
 	if($password ne $password2) {
 	    $errmsg .= "Password mismatch.";
 	}
-	if($username ne $firstname.$lastname) {
-	    $errmsg .= "Name/Username mismatch.";
-	}
+	#if($username ne $firstname.$lastname) {
+	#    $errmsg .= "Name/Username mismatch.";
+	#}
 	if($errmsg ne "") {
 	    $errormessage =  $errmsg;
 	    return $self->forward('error');
@@ -160,7 +160,7 @@ sub validation : Runmode {
 	my $matchcount = $result->count();
 
 	if($matchcount > 0) {
-	    $html .= "Username $username already exists!  If you have lost your password, please see the puzzlebitch or Joshua Randall to get it reset. ";
+	    $html .= "Username $username already exists!  If you have lost your password, please email someone on the team to get it reset. ";
 	} else {
 	    # username does not already exist, check for email
 	    my $emailresult = $ldap->search( # perform a search
@@ -222,7 +222,7 @@ EOB
 			$q->hidden(-name => 'rm', -value => 'confirm_validation', -override=>1).
 			$q->end_form;
 		} else {
-		    $html .= $q->p."A confirmation problem with this site has prevented us from sending you the confirmation email. Please contact puzzlebitch or Joshua Randall for assistance. [$Mail::Sendmail::error]";
+		    $html .= $q->p."A confirmation problem with this site has prevented us from sending you the confirmation email. Please contact puzzlebitch or Benjamin OConnor for assistance. [$Mail::Sendmail::error]";
 		}
 
 	    }
@@ -290,12 +290,12 @@ sub confirm_validation : Runmode {
     }
     
     # now add to twiki
-    my $twiki_rval = PB::API::twiki_add_user($username, $firstname, $lastname, $email, $password);
-    if($twiki_rval != 0) { 
-	$html.=$q->p."Error adding user to TWiki (this may just be because your UserTopic already existed)";
-    } else {
-	$html.=$q->p.'User added to <a href="$PB::Config::TWIKI_URI">TWiki</a>.';
-    }
+    #my $twiki_rval = PB::API::twiki_add_user($username, $firstname, $lastname, $email, $password);
+    #if($twiki_rval != 0) { 
+	#$html.=$q->p."Error adding user to TWiki (this may just be because your UserTopic already existed)";
+    #} else {
+	#$html.=$q->p.'User added to <a href="$PB::Config::TWIKI_URI">TWiki</a>.';
+    #}
 
     my $pbdb_rval = PB::API::add_solver($username);
     if(!($pbdb_rval < 0)) {
@@ -304,7 +304,8 @@ sub confirm_validation : Runmode {
 	$html.=$q->p."Error adding user to solver database.";
     }
     
-    $html.=$q->p.'If all was successful, you should now be able to login to the TWiki: <a href="'.$PB::Config::TWIKI_URI.'">'.$PB::Config::TWIKI_URI.'</a>';
+    #$html.=$q->p.'If all was successful, you should now be able to login to the TWiki: <a href="'.$PB::Config::TWIKI_URI.'">'.$PB::Config::TWIKI_URI.'</a>';
+    $html.=$q->p.'If all was succesful, you should now be able to login: <a href="http://'.$PB::Config::PB_DOMAIN_NAME.'">here</a>';
     return($html);
 }
 
@@ -404,7 +405,6 @@ sub validate_registration_form_data {
 
     return($html);
 }
-
 
 
 1;
