@@ -66,7 +66,7 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
     # safety check and untaint vars
     $puzzid =~ m/^([A-Z][[:alnum:]]*)$/;
     $puzzid = $1;
-    $round =~ m/^([A-Z][[:alnum:]]*)$/;
+    $round =~ m/^([A-Z][[:alnum:]-]*)$/;
     $round = $1;
     $template =~ m/^([A-Z][[:alnum:]]*)$/;
     $template = $1;

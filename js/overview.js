@@ -15,6 +15,7 @@ define([
        ], 
     function(pbmrc, parser, connect, array, win, dialog, formbutton, formselect, topic, dom, domconstruct, domclass) {
 
+	var wall; // Masonry element
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
 	var solverstore; // IFWS which will be returned from pbmrc.pb_init()
 	var remote_user;
@@ -167,6 +168,8 @@ define([
 
 	        set_status(puzzinfo, puzzstore.getValue(item,"status"));
 		roundboxes[puzzstore.getValue(item,"round")].appendChild(puzzinfo);
+
+	    wall.reload(); //may not need this for adding puzzles
 	}
 	
 	function remove_puzz_ui(item){
@@ -359,6 +362,7 @@ define([
 	        meta_container.appendChild(meta_answer);
 	        roundboxes[roundname].appendChild(meta_container);
 		summary.appendChild(roundboxes[roundname]);	
+	    wall.reload();
 	}
 
 	
@@ -504,6 +508,12 @@ define([
 		    
 		    puzzstore = ret.puzzstore;
 		    solverstore = ret.solverstore;
+
+	pbmrc.pb_log("starting Masonry");
+        wall = new Masonry ( document.getElementById('summary_layout'), { columnWidth: 600 });
+	pbmrc.pb_log("have Masonry:");
+        pbmrc.pb_log(wall);
+
 
 		},	
 	    

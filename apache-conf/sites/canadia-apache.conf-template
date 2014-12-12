@@ -50,7 +50,13 @@
 	</Directory>
 	
 	Alias /stats /var/www/webalizer
+        <Directory "/var/www/webalizer">
+	    Options FollowSymLinks
+	    Order Allow,Deny
+	    Allow from all
+	</Directory>
 	
+
 	# redirect / to landing page
 	RewriteEngine on
 	RewriteRule ^/$ /twiki/bin/view/MH2013/WebHome [R,L]

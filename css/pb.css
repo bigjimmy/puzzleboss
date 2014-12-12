@@ -119,7 +119,16 @@
 
 
 .round_container{
+    width: 530px;
+    margin: 10px;
+    float: left;
     border:1px solid #aaa;
+    padding: 1ex;
+    background: #fff;
+    vertical-align:top;
+}
+
+.round_container_old{
     padding: 1ex;
     margin: 0.5ex;
     background: #fff;
