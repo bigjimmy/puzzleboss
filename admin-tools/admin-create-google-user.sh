@@ -7,7 +7,7 @@ domain=`cat domain`
 ldapdc=`cat ldapdc`
 
 if [[ -n "${username}" ]]; then
-    ldif=`ldapsearch -x -D cn=admin,dc=stormynight,dc=org -w ${admin_pass} -LLL -b "dc=${ldapdc}" uid=${username} uid sn givenName userPassword`
+    ldif=`ldapsearch -x -D cn=admin,dc=wind-up-birds,dc=org -w ${admin_pass} -LLL -b "dc=${ldapdc}" uid=${username} uid sn givenName userPassword`
     if [[ -n "${ldif}" ]]; then
 	echo "ldif:${ldif}"
 	googleargs0=`echo "${ldif}" | awk 'BEGIN {FS=": ";} {map[$1]=$2;} END {print "--username \""map["givenName"]map["sn"]"\" --firstname \""map["givenName"]"\" --lastname \""map["sn"]"\"\t"map["userPassword:"]"";}'`
