@@ -47,10 +47,10 @@ Content-type: text/html
     \@import "$PB::Config::PB_CSS_REL/pb.css";
 	</style>
     <script type="text/javascript" src="$PB::Config::METEOR_JS_URI"></script>
+    <script type="text/javascript" src="$PB::Config::DOJO_ROOT/masonry.min.js"></script>
     <script type="text/javascript" src="$PB::Config::DOJO_ROOT/dojo/dojo.js"
             data-dojo-config="async: true, parseOnLoad: true"></script>
 	<script type="text/javascript">
-
 		var my_pbmrc;
 		var my_overview;
 		require({
@@ -64,10 +64,10 @@ Content-type: text/html
 			overview.my_init("$remote_user");
 		});	
 
-	</script>
+ 	</script>
 </head>
 <body class="tundra">
-    <h1>$title - <a href="/twiki/bin/view" target="_twiki">TWiki</a></h1>
+    <h1>$title - <a href="/wiki">Wiki</a></h1>
     <div id="adminDiv">Hello, $remote_user. 
       <span id="solver_active_p" class="solver_inactive">
         <span id="no_current_puzzle">I don't think you are currently working on anything.</span>
