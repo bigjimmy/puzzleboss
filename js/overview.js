@@ -297,6 +297,7 @@ define([
 								//enable_store_ui_handlers()
 							}else{
 								//TODO: if can't find this should alert the user!
+								pbmrc.pb_log("solverstore.fetchitembyitentity for identity "+remote_user+" is null!\n",2);
 							}
 						}
 					});}, 
