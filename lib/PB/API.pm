@@ -14,8 +14,8 @@ use Net::LDAP;
 use DBI;
 use SQL::Yapp;
 
-my $dbh;
-#my $dbh = DBI->connect('DBI:mysql:database=puzzlebitch'.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
+#my $dbh;
+my $dbh = DBI->connect('DBI:mysql:database=puzzlebitch'.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
 
 my $remoteuser = $ENV{'REMOTE_USER'} || "unknown user";
 
@@ -164,6 +164,8 @@ sub _add_puzzle_db {
     my $puzzle_uri = shift;
     my $drive_uri = shift;
 
+    debug_log("add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri drive_uri=$drive_uri \n", 4);
+
     # convert drive_uri to null (undef) if not set
     if($drive_uri eq '') {
 	$drive_uri = undef;
@@ -175,6 +177,7 @@ sub _add_puzzle_db {
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
 	_send_data_version();
+	debug_log("_add_puzzle_db: dbh->do returned success: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri\n",4);
 	return(1);
     } else {
 	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri\n",0);
@@ -198,12 +201,12 @@ sub _add_puzzle_google {
     debug_log("add_puzzle: have google folder $folderuri\n",0);
     
     # create google document for this puzzle
-    #debug_log("add_puzzle: creating google document\n",0);
-    #$google = _google_create_document($id, $round, $PB::Config::TWIKI_WEB);
-    #my $gduri = $google->{'document'};
-    #debug_log("add_puzzle: have google document $gduri\n",0);
-    #my $gdfolderuri = $google->{'subfolder'};
-    #debug_log("add_puzzle: have google folder $gdfolderuri\n",0);
+    debug_log("add_puzzle: creating google document\n",0);
+    $google = _google_create_document($id, $round, $PB::Config::TWIKI_WEB);
+    my $gduri = $google->{'document'};
+    debug_log("add_puzzle: have google document $gduri\n",0);
+    my $gdfolderuri = $google->{'subfolder'};
+    debug_log("add_puzzle: have google folder $gdfolderuri\n",0);
 
     # TODO update URI in data store
     return $drive_uri;
@@ -220,31 +223,33 @@ sub _add_puzzle_twiki {
     my $gduri = shift;
     my $folderuri = shift;
 
-    # Add puzzle to TWiki
-    debug_log("add_puzzle: creating twiki topic $puzzletopic $roundtopic $templatetopic $id\n",0);
-    if(    PB::TWiki::twiki_save($puzzletopic, {
-	onlynewtopic => 1,
-	parenttopic => $roundtopic,
-	templatetopic => $templatetopic,
-	prname => $id,
-	puzurl => $puzzle_uri,
-	gssurl => $drive_uri,
-	gdurl => $gduri,
-	googlepuzzleurl => $folderuri,
-				 }) >= 0) {
-	if(_twiki_update_round($roundtopic, $puzzletopic, $id) >= 0) {
-	    # update log
-	    _write_log_files("puzzles/$id:$remoteuser added puzzle $id to round $round");
-	    return(0);
-	} else {
-	    _write_log_files("puzzles/$id:$remoteuser added puzzle $id to round $round (ERROR, failed to update $roundtopic)");
-	    return(-3);
-	}
-    } else {
-	_write_log_files("puzzles/$id:$remoteuser added puzzle $id to round $round (ERROR, failed to save topic $puzzletopic)");
-	return(-4);
-    }
-    return(-2);
+debug_log("_add_puzzle_twiki: this is a stub twiki is dead. $puzzletopic $roundtopic $templatetopic $id\n",0);
+
+#    #Add puzzle to TWiki
+#    debug_log("add_puzzle: creating twiki topic $puzzletopic $roundtopic $templatetopic $id\n",0);
+#    if(    PB::TWiki::twiki_save($puzzletopic, {
+#	onlynewtopic => 1,
+#	parenttopic => $roundtopic,
+#	templatetopic => $templatetopic,
+#	prname => $id,
+#	puzurl => $puzzle_uri,
+#	gssurl => $drive_uri,
+#	gdurl => $gduri,
+#	googlepuzzleurl => $folderuri,
+#				 }) >= 0) {
+#	if(_twiki_update_round($roundtopic, $puzzletopic, $id) >= 0) {
+#	    # update log
+#	    _write_log_files("puzzles/$id:$remoteuser added puzzle $id to round $round");
+#	    return(0);
+#	} else {
+#	    _write_log_files("puzzles/$id:$remoteuser added puzzle $id to round $round (ERROR, failed to update $roundtopic)");
+#	    return(-3);
+#	}
+#   } else {
+#	_write_log_files("puzzles/$id:$remoteuser added puzzle $id to round $round (ERROR, failed to save topic $puzzletopic)");
+#	return(-4);
+#   }
+#  return(-2);
     
 }
 
@@ -263,6 +268,8 @@ sub add_puzzle {
 
     debug_log("add_puzzle()\n",2);
 
+    debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri templatetopic=$templatetopic\n", 2);
+
     # Figure out what names of TWiki topics should be
     my $puzzletopic = $id."Puzzle";
     my $roundtopic = $round."Round";
@@ -271,8 +278,7 @@ sub add_puzzle {
     }
     
     #_add_puzzle_twiki($id, $round, $puzzle_uri, $templatetopic, $puzzletopic, $roundtopic);
-    #my $drive_uri = _add_puzzle_google($id, $round, $puzzle_uri, $templatetopic, $puzzletopic);
-    my $drive_uri = "";
+    my $drive_uri = _add_puzzle_google($id, $round, $puzzle_uri, $templatetopic, $puzzletopic);
 
     # Add to backend data store files
     if($PB::Config::PB_DATA_WRITE_FILES > 0) {
@@ -951,10 +957,10 @@ sub _get_round_list_files {
 
 sub _get_round_list_db {
     debug_log("_get_round_list_db\n",6);
-    
     my $sql = "SELECT name FROM `round`";
+    debug_log("SQL: $sql\n",6);
     my $res = $dbh->selectcol_arrayref($sql);
-    
+    debug_log("_get_round_list SQL result: $res\n", 6);
     return @{$res};
 }
 
@@ -1031,8 +1037,8 @@ sub add_round {
 	}
 
 	my $gfuri = "";
-	#    $gfuri = _google_create_round($new_round, $PB::Config::TWIKI_WEB);
-	#    debug_log("add_round: have google folder $gfuri\n",0);
+	$gfuri = _google_create_round($new_round, $PB::Config::TWIKI_WEB);
+	debug_log("add_round: have google folder $gfuri\n",0);
     
 	my $roundtopic = $new_round."Round";
 	#    my $rval=_add_round_twiki($new_round, $roundtopic, $gfuri);
@@ -1920,17 +1926,17 @@ sub _send_data_version {
     my $ret = 1;
 
     # Send to bigjimmy bot
-    if(PB::BigJimmy::send_version($dataversion) <= 0) {
-	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
-	$ret = -1;
-    }
+    #if(PB::BigJimmy::send_version($dataversion) <= 0) {
+#	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
+#	$ret = -1;
+#    }
 
     # Send to meteor
+    debug_log("PB::API::_send_data_version() sending version ".$dataversion." to meteor\n",4);
     if(PB::Meteor::message($PB::Config::METEOR_VERSION_CHANNEL, $dataversion) <= 0) {
 	debug_log("PB::API::_send_data_version() error sending version $dataversion over meteor\n",0);
 	$ret = -1;
     }
-
     return $ret;
 }
 
