@@ -14,7 +14,7 @@ use CGI qw(:standard:);
 use CGI qw(param);
 
 my $debugp="false";
-if($PB::Config::PB_DEV_VERSION ne "") {
+if(($PB::Config::PB_DEV_VERSION ne "") || ($PB::Config::DEBUG > 0)) {
     $debugp="true";
 }
 
