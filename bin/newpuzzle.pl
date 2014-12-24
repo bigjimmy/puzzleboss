@@ -66,16 +66,14 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
     # safety check and untaint vars
     $puzzid =~ m/^([A-Z][[:alnum:]]*)$/;
     $puzzid = $1;
-    $round =~ m/^([A-Z][[:alnum:]-]*)$/;
-    $round = $1;
     $template =~ m/^([A-Z][[:alnum:]]*)$/;
     $template = $1;
     if(! ((my $rval = PB::API::add_puzzle($puzzid, $round, $cleanpuzzurl, $template)) < 0)) {
-#	if(! ($solver eq "")) {
-#	    # put the adding solver on the status line if we know them
-#	    my $statusline = "Puzzle added to tracking system by $solver";
-#	    PB::API::assign_solver_puzzle($puzzid, $statusline);
-#	}
+	#if(! ($solver eq "")) {
+	#    # put the adding solver on the status line if we know them
+	#    my $statusline = "Puzzle added to tracking system by $solver";
+	#    PB::API::assign_solver_puzzle($puzzid, $statusline);
+	#}
 	my $twikiurl = "/twiki/bin/view/$PB::Config::TWIKI_WEB/".$puzzid."Puzzle";
 	print header(-Refresh=>"5; URL=$cleanpuzzurl");
 	print start_html(-title=>"Add Puzzle");
@@ -89,7 +87,7 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
 	} elsif($rval == -4) {
 	    print "Could not add puzzle $puzzid to TWiki (but puzzle was successfully entered in the db, please do NOT attempt to add again).\n";
 	} else {
-	    print "Error adding puzzle $puzzid, please retry. (error $rval)\n";
+	    print "Error adding puzzle $puzzid to round $round with url $cleanpuzzurl and template $template please retry. (error $rval)\n";
 	    print newpuzzform($puzzid, $round, $template, $puzzurl);
 	}
 	print end_html;
