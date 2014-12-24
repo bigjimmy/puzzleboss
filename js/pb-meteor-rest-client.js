@@ -117,7 +117,7 @@ define([
 			handleAs: "text",
 			preventCache: true
 		    }).then(function(jsondata) {
-				 _pb_log("_pbrest_get: jsondata:"+jsondata, 10);
+				 _pb_log("_pbrest_get: path: " +path + " jsondata:"+jsondata, 10);
 				var data
 				try {
 				     data = dojo.fromJson(jsondata);  
@@ -204,8 +204,8 @@ define([
 		Meteor.registerEventCallback("reset", _pb_meteor_reset_cb);
 		Meteor.joinChannel(_pb_config.meteor_version_channel,1);
 		Meteor.mode = 'stream';
-		_pb_log("_pb_meteor_init: connecting meteor"+" (_pb_clientindex "+_pb_clientindex+")",1);
-//	    Meteor.debugmode=true;
+		_pb_log("_pb_meteor_init: connecting meteor"+" (_pb_clientindex "+_pb_clientindex+")",2);
+	    Meteor.debugmode=true;
 		Meteor.connect();
 		_pb_cb_connection_mode(Meteor.mode);
 	}
@@ -277,7 +277,7 @@ define([
 		    _pb_log("_pb_meteor_process_cb: received version not newer than existing queued data version",3);
 		}
 	    } else {
-		_pb_log("_pb_meteor_process_cb: dataversion processing enabled, but version not newer than existing data version",3);
+		_pb_log("_pb_meteor_process_cb: dataversion processing enabled, but version "+version+" not newer than existing data version "+_pb_dataversion+"!",3);
 	    }
 	}
     
