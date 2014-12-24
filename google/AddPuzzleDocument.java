@@ -369,7 +369,7 @@ public class AddPuzzleDocument {
 
 	// update permissions to give whole domain writer privs
 	System.err.println("Setting puzzle subfolder ACL to allow domain-wide writes from users at "+domainString);
-	setDomainAclRemoveDefault(puzzleSubfolderEntry, domainString, "writer");
+	//setDomainAclRemoveDefault(puzzleSubfolderEntry, domainString, "writer");
 
 	// String puzzleSubfolderUriString = puzzleSubfolderEntry.getDocumentLink().getHref();
 	String puzzleSubfolderUriString = "https://docs.google.com/a/" + domainString + "/#folders/" + puzzleSubfolderEntry.getDocId();
