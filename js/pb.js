@@ -78,8 +78,9 @@ define([
 				       type: cells.Select, options: ['New', 'Being worked', 'Needs eyes', 'Solved']},
 				     { field: 'answer', width: "12%", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
 				     { field: 'xyzloc', width: "10%", name: "Location", editable: my_editable, formatter: smallfontFormatter },
-				     { field: 'cursolvers', width: "20%", name:"Solvers", formatter:smallfontFormatter},
-				     { field: 'comments', width: "40%", name: "PB Notes", editable: my_editable, formatter: smallfontFormatter}
+				     { field: 'cursolvers', width: "20%", name:"Current Solvers", formatter:smallfontFormatter},
+				     { field: 'activity', width: "20%", name: "Recent Gdoc Activity", formatter:smallfontFormatter},
+				     { field: 'comments', width: "20%", name: "PB Notes", editable: my_editable, formatter: smallfontFormatter}
 				     ];
 	
 	    grid[roundname] = new enhancedgrid({

@@ -384,7 +384,37 @@ sub _update_puzzle_part_db {
     }
 }
 
+sub get_puzzle_activity {
+    my $pid = shift;
+    
+    my $sql = 'SELECT solver.name as solver, activity.time as time, activity.source as activity FROM solver, activity WHERE solver.id = activity.solver_id AND activity.puzzle_id = '.$pid.' ORDER BY activity.time DESC';
 
+    my $sth  = $dbh->prepare($sql);
+    $sth->execute() or die $dbh->errstr;
+    my @rows;
+
+    while (my $row = $sth->fetchrow_hashref) {
+        push @rows, $row;
+	debug_log("get_puzzle_activity: fetched line of activity for puzzid $pid\n",4);
+    } 
+
+    return \@rows; 
+    
+}
+
+sub get_puzzle_info {
+    my $pid = shift;
+
+    my $sql = 'SELECT * FROM puzzle_view WHERE id = '.$pid;
+    my $sth = $dbh->prepare($sql);
+    $sth->execute() or die $dbh->errstr;
+
+    debug_log("get_puzzle_info:  fetching line of puzzle_view table for puzzid $pid\n",4);
+ 
+    my $row = $sth->fetchrow_hashref;
+
+    return $row;
+}
 #######
 #ROUNDS
 #######
