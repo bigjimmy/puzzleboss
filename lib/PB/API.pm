@@ -278,7 +278,10 @@ sub add_puzzle {
     }
     
     #_add_puzzle_twiki($id, $round, $puzzle_uri, $templatetopic, $puzzletopic, $roundtopic);
-    my $drive_uri = _add_puzzle_google($id, $round, $puzzle_uri, $templatetopic, $puzzletopic);
+
+    #bigjimmy bot adds to google now
+    my $drive_uri = undef;
+    #my $drive_uri = _add_puzzle_google($id, $round, $puzzle_uri, $templatetopic, $puzzletopic);
 
     # Add to backend data store files
     if($PB::Config::PB_DATA_WRITE_FILES > 0) {
@@ -693,6 +696,8 @@ sub _update_puzzle_part_db {
 
     # TODO: fix SQL injection attack vector through $part
     my $sql = 'UPDATE `puzzle_view` SET `'.$part.'` = ? WHERE `name` LIKE ? LIMIT 1';
+    debug_log("_update_puzzle_part_db: SQL: $sql\n",2);
+
     my $c = $dbh->do($sql, undef, $val, $id);
     
     if(defined($c)) {
@@ -1037,8 +1042,10 @@ sub add_round {
 	}
 
 	my $gfuri = "";
-	$gfuri = _google_create_round($new_round, $PB::Config::TWIKI_WEB);
-	debug_log("add_round: have google folder $gfuri\n",0);
+
+	#Don't make round in gdocs here. Bigjimmy bot does this now.
+	#$gfuri = _google_create_round($new_round, $PB::Config::TWIKI_WEB);
+	#debug_log("add_round: have google folder $gfuri\n",0);
     
 	my $roundtopic = $new_round."Round";
 	#    my $rval=_add_round_twiki($new_round, $roundtopic, $gfuri);
@@ -1222,15 +1229,15 @@ sub _get_solver_db {
 }
 
 sub add_solver {
-	my $idin = shift;
-	chomp $idin;
+	my $idin = $_[0];
+        my $fullname = $_[1];
     
-	debug_log("add_solver: $idin\n",6);
+	debug_log("add_solver: username:$idin fullname:$fullname\n",6);
 
 	if($PB::Config::PB_DATA_READ_DB_OR_FILES eq "FILES") {
 		return _add_solver_files($idin);
 	} else {
-		return _add_solver_db($idin);
+		return _add_solver_db($idin, $fullname);
 	}
 }
 
@@ -1241,9 +1248,11 @@ sub _add_solver_files {
 }
 
 sub _add_solver_db {
-	my $id = shift;
+	my $id = $_[0];
+	my $fullname = $_[1];
 
-	my $sql = "INSERT INTO `solver` (`name`) VALUES (?);";
+	my $sql = "INSERT INTO `solver` (`name`, `fullname`) VALUES ('$id', '$fullname');";
+	debug_log("_add_solver_db: sql: $sql\n",3);
 	my $c = $dbh->do($sql, undef, $id);
     
 	if(defined($c)) {
@@ -1413,22 +1422,17 @@ sub ldap_get_user_list {
     my $mesg = $ldap->search ( base => "ou=people,dc=wind-up-birds,dc=org",
 			       scope   => "sub",
 			       filter  => "sn=*",
-			       attrs   =>  ['uid']
+			       attrs   =>  ['uid','displayName']
 	);
     my @entries = $mesg->entries;
-    my @rawdata;
+    my %userhash = ();
     foreach my $e (@entries){
-	push @rawdata, $e->get_value('uid');
+	my $uid = ($e->get_value('uid'));
+	my $fullname = ($e->get_value('displayName'));
+	$userhash{$uid} = $fullname;
     }
     
-    my @sortdata = sort(@rawdata);
-    
-    my @outdata;
-    foreach my $d (@sortdata){
-	push @outdata, $d;
-    }
-    
-    return \@outdata;
+    return %userhash;
 }
 
 sub update_solver_part {
@@ -1926,10 +1930,10 @@ sub _send_data_version {
     my $ret = 1;
 
     # Send to bigjimmy bot
-    #if(PB::BigJimmy::send_version($dataversion) <= 0) {
-#	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
-#	$ret = -1;
-#    }
+    if(PB::BigJimmy::send_version($dataversion) <= 0) {
+	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
+	$ret = -1;
+    }
 
     # Send to meteor
     debug_log("PB::API::_send_data_version() sending version ".$dataversion." to meteor\n",4);
