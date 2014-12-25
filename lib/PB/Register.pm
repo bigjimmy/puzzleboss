@@ -289,14 +289,6 @@ sub confirm_validation : Runmode {
 	$html.=$q->p."User added to google apps for education domain ($PB::Config::REGISTER_LDAP_DOMAIN).";
     }
     
-    # now add to twiki
-    #my $twiki_rval = PB::API::twiki_add_user($username, $firstname, $lastname, $email, $password);
-    #if($twiki_rval != 0) { 
-	#$html.=$q->p."Error adding user to TWiki (this may just be because your UserTopic already existed)";
-    #} else {
-	#$html.=$q->p.'User added to <a href="$PB::Config::TWIKI_URI">TWiki</a>.';
-    #}
-
     my $fullname = "$firstname $lastname";
     my $pbdb_rval = PB::API::add_solver($username, $fullname);
     if(!($pbdb_rval < 0)) {
@@ -305,7 +297,6 @@ sub confirm_validation : Runmode {
 	$html.=$q->p."Error adding user to solver database.";
     }
     
-    #$html.=$q->p.'If all was successful, you should now be able to login to the TWiki: <a href="'.$PB::Config::TWIKI_URI.'">'.$PB::Config::TWIKI_URI.'</a>';
     $html.=$q->p.'If all was succesful, you should now be able to login: <a href="http://'.$PB::Config::PB_DOMAIN_NAME.'">here</a>';
     return($html);
 }
