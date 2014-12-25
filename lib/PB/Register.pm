@@ -297,7 +297,8 @@ sub confirm_validation : Runmode {
 	#$html.=$q->p.'User added to <a href="$PB::Config::TWIKI_URI">TWiki</a>.';
     #}
 
-    my $pbdb_rval = PB::API::add_solver($username);
+    my $fullname = "$firstname $lastname";
+    my $pbdb_rval = PB::API::add_solver($username, $fullname);
     if(!($pbdb_rval < 0)) {
 	$html.=$q->p."User added to solver database.";
     } else {
