@@ -1,0 +1,57 @@
+#!/bin/bash
+
+####
+# monitor to kick and restart bigjimmy when open fds get too big
+# designed to run in an outer loop wrapper every N seconds
+####
+
+
+DATE=`/bin/date`
+PID=`ps -ef | grep bigjimmy-the-google | grep dbname | awk '{print $2}' | grep -v grep`
+
+if [ $? -ne 0 ]
+then echo $DATE bigjimmy not running!
+echo starting it up
+cd /canadia/puzzlebitch/lib && nohup /canadia/puzzlebitch/bigjimmy/bigjimmy-the-google-drive-bot.sh >> /var/log/bigjimmy.log &
+sleep 10
+echo started
+exit 255
+fi
+
+#echo PID = $PID
+NFD=`ls /proc/$PID/fd | wc -l`
+echo $DATE bigjimmy has $NFD file descriptors OK
+
+if [ "$NFD" -gt "20000" ]
+  then echo $DATE bigjimmy has $NFS file discriptors NOTOK
+  echo killing bigjimmy gently
+  pkill -f bigjimmy-the-google
+  sleep 10
+  echo checking for deadness
+  ps -ef | grep bigjimmy-the-google | grep -v grep > /dev/null
+  if [ $? -eq 0 ]
+    then echo bigjimmy not dead yet, executing
+    pkill -9 -f bigjimmy-the-google
+    sleep 10
+    echo checking for deadness again
+    ps -ef | grep bigjimmy-the-google | grep -v grep > /dev/null
+    if [ $? -eq 0 ]
+      then echo serious problem. zombie bigjimmy. need reboot?
+      exit 255
+    fi
+  fi
+  echo restarting bigjimmy
+  cd /canadia/puzzlebitch/lib && nohup /canadia/puzzlebitch/bigjimmy/bigjimmy-the-google-drive-bot.sh >> /var/log/bigjimmy.log &
+  sleep 10
+  echo restarted
+  exit 255
+fi
+
+#echo file descriptors within reasonable range
+exit 0
+  
+
+
+
+ 
+

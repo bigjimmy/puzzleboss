@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+# Simple wrapper to repeatedly run the meat of the bigjimmy monitor
+# repeatedly, every 5 seconds
+#
+
+echo "killing any pre-existing bigjimmy-monitor-checks running"
+pkill -9 -f bigjimmy-monitor-check
+sleep 5
+
+while /bin/true
+do /canadia/puzzlebitch/bigjimmy/bigjimmy-monitor-check
+sleep 5
+done
+
