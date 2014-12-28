@@ -336,6 +336,9 @@ define([
 						puzzinfo_div.appendChild(domconstruct.create("p",
 							{innerHTML: "All historical solvers: "+ puzzstore.getValue(item,"solvers").split(",").join(", ")}
 						));
+                                                puzzinfo_div.appendChild(domconstruct.create("p",
+							{innerHTML: "Location: "+ puzzstore.getValue(item, "xyzloc")} 
+						));
 					}
 			})
 				
