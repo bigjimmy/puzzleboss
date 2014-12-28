@@ -336,23 +336,37 @@ sub update_puzzle_part {
 	#We need special handling for a puzzle part update which imples the puzzle is solved
 	#This might be either a status change to "Solved", or an answer change to non-null
 	#Our accepted logic, system wide, is that only both of these things represent a solved puzzle
+        my $answer = undef;
 	
+	# Don't actually enter status change to "solved" without answer
+	# pb page edited will still say "solved" but at least it won't propagate
+ 	# and everyone else will know the puzz still isn't really solved
 	if ($part eq "status" && $val eq "Solved"){
 	    #is there an answer?
 	    my $puzzref = get_puzzle($id);
-	    if ($puzzref->{"answer"} ne ""){
+	    my $answer = $puzzref->{"answer"};
+	    debug_log("update_puzzle_part for status solved: PART=$part VAL=$val ANS=$answer\n",5);
+	    if ($answer ne undef){
+		debug_log("ok answer is defined.  we can mark as solved.",5);
 		puzzle_solved($id);
-	    }
-	}elsif ($part eq "answer" && $val ne ""){
-	    #am I solved status?
-	    my $puzzref = get_puzzle($id);
-	    if ($puzzref->{"status"} eq "Solved"){
-		puzzle_solved($id);
-	    }
+	    } else {
+	    debug_log("whoa whoa whoa. can't mark as solved. no answer defined.",1);
+	    return 255;
+            }
 	}
 
-
 	my $rval = _update_puzzle_part_db($id, $part, $val);
+
+	# If an answer is submitted, automatically mark the puzzle as solved
+	if ($part eq "answer" && $val ne ""){
+            #am I solved status?
+            my $puzzref = get_puzzle($id);
+            if ($puzzref->{"status"} ne "Solved"){
+                puzzle_solved($id);
+		my $rval = _update_puzzle_part_db($id, "status", "Solved");
+            }
+        }
+
 	if(looks_like_number($rval) && $rval < 0) {
 		return $rval;
 	}
