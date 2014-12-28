@@ -468,7 +468,7 @@ define([
 	
 	var is_addpuzzle_patt = /^puzzles\/[^\/]*\/$/;
 	var is_any_rounds_patt = /^rounds/;
-	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers|puzzle_uri|drive_uri)$/;
+	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers|puzzle_uri|drive_uri|xyzloc)$/;
 	var is_any_version_patt = /^version/;
 	function version_diff_filter(diff){
 	    // N.B. all pbmrcs must listen to version!
