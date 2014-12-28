@@ -119,12 +119,12 @@
 
 
 .round_container{
-    width: 530px;
-    margin: 10px;
+    width: 520px;
+    margin: 4px;
     float: left;
     border:1px solid #aaa;
     padding: 1ex;
-    background: #fff;
+    background: #eee;
     vertical-align:top;
 }
 
@@ -138,6 +138,8 @@
 
 .meta_container{
     display: table-row;
+    border: 2px solid #777;
+    border-right: none;
 }
 
 .pi_container{
@@ -149,6 +151,9 @@
     display: table-cell;
     vertical-align: bottom;
     font-weight: bold;
+    border-bottom: 2px solid #000;
+    border-right: none;
+    border-left: none;
 }
 
 .pi_answer, .pi_status, .pi_name, .pi_links {
@@ -185,6 +190,9 @@
 }
 
 .pi_name{
+    width: 320px;
+    max-width: 320px;
+    word-wrap: break-word;
     font-size: 16px;
     padding: 0.25ex;
 }
@@ -208,7 +216,8 @@
 }
 
 .puzzle_popup_dialog{
-	width: 350px;
+	width: 475px;
+        word-wrap: break-word;
 }
 
 

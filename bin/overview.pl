@@ -67,7 +67,11 @@ Content-type: text/html
  	</script>
 </head>
 <body class="tundra">
-    <h1>$title - <a href="/wiki">Wiki</a></h1>
+    <b>$title</b><br>
+    <ul>
+    <li><a href="/wiki">Wiki</a></li>
+    <li><a href="/puzzlebitch/bin/pb.pl">More Complete Puzzle Information Page</a></li>
+    </ul>
     <div id="adminDiv">Hello, $remote_user. 
       <span id="solver_active_p" class="solver_inactive">
         <span id="no_current_puzzle">I don't think you are currently working on anything.</span>
@@ -78,6 +82,14 @@ Content-type: text/html
         <span id="logout_span">Not $remote_user? 
           <a href="https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo=$selfuri">Logout</a> (or close browser)
         </span>
+        <p>Click on the spreadsheet icon (<img class="pi_icon" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img class="pi_icon" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
+        <p>Click on the status icon (e.g. <img class="pi_icon" src="../images/new.png" alt="new">) of a puzzle to learn more about who's working on the puzzle, or to let us know that you are working on it.</p>
+        <span id="overview_legend">
+        <b>Status icons: </b>
+        New (<img class="pi_icon" src="../images/new.png" alt="new">),
+        Being worked (<img class="pi_icon" src="../images/work.png" alt="being worked">),
+        Needs eyes (<img class="pi_icon" src="../images/eyes.png" alt="needs eyes">),
+        Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">)
       </span>
     </div>
     
@@ -87,15 +99,6 @@ Content-type: text/html
 	
 	<div id="statuscontainer"></div>
 	
-	<h2>Help:</h2>
-        <p>Click on the spreadsheet icon (<img class="pi_icon" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img class="pi_icon" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
-        <p>Click on the status icon (e.g. <img class="pi_icon" src="../images/new.png" alt="new">) of a puzzle to learn more about who's working on the puzzle, or to let us know that you are working on it.</p>
-	<span id="overview_legend">
-	<b>Status icons: </b>
-	New (<img class="pi_icon" src="../images/new.png" alt="new">),
-	Being worked (<img class="pi_icon" src="../images/work.png" alt="being worked">),
-	Needs eyes (<img class="pi_icon" src="../images/eyes.png" alt="needs eyes">),
-	Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">)
 	</span>
 </body>
 </html>
