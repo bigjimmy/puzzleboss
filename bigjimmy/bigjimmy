@@ -1,0 +1,42 @@
+#! /bin/bash
+
+### BEGIN INIT INFO
+# Provides:          bigjimmy
+# Required-Start:    $remote_fs $syslog $apache2 $mysql $network
+# Required-Stop:     
+# Should-Start:      $named
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: bigjimmy google doc bot
+# Long Description: bot to monitor google doc activity for mystery hunt
+#####
+
+if [ "$1" = "start" ]; then
+echo "starting bigjimmy monitor and bot"
+echo "making sure any running instances are dead"
+pkill -9 -f bigjimmy-monitor
+pkill -9 -f bigjimmy-the-google
+sleep 5
+cd /canadia/puzzlebitch/lib
+nohup ../bigjimmy/bigjimmy-monitor >> /var/log/bigjimmy-monitor.log &
+sleep 1
+echo
+echo "OK STARTED"
+exit
+fi
+
+if [ "$1" = "stop" ]; then
+echo "making sure any running instances are dead"
+pkill -9 -f bigjimmy-monitor
+pkill -9 -f bigjimmy-the-google
+sleep 5
+echo
+echo "OK STOPPED"
+exit
+fi
+
+echo "Give either 'start' or 'stop' param to this init script."
+
+
+
+
