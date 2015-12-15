@@ -656,11 +656,11 @@ define([
 		if(!_pb_roundlist) {
 			// try again in a bit
 			_pb_log("_pb_init_phase3: no roundlist yet, waiting...",1);
-			setTimeout(_pb_init_phase3, 1000);
+			setTimeout(_pb_init_phase3, 2000);
 		} else if (!_pb_solverstore){
 			//tray again in a bit.
 			_pb_log("_pb_init_phase3: no solverlist yet, waiting...",1);
-			setTimeout(_pb_init_phase3, 1000);
+			setTimeout(_pb_init_phase3, 2000);
 		} else {
 			_pb_log("_pb_init_phase3: have roundlist, calling _pb_cb_add_round for each round. roundlist=["+_pb_roundlist+"]",1);
 			for (var i in _pb_roundlist){
