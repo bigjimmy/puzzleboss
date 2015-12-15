@@ -23,6 +23,8 @@ else
 
 
     echo "deleting google user $deleteuser"
+    echo "with admin pass ${GOOGLE_ADMIN_PASS}"  
+    echo "with google domain ${GOOGLE_DOMAIN}"
     (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${GOOGLE_DOMAIN} -a ${GOOGLE_ADMIN_PASS})
 
 
