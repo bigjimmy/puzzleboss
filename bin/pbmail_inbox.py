@@ -293,14 +293,13 @@ if __name__ == "__main__":
     for attach in attachments:
  
 	if attach.filename:
-           print '\tFile: %s type=%s charset=%s desc=%s size=%d' % (attach.filename, attach.type, attach.charset, attach.description, 0 if attach.payload==None else len(attach.payload))
-       
+           #print '\tFile: %s type=%s charset=%s desc=%s size=%d' % (attach.filename, attach.type, attach.charset, attach.description, 0 if attach.payload==None else len(attach.payload))
+           print ('[File attached]')
         if attach.is_body=='text/plain':
             payload, used_charset=decode_text(attach.payload, attach.charset, 'auto')
             for line in payload.split('\n')[:15]:
                 if line:
                     print '\t\t', line
-        print (' ')
    
     outf.close()
     sys.stdout = sys.__stdout__
