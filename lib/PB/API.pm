@@ -765,14 +765,15 @@ sub google_add_user {
 		$ENVBACKUP{$var} = delete $ENV{$var};
 	}
 
-	$ENV{JAVA_HOME} = "/usr/java/jdk1.6.0_18";
-	$ENV{CLASSPATH} = ".:$PB::Config::PB_GOOGLE_PATH:/canadia/google/gdata/java/lib/gdata-core-1.0.jar:/canadia/google/gdata/java/lib/gdata-docs-3.0.jar:/canadia/google/gdata/java/lib/gdata-spreadsheet-3.0.jar:/canadia/google/gdata/java/sample/util/lib/sample-util.jar:/canadia/google/commons-cli-1.2/commons-cli-1.2.jar:/canadia/google/javamail-1.4.3/mail.jar:/canadia/google/jaf-1.1.1/activation.jar:/canadia/google/gdata/java/deps/google-collect-1.0-rc1.jar:/canadia/google/gdata/java/deps/jsr305.jar";
+	
+	#$ENV{JAVA_HOME} = "/usr/java/jdk1.6.0_18";
+	#$ENV{CLASSPATH} = ".:$PB::Config::PB_GOOGLE_PATH:/canadia/google/gdata/java/lib/gdata-core-1.0.jar:/canadia/google/gdata/java/lib/gdata-docs-3.0.jar:/canadia/google/gdata/java/lib/gdata-spreadsheet-3.0.jar:/canadia/google/gdata/java/sample/util/lib/sample-util.jar:/canadia/google/commons-cli-1.2/commons-cli-1.2.jar:/canadia/google/javamail-1.4.3/mail.jar:/canadia/google/jaf-1.1.1/activation.jar:/canadia/google/gdata/java/deps/google-collect-1.0-rc1.jar:/canadia/google/gdata/java/deps/jsr305.jar";
 
 	chdir $PB::Config::PB_GOOGLE_PATH;
 
-	print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
+	print STDERR "Running AddDomainUser.py from $PB::Config::PB_GOOGLE_PATH\n";
 	# Prepare command
-	my $cmd = "./AddDomainUser.sh --firstname '$firstname' --lastname '$lastname' --username '$username' --password '$password' --domain '$domain' --adminpass $PB::Config::TWIKI_USER_PASS|";
+	my $cmd = "./AddDomainUser.py --firstname '$firstname' --lastname '$lastname' --username '$username' --password '$password' --domain '$domain' |";
 	my $cmdout="";
 
 	# Execute command
