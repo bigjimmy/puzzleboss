@@ -9,8 +9,8 @@ if [ -z "$deleteuser" ]; then
     echo "please specify user to delete"
 else
 
-    echo "removing user $deleteuser from HuntTeam LDAP group"
-    /canadia/puzzlebitch/admin-tools/ldapdeleteuserfromgroup $deleteuser HuntTeam
+#    echo "removing user $deleteuser from HuntTeam LDAP group"
+#    /canadia/puzzlebitch/admin-tools/ldapdeleteuserfromgroup $deleteuser HuntTeam
 
     echo "deleting user $deleteuser"
     deletedn=`ldapsearch -xLLL -b "${REGISTER_LDAP_DC}" uid=$deleteuser dn|cut -d':' -f2|head -n 1|perl -pi -e 's/[[:space:]*]//g'`
@@ -23,9 +23,8 @@ else
 
 
     echo "deleting google user $deleteuser"
-    echo "with admin pass ${GOOGLE_ADMIN_PASS}"  
     echo "with google domain ${GOOGLE_DOMAIN}"
-    (cd /canadia/puzzlebitch/google && ./DeleteDomainUser.sh -u $deleteuser -d ${GOOGLE_DOMAIN} -a ${GOOGLE_ADMIN_PASS})
+    (cd /canadia/puzzlebitch/newgoogle && ./DeleteDomainUser.py ${deleteuser}@${GOOGLE_DOMAIN} )
 
 
 #    twikitopic=/canadia/twiki/data/Main/$deleteuser.txt
