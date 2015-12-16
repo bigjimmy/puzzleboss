@@ -294,7 +294,7 @@ sub confirm_validation : Runmode {
     if(!($pbdb_rval < 0)) {
 	$html.=$q->p."User added to solver database.";
     } else {
-	$html.=$q->p."Error adding user to solver database.";
+	$html.=$q->p."Error adding user to solver database. This is expected if you existed before (e.g. password reset)";
     }
     
     $html.=$q->p.'If all was succesful, you should now be able to login: <a href="http://'.$PB::Config::PB_DOMAIN_NAME.'">here</a>';
