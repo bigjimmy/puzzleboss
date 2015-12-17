@@ -297,9 +297,10 @@ if __name__ == "__main__":
            print ('[File attached]')
         if attach.is_body=='text/plain':
             payload, used_charset=decode_text(attach.payload, attach.charset, 'auto')
-            for line in payload.split('\n')[:15]:
+            for line in payload.split('\n')[:20]:
                 if line:
-                    print '\t\t', line
+                    print '\t\t', line.replace(u"\u2019", "'").encode('iso-8859-15')
+		    
    
     outf.close()
     sys.stdout = sys.__stdout__
