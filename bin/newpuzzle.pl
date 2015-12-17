@@ -44,6 +44,7 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
     print start_html(-title=>"Add Puzzle");
     # fix puzzle id from title
     $puzzid =~ s/[[:space:]][-][-][[:space:]].+$//g;
+    $puzzid =~ s/\://g;
     $puzzid =~ s/\W//g;
     $puzzid =~ s/\_//g;
     $puzzid =~ s/\-//g;
@@ -64,8 +65,8 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
     $puzzid =~ s/\-//g;
     $puzzid =~ s/\ //g;
     # safety check and untaint vars
-    $puzzid =~ m/^([A-Z][[:alnum:]]*)$/;
-    $puzzid = $1;
+    # $puzzid =~ m/^([A-Z][[:alnum:]]*)$/;
+    # $puzzid = $1;
     $template =~ m/^([A-Z][[:alnum:]]*)$/;
     $template = $1;
     if(! ((my $rval = PB::API::add_puzzle($puzzid, $round, $cleanpuzzurl, $template)) < 0)) {

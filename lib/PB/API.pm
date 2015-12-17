@@ -123,6 +123,8 @@ sub add_puzzle {
     my $puzzle_uri = shift;
     my $templatetopic = shift;
 
+    debug_log("add_puzzle: unsanitized id=$id\n");
+
     #clean up id
     $id =~ s/[[:space:]][-][-][[:space:]].+$//g;
     $id =~ s/\W//g;
