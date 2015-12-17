@@ -752,6 +752,28 @@ sub ldap_add_user {
 	return 0;
 }
 
+sub ldap_change_password {
+	my $username = shift;
+	my $password = shift;
+
+	my $ldap = Net::LDAP->new(  "$PB::Config::REGISTER_LDAP_HOST" );
+        # bind to a directory with dn and password
+        my $mesg = $ldap->bind( "cn=$PB::Config::REGISTER_LDAP_ADMIN_USER,$PB::Config::REGISTER_LDAP_DC",
+        password => $PB::Config::REGISTER_LDAP_ADMIN_PASS
+        );
+
+	my $result = $ldap->modify( "uid=$username,ou=people,$PB::Config::REGISTER_LDAP_DC", 
+        replace => {
+            userPassword    =>  $password,
+        }
+        );
+        
+        if($result->code() != 0) {
+		return -1;
+	}
+	return 0;
+}
+
 sub google_add_user {
 	my $username = shift;
 	my $firstname = shift;
@@ -803,6 +825,37 @@ sub google_add_user {
 	return(0);
 }
 
+sub google_change_password {
+	my $username = shift;
+	my $password = shift;
+	my $domain = $PB::Config::GOOGLE_DOMAIN;
+
+        chdir $PB::Config::PB_GOOGLE_PATH;
+
+	print STDERR "Running ChangeDomainUserPassword.py from $PB::Config::PB_GOOGLE_PATH\n";
+	# Prepare command
+        my $cmd = "./ChangeDomainUserPassword.py --username '$username' --password '$password' --domain '$domain' |";
+        my $cmdout="";
+
+        # Execute command
+        if(open ADDPUZZSSPS, $cmd) {
+                # success, check output
+                while(<ADDPUZZSSPS>) {
+                        $cmdout .= $_;
+                }
+        } else {
+                # failure
+                debug_log("google_change_password: could not open command\n",1);
+                return -100;
+        }
+        close ADDPUZZSSPS;
+        if(($?>>8) != 0) {
+                debug_log("google_change_password: exit value ".($?>>8)."\n",1);
+                return ($?>>8);
+        }
+
+        return(0);
+}
 
 sub ldap_get_user_list {
     debug_log("ldap_get_user_list() using LDAP\n",2);
