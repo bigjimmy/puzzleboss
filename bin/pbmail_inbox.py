@@ -297,9 +297,11 @@ if __name__ == "__main__":
            print ('[File attached]')
         if attach.is_body=='text/plain':
             payload, used_charset=decode_text(attach.payload, attach.charset, 'auto')
-            for line in payload.split('\n')[:20]:
+            for line in payload.split('\n')[:25]:
                 if line:
-                    print '\t\t', line.replace(u"\u2019", "'").encode('iso-8859-15')
+		    if not (re.match("^>", line)):
+                        if not (re.match("^On\ .*\<.*@.*>.*:$", line)):
+                            print '\t\t', line.replace(u"\u2019", "'").encode('iso-8859-15')
 		    
    
     outf.close()
