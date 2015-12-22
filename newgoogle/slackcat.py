@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import sys 
+import urllib
 
 import requests # pip install requests if you don't have it
 
@@ -52,7 +53,9 @@ def parse_args():
         required=False, default=':rocket:')
     parser.add_argument('-q','--quiet', help='Work quietly if post successful',
         action='store_true')
+    parser.add_argument('-g','--giphy', help='Output giphy search result based on text', action='store_true')
     parser.add_argument('-t','--text', help='Message to say. (uses stdin if not present)', required=False)
+    parser.set_defaults(giphy=False)
 
     args = vars(parser.parse_args())
 
@@ -71,8 +74,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    text = args['text'] or sys.stdin.read()
-    post_to_slack(WEBHOOK_URL, text, args['channel'], args['user'], args['emoji'], args['quiet'])
+    if args['giphy']:
+        text = args['text'] or "cat"
+        giphydata = json.loads(urllib.urlopen("http://api.giphy.com/v1/gifs/search?q="+text+"&api_key=dc6zaTOxFJmzC").read())
+	text = giphydata['data'][0]['images']['original']['url']
+	post_to_slack(WEBHOOK_URL, text, args['channel'], args['user'], args['emoji'], args['quiet'])
+    else:
+        text = args['text'] or sys.stdin.read()
+        post_to_slack(WEBHOOK_URL, text, args['channel'], args['user'], args['emoji'], args['quiet'])
 
 
 if __name__ == "__main__":
