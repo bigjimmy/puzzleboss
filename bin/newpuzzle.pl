@@ -78,7 +78,7 @@ if(($puzzid eq "") || ($round eq "") || ($template eq "") || ($cleanpuzzurl eq "
 	my $twikiurl = "/twiki/bin/view/$PB::Config::TWIKI_WEB/".$puzzid."Puzzle";
 	print header(-Refresh=>"5; URL=$cleanpuzzurl");
 	print start_html(-title=>"Add Puzzle");
-	print "Puzzle $puzzid successfully added!  Returning you to the page you came from in 5 seconds unless you would rather go to the <a href=\"$twikiurl\">puzzle twiki page</a>!\n";
+	print "Puzzle $puzzid successfully added!  Returning you to the page you came from in 5 seconds unless you would rather go to hell!\n";
     	print end_html;
     } else {
 	print header;
