@@ -79,5 +79,5 @@ func startHttpControl() {
 	
 
 	log.Logf(l4g.INFO, "starting http server on port %v\n", httpControlPort)
-	l4g.Crash(http.ListenAndServe(":"+httpControlPort, nil))
+	l4g.Crashf("http server died: %v", http.ListenAndServe(":"+httpControlPort, nil))
 }
