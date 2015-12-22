@@ -207,7 +207,7 @@ EOB
 			$q->hidden(-name => 'rm', -value => 'confirm_validation', -override=>1).
 			$q->end_form;
 		} else {
-		    $html .= $q->p."A confirmation problem with this site has prevented us from sending you the confirmation email. Please contact puzzlebitch or Benjamin OConnor for assistance. [$Mail::Sendmail::error]";
+		    $html .= $q->p."A confirmation problem with this site has prevented us from sending you the confirmation email. Please contact puzzleboss or Benjamin OConnor for assistance. [$Mail::Sendmail::error]";
 		}
 
 	    }

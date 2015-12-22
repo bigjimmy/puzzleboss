@@ -70,7 +70,7 @@ Content-type: text/html
     <b>$title</b><br>
     <ul>
     <li><a href="/wiki">Wiki</a></li>
-    <li><a href="/puzzlebitch/bin/pb.pl">More Complete Puzzle Information Page</a></li>
+    <li><a href="pb.pl">More Complete Puzzle Information Page</a></li>
     </ul>
     <div id="adminDiv">Hello, $remote_user. 
       <span id="solver_active_p" class="solver_inactive">
