@@ -90,33 +90,6 @@ sub _add_puzzle_db {
     }
 }
 
-sub _add_puzzle_google {
-    my $id = shift;
-    my $round = shift;
-    my $puzzle_uri = shift;
-    my $templatetopic = shift;
-    my $puzzletopic = shift;
-
-    # create google spreadsheet for this puzzle
-    debug_log("add_puzzle: creating google spreadsheet\n",0);
-    my $google = _google_create_spreadsheet($id, $round, $PB::Config::TWIKI_WEB, $PB::Config::TWIKI_URI."/twiki/bin/view/".$PB::Config::TWIKI_WEB."/".$puzzletopic, $puzzle_uri);
-    my $drive_uri = $google->{'spreadsheet'};
-    debug_log("add_puzzle: have google spreadsheet $drive_uri\n",0);
-    my $folderuri = $google->{'subfolder'};
-    debug_log("add_puzzle: have google folder $folderuri\n",0);
-    
-    # create google document for this puzzle
-    debug_log("add_puzzle: creating google document\n",0);
-    $google = _google_create_document($id, $round, $PB::Config::TWIKI_WEB);
-    my $gduri = $google->{'document'};
-    debug_log("add_puzzle: have google document $gduri\n",0);
-    my $gdfolderuri = $google->{'subfolder'};
-    debug_log("add_puzzle: have google folder $gdfolderuri\n",0);
-
-    # TODO update URI in data store
-    return $drive_uri;
-}
-
 sub add_puzzle {
     my $id = shift;
     my $round = shift;
@@ -128,7 +101,7 @@ sub add_puzzle {
     #clean up id
     $id =~ s/[[:space:]][-][-][[:space:]].+$//g;
     $id =~ s/\W//g;
-#    $id =~ s/\-//g;
+#   $id =~ s/\-//g;
     $id =~ s/\_//g;
     $id =~ s/\ //g;
 
@@ -141,149 +114,30 @@ sub add_puzzle {
 	$templatetopic = "GenericPuzzleTopicTemplate";
     }
     
-    #bigjimmy bot adds to google now
     my $drive_uri = undef;
-    #my $drive_uri = _add_puzzle_google($id, $round, $puzzle_uri, $templatetopic, $puzzletopic);
 
     if(_add_puzzle_db($id, $round, $puzzle_uri, $drive_uri) <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
 	    return(-101);
     }
+
+    #TODO:  Announce new puzzle in slack
+
     return 0; # success
-}
-
-
-sub _google_create_spreadsheet {
-    my $puzzle = shift;
-    my $round = shift;
-    my $hunt = shift;
-    my $twikiurl = shift;
-    my $puzzurl = shift;
-    my $domain = $PB::Config::GOOGLE_DOMAIN;
-    my $google_spreadsheet_uri = "";
-
-    # Backup environment
-    my %ENVBACKUP;
-
-    # Kill environment
-    foreach my $key (keys %ENV) {
-	$ENVBACKUP{$key} = delete $ENV{$key};
-    }
-
-    $ENV{JAVA_HOME} = "/usr/java/jdk1.6.0_18";
-    $ENV{CLASSPATH} = ".:$PB::Config::PB_GOOGLE_PATH:/canadia/google/gdata/java/lib/gdata-core-1.0.jar:/canadia/google/gdata/java/lib/gdata-docs-3.0.jar:/canadia/google/gdata/java/lib/gdata-spreadsheet-3.0.jar:/canadia/google/gdata/java/sample/util/lib/sample-util.jar:/canadia/google/commons-cli-1.2/commons-cli-1.2.jar:/canadia/google/javamail-1.4.3/mail.jar:/canadia/google/jaf-1.1.1/activation.jar:/canadia/google/gdata/java/deps/google-collect-1.0-rc1.jar:/canadia/google/gdata/java/deps/jsr305.jar";
-
-    chdir $PB::Config::PB_GOOGLE_PATH;
-
-    print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
-    # Prepare command
-    my $cmd = "./AddPuzzleSpreadsheet.sh --puzzle '$puzzle' --round '$round' --hunt '$hunt' --twikiurl '$twikiurl' --puzzleurl '$puzzurl' --domain '$domain' --adminpass $PB::Config::TWIKI_USER_PASS|";
-    #my $cmdout="";
-
-
-    my %output;
-
-    # Execute command
-    if(open ADDPUZZSSPS, $cmd) {
-	# success, check output
-	while(my $line = <ADDPUZZSSPS>) {
-	    chomp $line;
-	    my ($key,$value) = split /\=/,$line,2;
-	    debug_log("_google_create_spreadsheet: have key $key value $value\n", 3);
-	    $output{$key} = $value;
-	}
-    } else {
-	# failure
-	debug_log("_google_create_spreadsheet: could not open command\n",1);
-	return -100;
-    }
-    close ADDPUZZSSPS;
-    if(($?>>8) != 0) {
-	debug_log("_google_create_spreadsheet: exit value ".($?>>8)."\n",1);
-	return ($?>>8);
-    }
-
-    # Restore environement
-    foreach(keys %ENVBACKUP) {
-	$ENV{$_} = delete $ENVBACKUP{$_};
-    }
-
-    
-    return(\%output);
-}
-
-sub _google_create_document {
-    my $puzzle = shift;
-    my $round = shift;
-    my $hunt = shift;
-    my $domain = $PB::Config::GOOGLE_DOMAIN;
-    my $templatefile = $PB::Config::GOOGLE_PUZZLE_DOCUMENT_TEMPLATE;
-    my $google_document_uri = "";
-
-    # Backup environment
-    my %ENVBACKUP;
-
-    # Kill environment
-    foreach my $key (keys %ENV) {
-	$ENVBACKUP{$key} = delete $ENV{$key};
-    }
-
-    $ENV{JAVA_HOME} = "/usr/java/jdk1.6.0_18";
-    $ENV{CLASSPATH} = ".:$PB::Config::PB_GOOGLE_PATH:/canadia/google/gdata/java/lib/gdata-core-1.0.jar:/canadia/google/gdata/java/lib/gdata-docs-3.0.jar:/canadia/google/gdata/java/lib/gdata-spreadsheet-3.0.jar:/canadia/google/gdata/java/sample/util/lib/sample-util.jar:/canadia/google/commons-cli-1.2/commons-cli-1.2.jar:/canadia/google/javamail-1.4.3/mail.jar:/canadia/google/jaf-1.1.1/activation.jar:/canadia/google/gdata/java/deps/google-collect-1.0-rc1.jar:/canadia/google/gdata/java/deps/jsr305.jar";
-
-    chdir $PB::Config::PB_GOOGLE_PATH;
-
-    print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
-    # Prepare command
-    my $cmd = "./AddPuzzleDocument.sh --puzzle '$puzzle' --round '$round' --hunt '$hunt'  --domain '$domain' --templatefile '$templatefile' --adminpass $PB::Config::TWIKI_USER_PASS|";
-    #my $cmdout="";
-
-
-    my %output;
-
-    # Execute command
-    if(open ADDPUZZSSPS, $cmd) {
-	# success, check output
-	while(my $line = <ADDPUZZSSPS>) {
-	    chomp $line;
-	    my ($key,$value) = split /\=/,$line,2;
-	    debug_log("_google_create_document: have key $key value $value\n", 3);
-	    $output{$key} = $value;
-	}
-    } else {
-	# failure
-	debug_log("_google_create_document: could not open command\n",1);
-	return -100;
-    }
-    close ADDPUZZSSPS;
-    if(($?>>8) != 0) {
-	debug_log("_google_create_document: exit value ".($?>>8)."\n",1);
-	return ($?>>8);
-    }
-
-    # Restore environement
-    foreach(keys %ENVBACKUP) {
-	$ENV{$_} = delete $ENVBACKUP{$_};
-    }
-
-    
-    return(\%output);
 }
 
 sub puzzle_solved {
     my $idin = shift;
     debug_log("puzzle_solved():  $idin has been solved\n", 5);
 
-    #We want to send off notifications to users still tooling on this puzzle
-    #Also perhaps to watercooler?
-    #TODO: UNIMPLEMENTED!
-    
     #We want to send solvers working on this puzzle to the pool.
     my $puzzref = get_puzzle($idin);
     my @cursolvers = split(",", $puzzref->{"cursolvers"});
     foreach my $solver (@cursolvers){
 	assign_solver_puzzle("", $solver);
     }
+
+    #TODO send notification to slack when puzzle is completed
     
 }
 
@@ -435,58 +289,6 @@ sub get_puzzle_info {
 #ROUNDS
 #######
     
-sub _google_create_round {
-    my $round = shift;
-    my $hunt = shift;
-    my $domain = $PB::Config::GOOGLE_DOMAIN;
-    my $google_folder_uri = "";
-
-    # Backup environment
-    my %ENVBACKUP;
-
-    # Kill environment
-    foreach my $var (keys %ENV) {
-	$ENVBACKUP{$var} = delete $ENV{$var};
-    }
-
-    $ENV{JAVA_HOME} = "/usr/java/jdk1.6.0_18";
-    $ENV{CLASSPATH} = ".:$PB::Config::PB_GOOGLE_PATH:/canadia/google/gdata/java/lib/gdata-core-1.0.jar:/canadia/google/gdata/java/lib/gdata-docs-3.0.jar:/canadia/google/gdata/java/lib/gdata-spreadsheet-3.0.jar:/canadia/google/gdata/java/sample/util/lib/sample-util.jar:/canadia/google/commons-cli-1.2/commons-cli-1.2.jar:/canadia/google/javamail-1.4.3/mail.jar:/canadia/google/jaf-1.1.1/activation.jar:/canadia/google/gdata/java/deps/google-collect-1.0-rc1.jar:/canadia/google/gdata/java/deps/jsr305.jar";
-
-    chdir $PB::Config::PB_GOOGLE_PATH;
-
-    print STDERR "Running java from $PB::Config::PB_GOOGLE_PATH\n";
-    # Prepare command
-    my $cmd = "./AddRound.sh --round '$round' --hunt '$hunt' --domain '$domain' --adminpass $PB::Config::TWIKI_USER_PASS|";
-    my $cmdout="";
-
-    # Execute command
-    if(open ADDPUZZSSPS, $cmd) {
-	# success, check output
-	while(<ADDPUZZSSPS>) {
-	    $cmdout .= $_;
-	}
-    } else {
-	# failure
-	debug_log("_google_create_folder: could not open command\n",1);
-	return -100;
-    }
-    close ADDPUZZSSPS;
-    if(($?>>8) != 0) {
-	debug_log("_google_create_folder: exit value ".($?>>8)."\n",1);
-	return ($?>>8);
-    }
-
-    # Restore environement
-    foreach(keys %ENVBACKUP) {
-	$ENV{$_} = delete $ENVBACKUP{$_};
-    }
-
-    # Get uri from output
-    $google_folder_uri = $cmdout;
-    chomp $google_folder_uri;
-    
-    return($google_folder_uri);
-}
 
 sub get_round_list {
     debug_log("get_round_list\n",6);
@@ -536,10 +338,6 @@ sub add_round {
 	}
 
 	my $gfuri = "";
-
-	#Don't make round in gdocs here. Bigjimmy bot does this now.
-	#$gfuri = _google_create_round($new_round, $PB::Config::TWIKI_WEB);
-	#debug_log("add_round: have google folder $gfuri\n",0);
     
 	my $roundtopic = $new_round."Round";
 
@@ -547,6 +345,8 @@ sub add_round {
 	if($rval < 0) {
 		return $rval;
 	}
+
+	#TODO:  Make announcement in slack that new round is created
     
 	return 0; # success
 }
@@ -781,18 +581,6 @@ sub google_add_user {
 	my $password = shift;
 	my $domain = $PB::Config::GOOGLE_DOMAIN;
 
-	# Backup environment
-	my %ENVBACKUP;
-
-	# Kill environment
-	foreach my $var (keys %ENV) {
-		$ENVBACKUP{$var} = delete $ENV{$var};
-	}
-
-	
-	#$ENV{JAVA_HOME} = "/usr/java/jdk1.6.0_18";
-	#$ENV{CLASSPATH} = ".:$PB::Config::PB_GOOGLE_PATH:/canadia/google/gdata/java/lib/gdata-core-1.0.jar:/canadia/google/gdata/java/lib/gdata-docs-3.0.jar:/canadia/google/gdata/java/lib/gdata-spreadsheet-3.0.jar:/canadia/google/gdata/java/sample/util/lib/sample-util.jar:/canadia/google/commons-cli-1.2/commons-cli-1.2.jar:/canadia/google/javamail-1.4.3/mail.jar:/canadia/google/jaf-1.1.1/activation.jar:/canadia/google/gdata/java/deps/google-collect-1.0-rc1.jar:/canadia/google/gdata/java/deps/jsr305.jar";
-
 	chdir $PB::Config::PB_GOOGLE_PATH;
 
 	print STDERR "Running AddDomainUser.py from $PB::Config::PB_GOOGLE_PATH\n";
@@ -815,11 +603,6 @@ sub google_add_user {
 	if(($?>>8) != 0) {
 		debug_log("_google_add_user: exit value ".($?>>8)."\n",1);
 		return ($?>>8);
-	}
-
-	# Restore environement
-	foreach(keys %ENVBACKUP) {
-		$ENV{$_} = delete $ENVBACKUP{$_};
 	}
 
 	return(0);
