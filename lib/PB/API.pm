@@ -121,7 +121,8 @@ sub add_puzzle {
 	    return(-101);
     }
 
-    #TODO:  Announce new puzzle in slack
+    my $round_uri = get_round($round)->{"drive_uri"};
+    slack_say_something ("slackannouncebot","general","NEW PUZZLE $id ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: $round_uri");
 
     return 0; # success
 }
@@ -137,7 +138,7 @@ sub puzzle_solved {
 	assign_solver_puzzle("", $solver);
     }
 
-    #TODO send notification to slack when puzzle is completed
+    slack_say_something ("slackannouncebot", "general","PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:");
     
 }
 
@@ -346,8 +347,8 @@ sub add_round {
 		return $rval;
 	}
 
-	#TODO:  Make announcement in slack that new round is created
-    
+        slack_say_something ("puzzannouncebot","general","New Round Added! $new_round");
+
 	return 0; # success
 }
 
@@ -861,6 +862,38 @@ sub _send_data_version {
     return $ret;
 }
 
+sub slack_say_something {
+    my $username = shift;
+    my $channel = shift;
+    my $message = shift;
+
+    chdir $PB::Config::PB_GOOGLE_PATH;
+
+    print STDERR "Running slackcat.py from $PB::Config::PB_GOOGLE_PATH\n";
+
+    # Prepare command
+    my $cmd = "./slackcat.py -c $channel -n $username -t '$message' |";
+    my $cmdout="";
+
+    # Execute command
+    if(open SLACKSAY, $cmd) {
+        # success, check output
+        while(<SLACKSAY>) {
+            $cmdout .= $_;
+        }
+    } else {
+        # failure
+        debug_log("_slack_say_something: could not open command\n",1);
+        return -100;
+    }
+    close SLACKSAY;
+    if(($?>>8) != 0) {
+        debug_log("_slack_say_something: exit value ".($?>>8)."\n",1);
+        return ($?>>8);
+    }
+
+    return(0);
+}
 
 
 1;
