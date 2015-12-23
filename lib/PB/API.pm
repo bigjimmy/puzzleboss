@@ -218,6 +218,14 @@ sub update_puzzle_part {
             }
 	}
 
+	if ($part eq "status" && $val eq "Needs eyes"){
+	    my $eyespuzzref = get_puzzle($id);
+	    my $eyespuzzle_name = $eyespuzzref->{"name"};
+            my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
+            my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
+            slack_say_something ("slackannouncebot","general","Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
+        }
+
 	my $rval = _update_puzzle_part_db($id, $part, $val);
 
 	# If an answer is submitted, automatically mark the puzzle as solved
