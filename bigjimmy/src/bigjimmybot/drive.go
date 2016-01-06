@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+   	"strings"
 	l4g "code.google.com/p/log4go"
 )
 
@@ -240,7 +241,7 @@ func CreateFile(title string, mimeType string, parentId string) (fileId string, 
 		err = fmt.Errorf("CreateFile: an error occurred creating file [%v] mimeType [%v] parentId [%v]: %v\n", title, mimeType, parentId, err)
 	} else {
 		fileId = file.Id
-		fileUri = file.AlternateLink
+		fileUri = strings.Replace(file.AlternateLink,"stormynight.org","wind-up-birds.org",-1)
 	}
 
 	return 
