@@ -124,7 +124,7 @@ sub add_puzzle {
     my $round_drive_id = get_round($round)->{"drive_id"};
 
     #Announce puzzle in general slack
-    slack_say_something ("slackannouncebot","general","NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: https://drive.google.com/drive/u/2/folders/$round_drive_id");
+    slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: https://drive.google.com/drive/u/2/folders/$round_drive_id");
 
     #Announce puzzle in giphy slack with giphy
     #commenting out because this is dumb
@@ -145,7 +145,7 @@ sub puzzle_solved {
 	assign_solver_puzzle("", $solver);
     }
 
-    slack_say_something ("slackannouncebot", "general","PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:");
+    slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL,"PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:");
     
 }
 
@@ -224,7 +224,7 @@ sub update_puzzle_part {
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
             my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
             my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
-            slack_say_something ("slackannouncebot","general","Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
+            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
         }
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
@@ -362,7 +362,7 @@ sub add_round {
 		return $rval;
 	}
 
-        slack_say_something ("puzzannouncebot","general","New Round Added! $new_round");
+        slack_say_something ("puzzannouncebot",$PB::Config::SLACK_CHANNEL,"New Round Added! $new_round");
 
 	return 0; # success
 }
