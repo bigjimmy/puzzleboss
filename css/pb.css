@@ -119,7 +119,7 @@
 
 
 .round_container{
-    width: 520px;
+    width: 565px;
     margin: 4px;
     float: left;
     border:1px solid #aaa;
@@ -184,7 +184,7 @@
 .pi_answer{
     font-size: 16px;
     font-family: monospace;
-    max-width: 18ex;
+    max-width: 24ex;
     word-wrap: break-word;
 }
 
@@ -192,8 +192,8 @@
 }
 
 .pi_name{
-    width: 320px;
-    max-width: 320px;
+    width: 300px;
+    max-width: 300px;
     word-wrap: break-word;
     font-size: 16px;
     padding: 0.25ex;
