@@ -354,11 +354,13 @@ define([
 	
 	function add_round_cb(roundname) {
 		pbmrc.pb_log("add_round_cb(): adding round "+roundname);
-		roundboxes[roundname] = domconstruct.create("div", {class: "round_container", id: "round_div_"+roundname});
-	        var meta_container = domconstruct.create("div", {class: "meta_container", id: "meta_container_"+roundname});
-	        var meta_status = domconstruct.create("div", {class: "meta_status", id: "meta_status_"+roundname});
-	        meta_container.appendChild(meta_status);
-  	        var meta_name = domconstruct.create("div", {class: "meta_name", id: "meta_name_"+roundname, innerHTML: roundname});
+		var round_id = "round_div_"+roundname;
+                roundboxes[roundname] = domconstruct.create("div", {class: "round_container", id: round_id});
+                var meta_container = domconstruct.create("div", {class: "meta_container", id: "meta_container_"+roundname});
+                var meta_status = domconstruct.create("div", {class: "meta_status", id: "meta_status_"+roundname});
+                meta_container.appendChild(meta_status);
+                var meta_name = domconstruct.create("div", {class: "meta_name", id: "meta_name_"+roundname, innerHTML: roundname});
+                connect.connect(meta_container,"onclick",function(){domclass.toggle(round_id,"hidden_round");wall.reloac();});
 	        meta_container.appendChild(meta_name);
 	        var meta_links = domconstruct.create("div", {class: "meta_links", id: "meta_links_"+roundname});
 	        meta_container.appendChild(meta_links);
