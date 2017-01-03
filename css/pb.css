@@ -222,6 +222,9 @@
         word-wrap: break-word;
 }
 
+.hidden_round .pi_container{
+    display: none;
+}
 
 /*PB main stuff*/
 .fixedwidthformat{
