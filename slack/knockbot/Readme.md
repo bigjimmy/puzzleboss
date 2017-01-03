@@ -20,3 +20,8 @@ initctl start knockbot
 
 You must invite a bot into a channel:
 /invite @knockbot
+
+
+# TODO
+- stop polling the DB. find a way to push updates?
+  (might not be feasible)

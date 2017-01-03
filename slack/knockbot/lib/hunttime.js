@@ -1,6 +1,7 @@
 'use strict';
 
-var huntstart = new Date("Jan 15 2016 12:00:00 GMT-0500 (EST)");
+//var huntstart = new Date("Jan 15 2016 12:00:00 GMT-0500 (EST)");
+var huntstart = new Date("Jan 15 2016 14:00:00 GMT-0500 (EST)");
 var general_channel = 'general';
 
 // For testing
@@ -22,7 +23,8 @@ HuntTime.prototype.queueAnnouncements = function() {
         
         var now = (new Date()).getTime();
         var ms_before = minutes_before * 60 * 1000;
-        var target_time = huntstart - ms_before - 100; // 100ms early
+        var target_time = huntstart - ms_before;
+        target_time += 2 * 1000; // 2 second delay
         var timeout = target_time - now;
         
         if (timeout > 0) {
@@ -30,28 +32,20 @@ HuntTime.prototype.queueAnnouncements = function() {
         }        
     }
 
-    // Once a day, at noon
-    for (var days_before = 1; days_before <= 10; days_before++) {
-        var minutes_before = days_before * 24 * 60;
-        helper(minutes_before);
-    }
+    // 1, 2, and 3 days before
+    helper(3 * 24 * 60);
+    helper(2 * 24 * 60);
+    helper(1 * 24 * 60);
 
-    // Every six hours
-    for (var hours_before = 6; hours_before < 24; hours_before += 6) {
-        var minutes_before = hours_before * 60;
-        helper(minutes_before);
-    }
+    // 1, 2, 6, and 12 hours before
+    helper(12 * 60);
+    helper(6 * 60);
+    helper(2 * 60);
+    helper(1 * 60);
 
-    // Every hour
-    for (var hours_before = 1; hours_before < 6; hours_before++) {
-        var minutes_before = hours_before * 60;
-        helper(minutes_before);
-    }
-
-    // Every fifteen minutes
-    for (var minutes_before = 0; minutes_before < 60; minutes_before += 15) {
-        helper(minutes_before);
-    }    
+    // 0 and 30 minutes before
+    helper(30);
+    helper(0);
 };
 
 function announceTimeUntilHunt(knockbot) {
@@ -59,12 +53,15 @@ function announceTimeUntilHunt(knockbot) {
 }
 
 // Respond to 'time' or 'when'
-HuntTime.prototype.canRespond = function(channel, message_text) {
-    return message_text.indexOf('time') != -1 || message_text.indexOf('when') != -1 || message_text.indexOf('how long') != -1;
+HuntTime.prototype.canRespond = function(message) {
+    var message_text = message.text.toLowerCase();
+    return message_text.indexOf('time') != -1 ||
+           message_text.indexOf('when') != -1 ||
+           message_text.indexOf('how long') != -1;
 };
 
 // Tell them
-HuntTime.prototype.produceResponse = function(channel, message_text) {
+HuntTime.prototype.produceResponse = function(message) {
     return prettyTimeUntilHunt();
 };
 
@@ -106,6 +103,8 @@ function splitTime(ms) {
 }
 
 function spelledTime(number, noun) {
+
+    return 'The coin was found by SETEC on Sunday at 6:53pm!\nHunt was 53 hours long.\n';
 
     var print_number = Math.round(Math.abs(number));
 

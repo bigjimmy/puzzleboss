@@ -6,13 +6,16 @@ var HelpHandler = function Constructor(knockbot) {
 HelpHandler.prototype.start = function() {
 };
 
-HelpHandler.prototype.canRespond = function(channel, message_text) {
+HelpHandler.prototype.canRespond = function(message) {
+    var message_text = message.text.toLowerCase();
     return message_text.indexOf('help') != -1;
 };
 
-HelpHandler.prototype.produceResponse = function(channel, message_text) {
-    return "Hi, I'm KnockBot!\n" +
-           "I can tell you the 'status' of the Hunt or the 'time' since Hunt started.";
+HelpHandler.prototype.produceResponse = function(message) {
+    return "If you need *help*, I can tell you the *status* of the Hunt, about all the *rounds*," + 
+           " the *time* since Hunt started, and a list of important *links*. " +
+           "Or, just ask me about a specific round or puzzle.\n" +
+           "Feel free to DM me or */invite* me to a channel.";
 };
 
 module.exports = HelpHandler;

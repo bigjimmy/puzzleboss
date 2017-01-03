@@ -6,6 +6,10 @@ var util = require('util');
 var StatusHandler = require('./statushandler');
 var HuntTime = require('./hunttime');
 var HelpHandler = require('./helphandler');
+var AnnounceHandler = require('./announcehandler');
+var LinksHandler = require('./linkshandler');
+var EventHandler = require('./eventhandler');
+var JokeHandler = require('./jokehandler');
 var PBConnect = require('./pbconnect');
 
 /*
@@ -49,7 +53,6 @@ KnockBot.prototype.run = function () {
     // Connect to PB
     this.pbc = new PBConnect();
     this.pbc.connect();
-    this.pbc.continual_refresh();
 };
 
 // On Start
@@ -71,7 +74,11 @@ KnockBot.prototype._onStart = function () {
     this.handlers = [
         new StatusHandler(this),
         new HuntTime(this),
-        new HelpHandler(this)
+        new HelpHandler(this),
+        new LinksHandler(this),
+        new EventHandler(this),
+        new AnnounceHandler(this),
+        new JokeHandler(this)
         ];
  }
 
@@ -101,6 +108,12 @@ KnockBot.prototype._createUserList = function () {
     this.knownBotIds = botlist.map(function (user) {
         return user.id;
     });
+};
+
+KnockBot.prototype._userFromId = function (userId) {
+    return this.users.filter(function (user) {
+        return user.id == userId;
+    })[0];
 };
 
 // True if the message is from this bot
@@ -145,16 +158,6 @@ KnockBot.prototype._isDirectMessage = function (message) {
         (message.channel[0] == 'D');    
 };
 
-// Get a channel by ID
-KnockBot.prototype._getChannelById = function (channelId) {
-    var channel_list = [].concat(this.channels, this.groups, this.ims);
-
-    // Filter the channel list to the one we want
-    return channel_list.filter(function (item) {
-            return item.id == channelId;
-    })[0];
-};
-
 // Get a channel by name
 KnockBot.prototype._getChannelByName = function (channel_name) {
     var channel_list = [].concat(this.channels, this.groups, this.ims);
@@ -196,19 +199,16 @@ KnockBot.prototype._onMessage = function (message) {
 KnockBot.prototype._processMessage = function (message) {
     var response = null;
     
-    // Find the channel for this message
-    var channel = this._getChannelById(message.channel);
-
     // Iterate over the handlers
     for (var i = 0; i < this.handlers.length; i++) {
 
         // Skip if this handler cannot produce a response
-        if (!this.handlers[i].canRespond(channel.name, message.text)) {
+        if (!this.handlers[i].canRespond(message)) {
             continue;
         }
 
         // Get the response from the handler
-        response = this.handlers[i].produceResponse(channel.name, message.text);
+        response = this.handlers[i].produceResponse(message);
         
         // Stop at the first response
         if (response !== null) {
@@ -218,14 +218,13 @@ KnockBot.prototype._processMessage = function (message) {
 
     // Send a response
     if (response !== null) {
-        this.postMessage(channel.id, response, this.post_params);
+        this.postMessage(message.channel, response, this.post_params);
     }
 };
 
 // Post a new message to a named channel
 KnockBot.prototype.postNewMessage = function (channel_name, message_text) {
-    var channel = this._getChannelByName(channel_name);
-    this.postMessage(channel.id, message_text, this.post_params);
+    this.postMessageToChannel(channel_name, message_text, this.post_params);
 };
 
 module.exports = KnockBot;
