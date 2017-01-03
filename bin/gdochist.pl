@@ -52,6 +52,9 @@ print "Recent Activity History for puzzle: $puzzlerow{'name'}<br>\n";
 print "<table border=1><tr><th>Time</th><th>Solver</th><th>Activity</th></tr>\n";
 foreach my $rowref (@activityrows) {
 my %row = %$rowref;
+
+#Exclude "BigJimmy" robot activity
+next if $row{'solver'} eq "BigJimmy";
 print "<tr><td>$row{'time'}</td><td>$row{'solver'}</td><td>$row{'activity'}</td></tr>\n";
 }
 print "</table>";
