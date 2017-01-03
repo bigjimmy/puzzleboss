@@ -301,8 +301,14 @@ if __name__ == "__main__":
                 if line:
 		    if not (re.match("^>", line)):
                         if not (re.match("^On\ .*\<.*@.*>.*:$", line)):
-                            print '\t\t', line.replace(u"\u2019", "'").encode('iso-8859-15')
-		    
+			    #fucking unicode
+                            fixedline=line.replace(u"\u2019", "'").replace(u"\u201C", "'").replace(u"\u2026", "...").replace(u"\u201D", "'").replace(u"\u2018", "'").replace(u"\u2014", "--")
+                            try:
+			        newline=fixedline.encode('iso-8859-15')
+                            except UnicodeError:
+                                newline="[Unicode error in message, line omitted]"                             
+                            print '\t\t', newline
+		             
    
     outf.close()
     sys.stdout = sys.__stdout__
