@@ -701,11 +701,11 @@ sub _assign_solver_puzzle_db {
 	my $sql = "INSERT INTO `puzzle_solver` (`puzzle_id`, `solver_id`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?))";
 	my $c = $dbh->do($sql,undef,$puzzname,$solver);
 	if(defined($c)) {
-		debug_log("_get_client_index_db: dbh->do returned $c\n",2);
+		debug_log("_assign_solver_puzzle_db: dbh->do returned $c\n",2);
 		_send_data_version();
 		return(1);
 	} else {
-		debug_log("_get_client_index_db: dbh->do returned error: ".$dbh->errstr."\n",0);
+		debug_log("_assign_solver_puzzle_db: dbh->do returned error: ".$dbh->errstr."\n",0);
 		return(-1);
 	}
 }
