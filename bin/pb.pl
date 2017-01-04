@@ -108,6 +108,7 @@ $html .= <<"EOF"
 <!--administrative stuff below here-->
 
 <p><a href="puzzsolvers" target="new">Solver management tool (move solvers on/off puzzles)</a></p>
+<p><a href="deletepuzzle.pl" target="new">Emergency Puzzle Deletion Tool</a></p>
 
 <!-- new puzzle -->
 <table>

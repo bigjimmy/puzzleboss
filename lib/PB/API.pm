@@ -160,8 +160,9 @@ sub delete_puzzle {
 
 sub _delete_puzzle_db {
     my $idin = shift;
+    debug_log("_delete_puzzle_db: $idin\n", 6);
 
-    my $sql = 'DELETE FROM `puzzle` WHERE id=$idin';
+    my $sql = 'DELETE FROM `puzzle` WHERE id='.$idin;
     my $sth;
     $sth = $dbh->prepare($sql);
     $sth->execute() or die $dbh->errstr;
