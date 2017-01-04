@@ -6,7 +6,6 @@ use Scalar::Util qw(tainted looks_like_number);
 
 use PB::Config;
 use PB::Meteor;
-use PB::TWiki;
 use PB::BigJimmy;
 
 use Net::LDAP;
@@ -94,7 +93,6 @@ sub add_puzzle {
     my $id = shift;
     my $round = shift;
     my $puzzle_uri = shift;
-    my $templatetopic = shift;
 
     debug_log("add_puzzle: unsanitized id=$id\n");
 
@@ -105,14 +103,8 @@ sub add_puzzle {
     $id =~ s/\_//g;
     $id =~ s/\ //g;
 
-    debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri templatetopic=$templatetopic\n", 2);
+    debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2);
 
-    # Figure out what names of TWiki topics should be
-    my $puzzletopic = $id."Puzzle";
-    my $roundtopic = $round."Round";
-    if(!defined($templatetopic) || $templatetopic eq "") {
-	$templatetopic = "GenericPuzzleTopicTemplate";
-    }
     
     my $drive_uri = undef;
 
@@ -147,6 +139,33 @@ sub puzzle_solved {
 
     slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL,"PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:");
     
+}
+
+sub delete_puzzle {
+    my $idin = shift;
+    chomp $idin;
+
+    debug_log("delete_puzzle: $idin\n",6);
+
+    my $puzzref = get_puzzle($idin);
+
+    # remove solvers from puzzle before you delete it
+    my @cursolvers = split(",", $puzzref->{"cursolvers"});
+    foreach my $solver (@cursolvers){
+        assign_solver_puzzle("", $solver);
+    }
+ 
+    return _delete_puzzle_db($idin);
+}
+
+sub _delete_puzzle_db {
+    my $idin = shift;
+
+    my $sql = 'DELETE FROM `puzzle` WHERE id=$idin';
+    my $sth;
+    $sth = $dbh->prepare($sql);
+    $sth->execute() or die $dbh->errstr;
+    return(1);
 }
 
 
@@ -355,8 +374,6 @@ sub add_round {
 
 	my $gfuri = "";
     
-	my $roundtopic = $new_round."Round";
-
 	my $rval = _add_round_db($new_round);
 	if($rval < 0) {
 		return $rval;
@@ -419,28 +436,6 @@ sub update_round_part {
     }
 }
 
-
-##########
-#TEMPLATES
-##########
-
-sub get_template_list {
-	debug_log("get_template_list\n",6);
-	my @templates;
-	chdir $PB::Config::TWIKI_DATA_PATH.'/'.$PB::Config::TWIKI_WEB;
-	open FILE, "ls *PuzzleTopicTemplate.txt|";
-	#    open FILE, $PB::Config::TEMPLATES_FILE;
-	#    flock FILE, $EXCLUSIVE_LOCK;
-	while (<FILE>){
-		chomp;
-		s/\.txt$//;
-		push @templates, $_;
-	}
-	#    flock FILE, $UNLOCK;
-	close FILE;
-        
-	return @templates;
-}
 
 ##############
 #SOLVERS/USERS
