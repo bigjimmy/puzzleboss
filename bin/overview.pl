@@ -89,6 +89,8 @@ Content-type: text/html
         New (<img class="pi_icon" src="../images/new.png" alt="new">),
         Being worked (<img class="pi_icon" src="../images/work.png" alt="being worked">),
         Needs eyes (<img class="pi_icon" src="../images/eyes.png" alt="needs eyes">),
+	Critical (<img class="pi_icon" src="../images/critical.jpg" alt="critical">),
+	Unnecessary (<img class="pi_icon" src="../images/unnecessary.png" alt="unnecessary">),
         Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">)
       </span>
     </div>

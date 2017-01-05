@@ -115,6 +115,8 @@
 .pi_icon{
 	vertical-align: middle;
 	cursor: pointer;
+	width: 20px;
+	height: 20px;
 }
 
 

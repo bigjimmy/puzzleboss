@@ -114,6 +114,12 @@ define([
 			html_msg = "<img class=\"pi_icon\" src=\"../images/eyes.png\" title=\"Needs eyes\" alt=\"needs eyes\">";
 		}else if (my_status == "Solved"){
 			html_msg = "<img class=\"pi_icon\" src=\"../images/solved.png\" title=\"Solved\" alt=\"solved\">";
+		}else if (my_status == "Critical"){
+			html_msg = "<img class=\"pi_icon\" src=\"../images/critical.jpg\" title=\"Critical\" alt=\"critical\">";
+		}else if (my_status == "Unnecessary"){
+			html_msg = "<img class=\"pi_icon\" src=\"../images/unnecessary.png\" title=\"Unnecessary\" alt=\"unnecessary\">";
+		}else{
+			html_msg = "X"
 		}
 		
 		return html_msg;
@@ -211,7 +217,7 @@ define([
 	
 	function set_status(id_or_node, status) {
 	    statusclass = "status_"+status.replace(/\ /g,"_");
-  	    domclass.replace(id_or_node, statusclass, "status_New status_Being_worked status_Needs_eyes status_Solved");
+  	    domclass.replace(id_or_node, statusclass, "status_New status_Being_worked status_Needs_eyes status_Solved status_Critical status_Unnecessary");
 	}
 	
 	function add_solver_ui(item, parentinfo){
@@ -316,7 +322,9 @@ define([
 							{value: 'New', label: 'New'},
 							{value: 'Being worked', label: 'Being worked'},
 							{value: 'Needs eyes', label: 'Needs eyes'},
-							{value: 'Solved', label:'Solved'}
+							{value: 'Solved', label:'Solved'},
+							{value: 'Critical', label:'Critical'},
+							{value: 'Unnecessary', label:'Unnecessary'}
 							],
 							onChange: function (){
 									puzzstore.setValue(item,"status",status_dd_select.get("value"));
