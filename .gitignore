@@ -12,7 +12,6 @@ Jit
 admin-tools/domain
 admin-tools/ldapdc
 admin-tools/pw
-apache-conf/sites/canadia-apache.conf
 bigjimmy/bigjimmy-oauth-cache.json
 bigjimmy/bin
 bin/junk/
