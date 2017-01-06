@@ -247,6 +247,14 @@ sub update_puzzle_part {
             slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
         }
 
+        if ($part eq "status" && $val eq "Critical"){
+            my $critpuzzref = get_puzzle($id);
+            my $critpuzzle_name = $critpuzzref->{"name"};
+            my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
+            my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
+            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
+        }
+
 	my $rval = _update_puzzle_part_db($id, $part, $val);
 
 	# If an answer is submitted, automatically mark the puzzle as solved
