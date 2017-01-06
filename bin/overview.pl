@@ -83,7 +83,7 @@ Content-type: text/html
           <a href="https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo=$selfuri">Logout</a> (or close browser)
         </span>
         <p>Click on the spreadsheet icon (<img class="pi_icon" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img class="pi_icon" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
-        <p>Click on the status icon (e.g. <img class="pi_icon" src="../images/new.png" alt="new">) of a puzzle to learn more about who's working on the puzzle, or to let us know that you are working on it.</p>
+        <p>Click on the status icon of a puzzle to learn more about who's working on the puzzle, or to let us know that you are working on it.</p>
         <span id="overview_legend">
         <b>Status icons: </b>
         New (<img class="pi_icon" src="../images/new.png" alt="new">),
@@ -91,7 +91,8 @@ Content-type: text/html
         Needs eyes (<img class="pi_icon" src="../images/eyes.png" alt="needs eyes">),
 	Critical (<img class="pi_icon" src="../images/critical.jpg" alt="critical">),
 	Unnecessary (<img class="pi_icon" src="../images/unnecessary.png" alt="unnecessary">),
-        Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">)
+        Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">),
+	WTF (<img class="pi_icon" src="../images/hazard.png" alt=WTF>)
       </span>
     </div>
     

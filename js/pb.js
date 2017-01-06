@@ -66,6 +66,8 @@ define([
 			return "<span style='font-size: 12'>CRITICAL</span>";
 			case "Unnecessary":
 			return "<span style='font-size: 12'>UNNECESSARY</span>";
+			case "WTF":
+			return "<span style='font-size: 12'>WTF</span>";
 			default:
 			return "<span style='font-size: 12'>ERROR</span>";
 		};
@@ -79,7 +81,7 @@ define([
 				     { field: 'round', hidden: true },
 				     { field: 'linkid', width: "12%", name: "Puzzle", formatter: smallfontFormatter},
 				     { field: 'status', width: "10%", name: "Status", editable: my_editable, formatter: statusFormatter,
-				       type: cells.Select, options: ['New', 'Being worked', 'Needs eyes', 'Solved', 'Critical', 'Unnecessary']},
+				       type: cells.Select, options: ['New', 'Being worked', 'Needs eyes', 'Solved', 'Critical', 'Unnecessary', 'WTF']},
 				     { field: 'answer', width: "12%", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
 				     { field: 'xyzloc', width: "10%", name: "Location", editable: my_editable, formatter: smallfontFormatter },
 				     { field: 'cursolvers', width: "20%", name:"Current Solvers", formatter:smallfontFormatter},
