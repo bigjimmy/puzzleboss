@@ -367,11 +367,18 @@ define([
 		pbmrc.pb_log("add_round_cb(): adding round "+roundname);
 		var round_id = "round_div_"+roundname;
                 roundboxes[roundname] = domconstruct.create("div", {class: "round_container", id: round_id});
+	    /*currently don't use the meta items for anything (always worried we won't have a round based meta system*/
                 var meta_container = domconstruct.create("div", {class: "meta_container", id: "meta_container_"+roundname});
-                var meta_status = domconstruct.create("div", {class: "meta_status", id: "meta_status_"+roundname});
-                meta_container.appendChild(meta_status);
+	    /*little widget to expand/collapse*/
+	    var collapsor_span = domconstruct.create("span", {id: "collapsor_span_"+roundname,
+                                                                  innerHTML: "<img class=\"pi_icon\" src=\"../images/down.png\" title=\"More\" alt=\"More\" >"});
+	    meta_container.appendChild(collapsor_span);
+	    connect.connect(collapsor_span,"onclick",function(){domclass.toggle(round_id,"hidden_round");domclass.toggle(collapsor_span,"hidden_round_img");wall.reload();});
+
+	    /*if we wanted this, too, we'd have to get rid of the toggler*/
+                /*var meta_status = domconstruct.create("div", {class: "meta_status", id: "meta_status_"+roundname});
+                meta_container.appendChild(meta_status);*/
                 var meta_name = domconstruct.create("div", {class: "meta_name", id: "meta_name_"+roundname, innerHTML: roundname});
-                connect.connect(meta_container,"onclick",function(){domclass.toggle(round_id,"hidden_round");wall.reloac();});
 	        meta_container.appendChild(meta_name);
 	        var meta_links = domconstruct.create("div", {class: "meta_links", id: "meta_links_"+roundname});
 	        meta_container.appendChild(meta_links);
@@ -527,7 +534,7 @@ define([
 		    solverstore = ret.solverstore;
 
 	pbmrc.pb_log("starting Masonry");
-        wall = new Masonry ( document.getElementById('summary_layout'), { columnWidth: 600 });
+        wall = new Masonry ( document.getElementById('summary_layout'), { columnWidth: 700 });
 	pbmrc.pb_log("have Masonry:");
         pbmrc.pb_log(wall);
 
