@@ -14,25 +14,42 @@ func init() {
 	puzzleRevisionSeenP = make(map[int64] bool, 500) 
 }
 
-func BigJimmySolverActivityMonitor(solver *Solver) {
-	log.Logf(l4g.INFO, "BigJimmySolverActivityMonitor(%v)\n", solver.Name)
+func BigJimmySolverActivityMonitor(solverName string, solverActivityMonitorChan chan *Solver) {
+	log.Logf(l4g.INFO, "BigJimmySolverActivityMonitor(%v)\n", solverName)
+	var solver *Solver
 	go func() {
 		for true {
 			// set timer
 			updateTimer := time.NewTimer(10 * time.Minute)
 			
-			// do the activity update
-			updateSolverActivity(solver)
+			// wait for timer or solver update
+			log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solverName)
 			
-			// wait for timer
-			<-updateTimer.C
+			select {
+			   case <-updateTimer.C:
+			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): timer went off!", solverName)
+			     // if we have a solver, do the activity update
+			     if solver != nil {
+  			       updateSolverActivity(solverName, solver)
+			     } else {
+			       log.Logf(l4g.WARNING, "BigJimmySolverActivityMonitor(%v) timer went off before receiving solver\n", solverName)
+			     }
+			   case solver = <-solverActivityMonitorChan:
+			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): have updated solver=%v", solverName, solver)
+			     updateSolverActivity(solverName, solver)
+			}
 		}
 	}()
 }
 
-func updateSolverActivity(solver *Solver) {
-	log.Logf(l4g.DEBUG, "updateSolverActivity(%v)\n", solver.Name)
+func updateSolverActivity(solverName string, solver *Solver) {
+	log.Logf(l4g.TRACE, "updateSolverActivity(%v, %v): %+v\n", solverName, solver.Name, solver)
+	if solverName != solver.Name {
+	  log.Logf(l4g.ERROR, "updateSolverActivity solver name mismatch: solverName=%v solver.Name=%v", solverName, solver.Name)
+	  return
+	}
 	// TODO check solver activity in DB and take action through API if needed
+	return
 }
 
 
