@@ -35,7 +35,7 @@ CREATE  TABLE IF NOT EXISTS `$PB_DATA_DB_NAME`.`puzzle` (
   `puzzle_uri` TEXT NULL ,
   `drive_uri` VARCHAR(300) NULL ,
   `pb_comments` TEXT NULL ,
-  `status` ENUM('New','Being worked','Needs eyes','Solved') NOT NULL ,
+  `status` ENUM('New','Being worked','Needs eyes','Solved','Critical','WTF') NOT NULL ,
   `answer` VARCHAR(500) NULL ,
   `round_id` INT NOT NULL ,
   `drive_id` VARCHAR(100) NULL ,

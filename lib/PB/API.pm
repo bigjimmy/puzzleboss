@@ -701,6 +701,13 @@ sub assign_solver_puzzle {
     if($rval < 0) {
 	    return $rval;
     }
+
+    #If this puzzle is NEW, we should change it to being worked
+    my $puzzle = get_puzzle($puzzname);
+    if ($puzzle->{"status"} eq "New"){
+	update_puzzle_part($puzzname,"status","Being worked");
+    }
+
 }
 
 sub _assign_solver_puzzle_db {    
