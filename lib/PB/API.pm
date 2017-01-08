@@ -15,8 +15,6 @@ use SQL::Yapp;
 
 my $dbh = DBI->connect('DBI:mysql:database=puzzlebitch'.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
 
-my $remoteuser = $ENV{'REMOTE_USER'} || "unknown user";
-
 my $EXCLUSIVE_LOCK = 2;
 my $UNLOCK = 8;
 
@@ -684,13 +682,20 @@ sub update_solver_part {
     my $id = shift;
     my $part = shift;
     my $val = shift;
+
+    my $remote_user = $ENV{'REMOTE_USER'};
 	
-	if ($part eq "puzz"){
-		return assign_solver_puzzle($val,$id);
-	}else{
-		#I don't know who you are.
-		return -7;
+    if ($part eq "puzz"){
+	#If this action is being taken by the solver herself, log it in the activity table
+	if (defined $remote_user && $id eq $remote_user){
+	    #apache is the source for interactions via the web UI
+	    _write_solver_activity($val,$id,"apache","interact");
 	}
+	return assign_solver_puzzle($val,$id);
+    }else{
+	#I don't know what you are.
+	return -7;
+    }
 }
 
 sub assign_solver_puzzle {
@@ -706,6 +711,25 @@ sub assign_solver_puzzle {
     my $puzzle = get_puzzle($puzzname);
     if ($puzzle->{"status"} eq "New"){
 	update_puzzle_part($puzzname,"status","Being worked");
+    }
+
+    return $rval;
+}
+
+sub _write_solver_activity {
+    my $puzzname = shift;
+    my $solver = shift;
+    my $source = shift;
+    my $type = shift;
+
+    my $sql = "INSERT INTO `activity` (`puzzle_id`, `solver_id`, `source`, `type`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?),?,?)";
+    my $c = $dbh->do($sql,undef,$puzzname,$solver,$source,$type);
+    if(defined($c)) {
+	debug_log("_write_solver_activity: dbh->do returned $c\n",2);
+	return(1);
+    } else {
+	debug_log("_write_solver_activity: dbh->do returned error: ".$dbh->errstr."\n",0);
+	return(-1);
     }
 
 }

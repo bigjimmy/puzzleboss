@@ -66,7 +66,7 @@ sub part_POST : Runmode {
 	my $json = $self->query->param('POSTDATA');
 	my $partref = $self->from_json($json);
 	if(exists($partref->{'data'})) {	
-		if(PB::API::update_solver_part($solvername,$part,$partref->{'data'}) < 0) {
+	    if(PB::API::update_solver_part($solvername,$part,$partref->{'data'}) < 0) {	
 			my $errmsg = "PB::REST::Solvers::part_POST: could not update $part for $solvername";
 			print STDERR $errmsg;
 			$error_status = 404;
