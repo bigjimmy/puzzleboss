@@ -82,17 +82,17 @@ Content-type: text/html
         <span id="logout_span">Not $remote_user? 
           <a href="https://wind-up-birds.org/saml/module.php/core/as_logout.php?AuthId=default-sp&ReturnTo=$selfuri">Logout</a> (or close browser)
         </span>
-        <p>Click on the spreadsheet icon (<img class="pi_icon" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img class="pi_icon" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
+        <p>Click on the spreadsheet icon (<img width=20 height=20 valign="middle" src="../images/spreadsheet.png" alt="spreadsheet">) to open the Google Spreadsheet or the puzzle icon (<img width=20 height=20 valign="middle" src="../images/puzzle.png" alt="puzzle">) to open the puzzle itself.</p>
         <p>Click on the status icon of a puzzle to learn more about who's working on the puzzle, or to let us know that you are working on it.</p>
         <span id="overview_legend">
         <b>Status icons: </b>
-        New (<img class="pi_icon" src="../images/new.png" alt="new">),
-        Being worked (<img class="pi_icon" src="../images/work.png" alt="being worked">),
-        Needs eyes (<img class="pi_icon" src="../images/eyes.png" alt="needs eyes">),
-	Critical (<img class="pi_icon" src="../images/critical.png" alt="critical">),
-	Unnecessary (<img class="pi_icon" src="../images/unnecessary.png" alt="unnecessary">),
-        Solved (<img class="pi_icon" src="../images/solved.png" alt="solved">),
-	WTF (<img class="pi_icon" src="../images/hazard.png" alt=WTF>)
+        New (<img width=20 height=20 valign="middle" src="../images/new.png" alt="new">),
+        Being worked (<img width=20 height=20 valign="middle" src="../images/work.png" alt="being worked">),
+        Needs eyes (<img width=20 height=20 valign="middle" src="../images/eyes.png" alt="needs eyes">),
+	Critical (<img width=20 height=20 valign="middle" src="../images/critical.png" alt="critical">),
+	Unnecessary (<img width=20 height=20 valign="middle" src="../images/unnecessary.png" alt="unnecessary">),
+        Solved (<img width=20 height=20 valign="middle" src="../images/solved.png" alt="solved">),
+	WTF (<img width=20 height=20 valign="middle" src="../images/hazard.png" alt=WTF>)
       </span>
     </div>
     
