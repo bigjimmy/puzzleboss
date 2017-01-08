@@ -115,7 +115,7 @@ define([
 		}else if (my_status == "Solved"){
 			html_msg = "<img class=\"pi_icon\" src=\"../images/solved.png\" title=\"Solved\" alt=\"solved\">";
 		}else if (my_status == "Critical"){
-			html_msg = "<img class=\"pi_icon\" src=\"../images/critical.jpg\" title=\"Critical\" alt=\"critical\">";
+			html_msg = "<img class=\"pi_icon\" src=\"../images/critical.png\" title=\"Critical\" alt=\"critical\">";
 		}else if (my_status == "Unnecessary"){
 			html_msg = "<img class=\"pi_icon\" src=\"../images/unnecessary.png\" title=\"Unnecessary\" alt=\"unnecessary\">";
 		}else if (my_status == "WTF"){
