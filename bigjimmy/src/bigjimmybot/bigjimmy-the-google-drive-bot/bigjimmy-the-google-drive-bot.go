@@ -6,6 +6,7 @@ import (
 	l4g "code.google.com/p/log4go"
 	"time"
 	"runtime"
+	"strings"
 )
 
 // Globals for command-line args 
@@ -16,6 +17,7 @@ var huntFolderTitle, huntFolderId string
 var googleDomain string
 var pbRestUri string
 var maxConcHttpRestReqs int
+var logLevel string
 
 // Global for logging
 var log l4g.Logger
@@ -53,13 +55,8 @@ func init() {
 	flag.StringVar(&pbRestUri, "pb_rest_uri", "", "Puzzlebitch REST interface URI")
 	flag.IntVar(&maxConcHttpRestReqs, "max_concurrent_req", 15, "Maximum concurrest HTTP REST requests")
 
-	
-	// Initialize logger TODO: set from flags
-	log = l4g.NewDefaultLogger(l4g.TRACE)
-	//log = l4g.NewDefaultLogger(l4g.DEBUG)
-	//log = l4g.NewDefaultLogger(l4g.INFO)
-	//log.AddFilter("log", l4g.FINE, l4g.NewFileLogWriter("example.log", true))
-	bigjimmybot.SetLog(log)
+	// Log verbosity
+	flag.StringVar(&logLevel, "log_level", "info", "Log level (error, warning, info, debug, trace)")
 
 	// channels
 	httpRestReqLimiter = make(chan int, maxConcHttpRestReqs)
@@ -76,6 +73,23 @@ You can assign or lookup a client ID from the Google APIs console: https://code.
 
 func main() {
 	flag.Parse()
+
+	// Initialize logger
+	logLevel = strings.ToLower(logLevel)
+	switch {
+	  case logLevel == "trace":
+	    log = l4g.NewDefaultLogger(l4g.TRACE)
+	  case logLevel == "debug":
+	    log = l4g.NewDefaultLogger(l4g.DEBUG)
+	  case logLevel == "info":
+	    log = l4g.NewDefaultLogger(l4g.INFO)
+	  case logLevel == "warning":
+	    log = l4g.NewDefaultLogger(l4g.WARNING)
+	  case logLevel == "error":
+	    log = l4g.NewDefaultLogger(l4g.ERROR)
+	}
+	//log.AddFilter("log", l4g.FINE, l4g.NewFileLogWriter("example.log", true))
+	bigjimmybot.SetLog(log)
 
 	// Connect to DB
 	log.Logf(l4g.TRACE, "main(): before OpenDB, %v goroutines.", runtime.NumGoroutine())
