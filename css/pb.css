@@ -121,7 +121,7 @@
 
 
 .round_container{
-    width: 670px;
+    width: 600px;
     margin: 4px;
     float: left;
     border:1px solid #aaa;
@@ -187,7 +187,7 @@
 .pi_answer{
     font-size: 16px;
     font-family: monospace;
-    max-width: 300px;
+    max-width: 240px;
     word-wrap: break-word;
 }
 
@@ -195,8 +195,8 @@
 }
 
 .pi_name{
-    width: 300px;
-    max-width: 300px;
+    width: 280px;
+    max-width: 280px;
     word-wrap: break-word;
     font-size: 16px;
     padding: 0.25ex;
@@ -221,8 +221,12 @@
 }
 
 .puzzle_popup_dialog{
-	width: 475px;
+	width: 470px;
         word-wrap: break-word;
+}
+
+.comment_formtextbox{
+    width: 350px;
 }
 
 .hidden_round .pi_container{

@@ -7,13 +7,14 @@ define([
 	   "dijit/Dialog", 
 	   "dijit/form/Button",
 	   "dijit/form/Select", 
+           "dijit/form/TextBox",
 	   "dojo/topic",
 	   "dojo/dom",
 	   "dojo/dom-construct",
 	   "dojo/dom-class",
 	   "dojo/domReady!",
        ], 
-    function(pbmrc, parser, connect, array, win, dialog, formbutton, formselect, topic, dom, domconstruct, domclass) {
+    function(pbmrc, parser, connect, array, win, dialog, formbutton, formselect, formtextbox, topic, dom, domconstruct, domclass) {
 
 	var wall; // Masonry element
 	var puzzstore; // IFWS which will be returned from pbmrc.pb_init()
@@ -324,7 +325,9 @@ define([
 							{value: 'New', label: 'New'},
 							{value: 'Being worked', label: 'Being worked'},
 							{value: 'Needs eyes', label: 'Needs eyes'},
-							{value: 'Solved', label:'Solved'},
+							/** Probably shouldn't be able to say, "Solved!" from this interface, because
+							    you can't enter the answer here (only through pb.pl).
+							   {value: 'Solved', label:'Solved'},**/
 							{value: 'Critical', label:'Critical'},
 							{value: 'Unnecessary', label:'Unnecessary'},
 							{value: 'WTF', label:'WTF'}
@@ -350,6 +353,16 @@ define([
                                                 puzzinfo_div.appendChild(domconstruct.create("p",
 							{innerHTML: "Location: "+ puzzstore.getValue(item, "xyzloc")} 
 						));
+					        var comment_div = domconstruct.create("div", {innerHTML: "PB notes: "});
+					        puzzinfo_div.appendChild(comment_div);
+					        var comment_formtextbox = new formtextbox({
+						    value: puzzstore.getValue(item,"comments"),
+						    class:"comment_formtextbox",
+						    onChange: function(){
+							puzzstore.setValue(item,"comments",comment_formtextbox.get("value"));
+						    }
+						});
+					        comment_div.appendChild(comment_formtextbox.domNode);
 					}
 			})
 				
@@ -488,7 +501,7 @@ define([
 	
 	var is_addpuzzle_patt = /^puzzles\/[^\/]*\/$/;
 	var is_any_rounds_patt = /^rounds/;
-	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers|puzzle_uri|drive_uri|xyzloc)$/;
+	var is_puzzleinteresting_patt = /^puzzles\/[^\/]*\/(answer|status|solvers|cursolvers|puzzle_uri|drive_uri|xyzloc|comments)$/;
 	var is_any_version_patt = /^version/;
 	function version_diff_filter(diff){
 	    // N.B. all pbmrcs must listen to version!
@@ -534,7 +547,7 @@ define([
 		    solverstore = ret.solverstore;
 
 	pbmrc.pb_log("starting Masonry");
-        wall = new Masonry ( document.getElementById('summary_layout'), { columnWidth: 700 });
+        wall = new Masonry ( document.getElementById('summary_layout'), { columnWidth: 630 });
 	pbmrc.pb_log("have Masonry:");
         pbmrc.pb_log(wall);
 
