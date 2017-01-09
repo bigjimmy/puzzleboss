@@ -29,16 +29,16 @@ func init() {
 	// get rounds from roundChan and shovel them into rounds map
 	go func(){
 		for true {
-			log.Logf(l4g.TRACE, "roundChan listener: waiting for new round\n")
+			log.Logf(l4g.TRACE, "roundChan listener: waiting for new round")
 			round := <-roundChan // this will block waiting for new rounds
-			log.Logf(l4g.INFO, "roundChan listener: got new round %+v\n", round)
+			log.Logf(l4g.INFO, "roundChan listener: got new round %+v", round)
 			
 			if round.Drive_id == "" {
 				// don't have a drive_id for this round
 				// create round folder in Google Drive 
 				roundFolderId, roundFolderUri, err := CreateRound(round.Name, huntFolderId)
 				if err != nil {
-					log.Logf(l4g.ERROR, "roundChan listener: could not create round [%v] in huntFolderId=[%v]: %v\n", round.Name, huntFolderId, err)
+					log.Logf(l4g.ERROR, "roundChan listener: could not create round [%v] in huntFolderId=[%v]: %v", round.Name, huntFolderId, err)
 					// retry 3 times
 					retry := 3
 					for err != nil && retry > 0 {
@@ -46,12 +46,12 @@ func init() {
 						roundWaitTimer := time.NewTimer(500 * time.Millisecond)
 						// block on timer channel
 						<-roundWaitTimer.C
-						log.Logf(l4g.ERROR, "roundChan listener: retrying CreateRound(%v, %v)\n", round.Name, huntFolderId)
+						log.Logf(l4g.ERROR, "roundChan listener: retrying CreateRound(%v, %v)", round.Name, huntFolderId)
 						roundFolderId, roundFolderUri, err = CreateRound(round.Name, huntFolderId)
 						
 					}
 					if err != nil {
-						l4g.Crashf("roundChan listener: retried CreateRound(%v, %v) 3 times and all failed -- bailing out!\n", round.Name, huntFolderId)
+						l4g.Crashf("roundChan listener: retried CreateRound(%v, %v) 3 times and all failed -- bailing out!", round.Name, huntFolderId)
 					}
 				} 
 				// creation should have succeeded
@@ -66,7 +66,7 @@ func init() {
 			rounds[round.Name] = round
 			roundsArrived++
 			
-			log.Logf(l4g.DEBUG, "roundChan listener: %v >= %v ?\n", roundsArrived, RoundCount)
+			log.Logf(l4g.DEBUG, "roundChan listener: %v >= %v ?", roundsArrived, RoundCount)
 			if roundsArrived >= RoundCount {
 				restGetRoundsDone<-1
 			}

@@ -29,9 +29,9 @@ func init() {
 	// get versions from versionChan and process them using PbGetVersionDiff
 	go func(){
 		for true {
-			log.Logf(l4g.TRACE, "versionChan listener: waiting for new version\n")
+			log.Logf(l4g.TRACE, "versionChan listener: waiting for new version")
 			version := <-versionChan // this will block waiting for new versions
-			log.Logf(l4g.INFO, "versionChan listener: got new version %v\n", version)
+			log.Logf(l4g.INFO, "versionChan listener: got new version %v", version)
 			Version = version
 			PbGetVersionDiff(version)
 		}
@@ -39,7 +39,7 @@ func init() {
 }
 
 func PbGetVersionDiff(version int64) (versionDiff *PBVersionDiff, err error) {
-	log.Logf(l4g.TRACE, "PbGetVersionDiff(version=%v)\n", version)
+	log.Logf(l4g.TRACE, "PbGetVersionDiff(version=%v)", version)
 	pbGetVersionUri := fmt.Sprintf("%v/version/%v/%v", pbRestUri, version-1, version)
 	versionDiff, err = pbGetVersionDiff(pbGetVersionUri)
 	return
@@ -52,10 +52,10 @@ func PbGetInitialVersionDiff() (versionDiff *PBVersionDiff, err error) {
 }
 
 func pbGetVersionDiff(pbGetVersionUri string) (versionDiff *PBVersionDiff, err error) {
-	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v)\n", pbGetVersionUri)
+	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v)", pbGetVersionUri)
 	pbGetVersionDiffLimiter<-1 // put a token in the limiting channel (this will block if buffer is full)
 	defer func() {
-		log.Logf(l4g.DEBUG, "pbGetVersionDiff: releasing token for pbGetVersionUri=%v\n", pbGetVersionUri)
+		log.Logf(l4g.DEBUG, "pbGetVersionDiff: releasing token for pbGetVersionUri=%v", pbGetVersionUri)
 		<-pbGetVersionDiffLimiter // release a token from the limiting channel
 	}()
 
@@ -69,45 +69,45 @@ func pbGetVersionDiff(pbGetVersionUri string) (versionDiff *PBVersionDiff, err e
 	// decode JSON
 	err = json.NewDecoder(resp.Body).Decode(&versionDiff)
 	if err != nil {
-		log.Logf(l4g.ERROR, "pbGetVersionDiff: error decoding JSON from pbrest response: %v\n", err)
+		log.Logf(l4g.ERROR, "pbGetVersionDiff: error decoding JSON from pbrest response: %v", err)
 		return
 	}
-	log.Logf(l4g.DEBUG, "pbGetVersionDiff: processed data from pbrest response: %+v\n", versionDiff)
+	log.Logf(l4g.DEBUG, "pbGetVersionDiff: processed data from pbrest response: %+v", versionDiff)
 	
 	// set new version (because we have the diff and are going to process it, so eventually this will be our version)
 	Version, err = strconv.ParseInt(versionDiff.To, 10, 0)
 	if err != nil {
-		log.Logf(l4g.ERROR, "pbGetVersionDiff: could not parse version [%v] as int: %v\n", versionDiff.To, err)
+		log.Logf(l4g.ERROR, "pbGetVersionDiff: could not parse version [%v] as int: %v", versionDiff.To, err)
 	}
 
-	log.Logf(l4g.DEBUG, "pbGetVersionDiff: have diff from %v to %v, processing entries.\n", versionDiff.From, versionDiff.To)
+	log.Logf(l4g.DEBUG, "pbGetVersionDiff: have diff from %v to %v, processing entries.", versionDiff.From, versionDiff.To)
 	roundsAddedP := false
 	puzzlesAddedP := false
 	solversAddedP := false
 	// process diff entries
 	for index, entry := range versionDiff.Diff {
-		log.Logf(l4g.DEBUG, "pbGetVersionDiff: processing [%v]th entry [%v]\n", index, entry)
+		log.Logf(l4g.DEBUG, "pbGetVersionDiff: processing [%v]th entry [%v]", index, entry)
 		modNamePart := strings.SplitN(entry, "/", 3)
 		mod := modNamePart[0]
 		name := modNamePart[1]
 		part := modNamePart[2]
-		log.Logf(l4g.DEBUG, "processSingleDiffEntry: mod=[%v] name=[%v] part=[%v]\n", mod, name, part)
+		log.Logf(l4g.DEBUG, "processSingleDiffEntry: mod=[%v] name=[%v] part=[%v]", mod, name, part)
 		if mod != "" && name != "" && part == "" { // addition of a puzzle, round, solver, or location
 			switch mod {
 			case "rounds": {
-					log.Logf(l4g.INFO, "pbGetVersionDiff: have new round name=[%v]\n", name)
+					log.Logf(l4g.INFO, "pbGetVersionDiff: have new round name=[%v]", name)
 					RoundCount++
 					roundsAddedP = true
 					go RestGetRound(name)
 				}
 			case "puzzles": {
-					log.Logf(l4g.INFO, "pbGetVersionDiff: have new puzzle name=[%v]\n", name)
+					log.Logf(l4g.INFO, "pbGetVersionDiff: have new puzzle name=[%v]", name)
 					PuzzleCount++
 					puzzlesAddedP = true
 					go RestGetPuzzle(name)
 				}
 			case "solvers": {
-					log.Logf(l4g.INFO, "pbGetVersionDiff: have new solver name=[%v]\n", name)
+					log.Logf(l4g.INFO, "pbGetVersionDiff: have new solver name=[%v]", name)
 					SolverCount++
 					solversAddedP = true
 					go RestGetSolver(name)

@@ -17,7 +17,7 @@ func OpenDB(dbUser string, dbPassword string, dbProtocol string, dbHost string, 
 	var err error
 	dbCon, err = sql.Open("mysql", mysqlDsn)
 	if err != nil {
-		l4g.Crashf("could not connect to mysql database with DSN %v: %v\n", mysqlDsn, err)
+		l4g.Crashf("could not connect to mysql database with DSN %v: %v", mysqlDsn, err)
 	}
 }
 func CloseDB() {
@@ -53,44 +53,31 @@ func DbSetConfig(key string, val string) (err error) {
 
 
 // Query/Report Activity
-func DbQueryActivity(key string) (val string, err error) {
-	var valNS sql.NullString
-	row := dbCon.QueryRow("SELECT `val` FROM `activity` WHERE `key` = '"+key+"'")
-	//defer row.Close()
-	err = row.Scan(&valNS)
-	if err != nil {
-		log.Logf(l4g.ERROR, "dbGetActivity: SELECT unsuccessful for [key=%v]: %v", key, err)
+func DbGetLastRevisedPuzzleForSolver(solverId string) (puzzle string, err error) {
+	var puzzleNS sql.NullString
+	err = dbCon.QueryRow("SELECT `puzzle`.`name` FROM `activity` JOIN `puzzle` ON `puzzle`.`id` = `activity`.`puzzle_id` WHERE `activity`.`solver_id` = '"+solverId+"' ORDER BY `activity`.`id` DESC LIMIT 1").Scan(&puzzleNS)
+	switch {
+	case err == sql.ErrNoRows:
+	     puzzle = ""
+	     err = nil
+	     return
+	case err != nil:
+		log.Logf(l4g.ERROR, "DbGetLastRevisedPuzzleForSolver: SELECT unsuccessful for [solver_id=%v]: %v", solverId, err)
 		return
 	}
-	if valNS.Valid {
-		val = valNS.String
+	if puzzleNS.Valid {
+		puzzle = puzzleNS.String
 	} else {
 		// null string
-		err = fmt.Errorf("dbGetActivity got NULL value for key %v", key)
+		err = fmt.Errorf("DbGetLastRevisedPuzzleForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
 	}
 	return
 }
-func ReportSolverPuzzleActivity(solverName string, puzzleName string, modifiedDate string, revisionId int64) {
+
+func DbReportSolverPuzzleActivity(solverName string, puzzleName string, modifiedDate string, revisionId int64) {
 	_, err := dbCon.Exec("INSERT INTO `activity` (`time`, `solver_id`, `puzzle_id`, `source`, `type`, `source_version`) VALUES (?, (SELECT `id` FROM `solver` WHERE `solver`.`fullname` LIKE ?), (SELECT `id` FROM `puzzle` WHERE `puzzle`.`name` LIKE ?), 'google', 'revise', ?)", modifiedDate, solverName, puzzleName, revisionId)
 	if err != nil {
 		log.Logf(l4g.ERROR, "ReportSolverPuzzleActivity: INSERT unsuccessful for solverName=[%v] puzzleName=[%v] modifiedDate=[%v] revisionId=[%v]: %v", solverName, puzzleName, modifiedDate, revisionId, err)
-	}
-	return
-}
-func DbReportActivity(key string) (val string, err error) {
-	var valNS sql.NullString
-	row := dbCon.QueryRow("SELECT `val` FROM `activity` WHERE `key` = '"+key+"'")
-	//defer row.Close()
-	row.Scan(&valNS)
-	if err != nil {
-		log.Logf(l4g.ERROR, "dbGetActivity: SELECT unsuccessful for [key=%v]: %v", key, err)
-		return
-	}
-	if valNS.Valid {
-		val = valNS.String
-	} else {
-		// null string
-		err = fmt.Errorf("dbGetActivity got NULL value for key %v", key)
 	}
 	return
 }

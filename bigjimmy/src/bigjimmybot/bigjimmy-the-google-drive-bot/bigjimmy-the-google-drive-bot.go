@@ -78,45 +78,45 @@ func main() {
 	flag.Parse()
 
 	// Connect to DB
-	log.Logf(l4g.TRACE, "main(): before OpenDB, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before OpenDB, %v goroutines.", runtime.NumGoroutine())
 	bigjimmybot.OpenDB(dbUser, dbPassword, dbProtocol, dbHost, dbPort, dbName)
 	defer bigjimmybot.CloseDB()
-	log.Logf(l4g.TRACE, "main(): after OpenDB, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): after OpenDB, %v goroutines.", runtime.NumGoroutine())
 
 	var err error
 
 	// Connect to Drive
 	// Ensure we have googleClientId and googleClientSecret (from command-line args or DB)
-	log.Logf(l4g.TRACE, "main(): before getting client id and secret, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before getting client id and secret, %v goroutines.", runtime.NumGoroutine())
 	if googleClientId == "" {
 		googleClientId, err = bigjimmybot.DbGetConfig("GOOGLE_CLIENT_ID")	
 		if err != nil {
-			log.Logf(l4g.ERROR, "attempt to get googleClientId from DB failed: %v\n", err)
+			log.Logf(l4g.ERROR, "attempt to get googleClientId from DB failed: %v", err)
 		}
 	}
 	if googleClientSecret == "" {
 		googleClientSecret, err = bigjimmybot.DbGetConfig("GOOGLE_CLIENT_SECRET")
 		if err != nil {
-			log.Logf(l4g.ERROR, "attempt to get googleClientSecret from DB failed: %v\n", err)
+			log.Logf(l4g.ERROR, "attempt to get googleClientSecret from DB failed: %v", err)
 		}
 	}
 	if googleClientId == "" || googleClientSecret == "" {
-		log.Logf(l4g.ERROR, "Please specify -google_client_id and -google_client_secret (or ensure they are in the DB and database connection is working)\n")
+		log.Logf(l4g.ERROR, "Please specify -google_client_id and -google_client_secret (or ensure they are in the DB and database connection is working)")
 		flag.Usage()
 		l4g.Crashf(usageMsg)
 	} else {
-		log.Logf(l4g.INFO, "Using google_client_id=%v and google_client_secret=%v\n", googleClientId, googleClientSecret)
+		log.Logf(l4g.INFO, "Using google_client_id=%v and google_client_secret=%v", googleClientId, googleClientSecret)
 	}
 	// Try to get google_domain (for permissions) from DB
 	if googleDomain == "" {
 		googleDomain, err = bigjimmybot.DbGetConfig("GOOGLE_DOMAIN")
 		if err != nil {
-			l4g.Crashf("Could not get pb_rest_uri from DB: %v\n", err)
+			l4g.Crashf("Could not get pb_rest_uri from DB: %v", err)
 		}
 	}
-	log.Logf(l4g.TRACE, "main(): before open drive, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before open drive, %v goroutines.", runtime.NumGoroutine())
 	bigjimmybot.OpenDrive(googleClientId, googleClientSecret, googleDomain, cacheFile)
-	log.Logf(l4g.TRACE, "main(): after open drive, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): after open drive, %v goroutines.", runtime.NumGoroutine())
 
 
 	// Setup PB REST client
@@ -124,7 +124,7 @@ func main() {
 	if pbRestUri == "" {
 		pbRestUri, err = bigjimmybot.DbGetConfig("PB_REST_URI")
 		if err != nil {
-			l4g.Crashf("Could not get pb_rest_uri from DB: %v\n", err)
+			l4g.Crashf("Could not get pb_rest_uri from DB: %v", err)
 		}
 	}
 	bigjimmybot.SetPbRestUri(pbRestUri)
@@ -142,76 +142,76 @@ func main() {
 		log.Logf(l4g.INFO, "you specified hunt_folder_title but we have hunt_folder_id so it is being ignored.")
 		huntFolderTitle = ""
 	}
-	log.Logf(l4g.TRACE, "main(): before getting hunt folder id, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before getting hunt folder id, %v goroutines.", runtime.NumGoroutine())
 	if huntFolderId == "" && huntFolderTitle != "" {
 		// huntFolderId neither specified nor in DB, but we do have title
 		// so get hunt folder ID from Google by looking it up by title
 		// or create it if it does not exist
-		log.Logf(l4g.INFO, "looking up google docs folder id for title %v\n", huntFolderTitle)
+		log.Logf(l4g.INFO, "looking up google docs folder id for title %v", huntFolderTitle)
 		huntFolderId, err = bigjimmybot.GetFolderIdByTitle(huntFolderTitle)
 		if err != nil {
 			if err, ok := err.(*bigjimmybot.ListError); ok {
 				if err.Found > 1 {
-					l4g.Crashf("more than one document matches %v\n", huntFolderTitle)
+					l4g.Crashf("more than one document matches %v", huntFolderTitle)
 				} else if err.Found == 0 {
-				        //l4g.Crashf("no hunt folder found for %v\n", huntFolderTitle)
-					log.Logf(l4g.INFO, "no hunt folder found for %v, creating it\n", huntFolderTitle)
+				        //l4g.Crashf("no hunt folder found for %v", huntFolderTitle)
+					log.Logf(l4g.INFO, "no hunt folder found for %v, creating it", huntFolderTitle)
 					var cferr error
 					huntFolderId, _, cferr = bigjimmybot.CreateHunt(huntFolderTitle)
 					if cferr != nil {
-						l4g.Crashf("could not create hunt folder for title [%v]: %v\n", huntFolderTitle, cferr)
+						l4g.Crashf("could not create hunt folder for title [%v]: %v", huntFolderTitle, cferr)
 					}
-					log.Logf(l4g.INFO, "hunt folder created\n")
+					log.Logf(l4g.INFO, "hunt folder created")
 				}
 			} else {
-				l4g.Crashf("an error occurred getting hunt folder ID: %v\n", err)
+				l4g.Crashf("an error occurred getting hunt folder ID: %v", err)
 			}
 		}
-		log.Logf(l4g.INFO, "hunt_folder_id: %v\n", huntFolderId)
+		log.Logf(l4g.INFO, "hunt_folder_id: %v", huntFolderId)
 		// DB doesn't yet have huntFolderId, set it if we have it 
 		if huntFolderId != "" {
 			err = bigjimmybot.DbSetConfig("google_hunt_folder_id", huntFolderId)
 			if err != nil {
-				l4g.Crashf("could not set hunt_folder_id in DB\n")
+				l4g.Crashf("could not set hunt_folder_id in DB")
 			}
 		}
 	}
-	log.Logf(l4g.TRACE, "main(): after getting hunt folder id, %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): after getting hunt folder id, %v goroutines.", runtime.NumGoroutine())
 	// set huntFolderId in bigjimmybot
 	bigjimmybot.SetHuntFolderId(huntFolderId)
 
 	// get initial version diff
-	log.Logf(l4g.TRACE, "main(): before bigjimmybot.PbGetInitialVersionDiff %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before bigjimmybot.PbGetInitialVersionDiff %v goroutines.", runtime.NumGoroutine())
 	bigjimmybot.PbGetInitialVersionDiff()
-	log.Logf(l4g.TRACE, "main(): after bigjimmybot.PbGetInitialVersionDiff %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): after bigjimmybot.PbGetInitialVersionDiff %v goroutines.", runtime.NumGoroutine())
 
 	// Start ControlServer main loop
 	// Ensure we have httpControlPort and httpControlPath
-	log.Logf(l4g.TRACE, "main(): before ensuring httpControlPort and httpControlPath %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before ensuring httpControlPort and httpControlPath %v goroutines.", runtime.NumGoroutine())
 	if httpControlPort == "" {
 		httpControlPort, err = bigjimmybot.DbGetConfig("BIGJIMMY_CONTROL_PORT")	
 		if err != nil {
-			log.Logf(l4g.ERROR, "attempt to get httpControlPort from DB failed: %v\n", err)
+			log.Logf(l4g.ERROR, "attempt to get httpControlPort from DB failed: %v", err)
 		}
 	}
 	if httpControlPath == "" {
 		httpControlPath, err = bigjimmybot.DbGetConfig("BIGJIMMY_CONTROL_PATH")
 		if err != nil {
-			log.Logf(l4g.ERROR, "attempt to get httpControlPath from DB failed: %v\n", err)
+			log.Logf(l4g.ERROR, "attempt to get httpControlPath from DB failed: %v", err)
 		}
 	}
 	if httpControlPort == "" || httpControlPath == "" {
-		log.Logf(l4g.ERROR, "Please specify -http_control_port and -http_control_path (or ensure they are in the DB and database connection is working)\n")
+		log.Logf(l4g.ERROR, "Please specify -http_control_port and -http_control_path (or ensure they are in the DB and database connection is working)")
 		flag.Usage()
 		l4g.Crashf(usageMsg)
 	} else {
-		log.Logf(l4g.INFO, "Using http_control_port=%v and http_control_path=%v\n", httpControlPort, httpControlPath)
+		log.Logf(l4g.INFO, "Using http_control_port=%v and http_control_path=%v", httpControlPort, httpControlPath)
 	}
-	log.Logf(l4g.TRACE, "main(): after ensuring httpControlPort and httpControlPath %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): after ensuring httpControlPort and httpControlPath %v goroutines.", runtime.NumGoroutine())
 
 	time.Sleep(5*time.Second)
-	log.Logf(l4g.TRACE, "main(): before bigjimmybot.ControlServer %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): before bigjimmybot.ControlServer %v goroutines.", runtime.NumGoroutine())
 	bigjimmybot.ControlServer(httpControlPort, httpControlPath)
-	log.Logf(l4g.TRACE, "main(): after bigjimmybot.ControlServer %v goroutines.\n", runtime.NumGoroutine())
+	log.Logf(l4g.TRACE, "main(): after bigjimmybot.ControlServer %v goroutines.", runtime.NumGoroutine())
 }
 

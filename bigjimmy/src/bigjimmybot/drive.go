@@ -27,10 +27,10 @@ func init() {
 }
 
 func resetOauthClient() {
-	log.Logf(l4g.INFO, "resetOauthClient()\n")
+	log.Logf(l4g.INFO, "resetOauthClient()")
 	select {
 	case resetSingleton <- 1: {
-			log.Logf(l4g.INFO, "resetOauthClient: attempting to reopen drive client\n")
+			log.Logf(l4g.INFO, "resetOauthClient: attempting to reopen drive client")
 			OpenDrive(GgoogleClientId, GgoogleClientSecret, googleWriterDomain, GcacheFile)
 			time.Sleep(5 * time.Second)
 			<- resetSingleton
@@ -69,7 +69,7 @@ func OpenDrive(googleClientId string, googleClientSecret string, googleDomain st
 	if err != nil {
 		// Get an authorization code from the user
 		authUrl := oauthConfig.AuthCodeURL("state")
-		log.Logf(l4g.INFO, "Go to the following link in your browser: %v\n", authUrl)
+		log.Logf(l4g.INFO, "Go to the following link in your browser: %v", authUrl)
 
 		// Read the code, and exchange it for a token.
 		log.Logf(l4g.INFO, "Enter verification code: ")
@@ -77,9 +77,9 @@ func OpenDrive(googleClientId string, googleClientSecret string, googleDomain st
 		fmt.Scanln(&code)
 		token, err = oauthTransport.Exchange(code)
 		if err != nil {
-			l4g.Crashf("An error occurred exchanging the code: %v\n", err)
+			l4g.Crashf("An error occurred exchanging the code: %v", err)
 		}
-		log.Logf(l4g.INFO, "Token is cached in %v\n", oauthConfig.TokenCache)
+		log.Logf(l4g.INFO, "Token is cached in %v", oauthConfig.TokenCache)
 	}
 
 	oauthTransport.Token = token
@@ -89,7 +89,7 @@ func OpenDrive(googleClientId string, googleClientSecret string, googleDomain st
 	// Create a new authorized Drive client.
 	driveSvc, err = drive.New(oauthClient)
 	if err != nil {
-		l4g.Crashf("An error occurred creating Drive client: %v\n", err)
+		l4g.Crashf("An error occurred creating Drive client: %v", err)
 	}
 }
 
@@ -98,7 +98,7 @@ func GetFolderIdByTitle(folderTitle string) (folderId string, err error) {
 	folderQuery := fmt.Sprintf("title = '%v' and mimeType = 'application/vnd.google-apps.folder'", folderTitle)
 	filelist, err := driveSvc.Files.List().Q(folderQuery).Do()
 	if err != nil {
-		log.Logf(l4g.ERROR, "an error occurred searching for [%v]: %v\n", folderQuery, err)
+		log.Logf(l4g.ERROR, "an error occurred searching for [%v]: %v", folderQuery, err)
 		return
 	}
 	if len(filelist.Items) != 1 {
@@ -116,10 +116,10 @@ func GetChildFolderIdByTitle(folderTitle string) (parentFolderId string, folderI
 	folderQuery := fmt.Sprintf("title = '%v' and mimeType = 'application/vnd.google-apps.folder'", folderTitle)
 	filelist, err := driveSvc.Children.List(parentFolderId).Q(folderQuery).Do()
 	if err != nil {
-		log.Logf(l4g.ERROR, "getFolderId: an error occurred searching for [%v]: %v\n", folderQuery, err)
+		log.Logf(l4g.ERROR, "getFolderId: an error occurred searching for [%v]: %v", folderQuery, err)
 	}
 	if len(filelist.Items) != 1 {
-		err = fmt.Errorf("Filelist query for [%v] returned %v items (expecting exactly 1)\n", folderQuery, len(filelist.Items)) 
+		err = fmt.Errorf("Filelist query for [%v] returned %v items (expecting exactly 1)", folderQuery, len(filelist.Items)) 
 	}
 	folderId = filelist.Items[0].Id
 	return 
@@ -127,7 +127,7 @@ func GetChildFolderIdByTitle(folderTitle string) (parentFolderId string, folderI
 
 type Revision struct {
 	Id string
-	LastModifyingUserName string
+	LastModifyingFullName string
 	ModifiedDate string
 }
 
@@ -138,7 +138,7 @@ func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
 	revisionList, err := driveSvc.Revisions.List(puzzleId).Do()
 
 	if err != nil {
-		log.Logf(l4g.ERROR, "GetPuzzleRevisions: an error occurred getting revisions list for puzzleId [%v]: %v\n", puzzleId, err)
+		log.Logf(l4g.ERROR, "GetPuzzleRevisions: an error occurred getting revisions list for puzzleId [%v]: %v", puzzleId, err)
 //		resetOauthClient()
 		return
 	}
@@ -146,7 +146,7 @@ func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
 	for _, rev := range revisionList.Items { 
 		var revision Revision
 		revision.Id = rev.Id
-		revision.LastModifyingUserName = rev.LastModifyingUserName
+		revision.LastModifyingFullName = rev.LastModifyingUserName
 		revision.ModifiedDate = rev.ModifiedDate
 		revisions = append(revisions, revision)
 	}
@@ -157,7 +157,7 @@ func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
 func GetNewPuzzleComments(puzzleId string) (commentList *drive.CommentList, err error) {
 	commentList, err = driveSvc.Comments.List(puzzleId).Do()
 	if err != nil {
-		log.Logf(l4g.ERROR, "GetPuzzleComments: an error occurred getting comments list for puzzleId [%v]\n", puzzleId)
+		log.Logf(l4g.ERROR, "GetPuzzleComments: an error occurred getting comments list for puzzleId [%v]", puzzleId)
 		return
 	}
 	
@@ -165,14 +165,14 @@ func GetNewPuzzleComments(puzzleId string) (commentList *drive.CommentList, err 
 }
 
 func CreateHunt(huntTitle string) (huntFolderId string, huntFolderUri string, err error) {
-	log.Logf(l4g.TRACE, "CreateHunt(huntTitle=%v)\n", huntTitle)
+	log.Logf(l4g.TRACE, "CreateHunt(huntTitle=%v)", huntTitle)
 	huntFolderId, huntFolderUri, err = CreateRootFile(huntTitle, "application/vnd.google-apps.folder")
 	if err != nil {
-		err = fmt.Errorf("CreateHunt: could not create hunt folder [%v]: %v\n", huntTitle, err)
+		err = fmt.Errorf("CreateHunt: could not create hunt folder [%v]: %v", huntTitle, err)
 	} else {
 		err = SetDomainWriterPermissions(huntFolderId)
 		if err != nil {
-			err = fmt.Errorf("CreateHunt: could not set permissions for hunt folder [%v]: %v\n", huntFolderId, err)
+			err = fmt.Errorf("CreateHunt: could not set permissions for hunt folder [%v]: %v", huntFolderId, err)
 		}
 	}
 	
@@ -180,14 +180,14 @@ func CreateHunt(huntTitle string) (huntFolderId string, huntFolderUri string, er
 }
 
 func CreateRound(roundName string, huntFolderId string) (roundFolderId string, roundFolderUri string, err error) {
-	log.Logf(l4g.TRACE, "CreateFolder(roundName=%v, huntFolderId=%v)\n", roundName, huntFolderId)
+	log.Logf(l4g.TRACE, "CreateFolder(roundName=%v, huntFolderId=%v)", roundName, huntFolderId)
 	roundFolderId, roundFolderUri, err = CreateFile(roundName, "application/vnd.google-apps.folder", huntFolderId)
 	if err != nil {
-		err = fmt.Errorf("CreateRound: could not create round folder [%v]: %v\n", roundName, err)
+		err = fmt.Errorf("CreateRound: could not create round folder [%v]: %v", roundName, err)
 	} else {
 		err = SetDomainWriterPermissions(roundFolderId)
 		if err != nil {
-			err = fmt.Errorf("CreateRound: could not set permissions for round folder [%v]: %v\n", roundFolderId, err)
+			err = fmt.Errorf("CreateRound: could not set permissions for round folder [%v]: %v", roundFolderId, err)
 		}
 	}
 
@@ -195,14 +195,14 @@ func CreateRound(roundName string, huntFolderId string) (roundFolderId string, r
 }
 
 func CreatePuzzle(puzzleName string, roundFolderId string) (puzzleSsId string, puzzleUri string, err error) {
-	log.Logf(l4g.TRACE, "CreatePuzzle(puzzleName=%v, roundFolderId=%v)\n", puzzleName, roundFolderId)
+	log.Logf(l4g.TRACE, "CreatePuzzle(puzzleName=%v, roundFolderId=%v)", puzzleName, roundFolderId)
 	puzzleSsId, puzzleUri, err = CreateFile(puzzleName, "application/vnd.google-apps.spreadsheet", roundFolderId)
 	if err != nil {
-		err = fmt.Errorf("CreatePuzzle: could not create puzzle ss [%v]: %v\n", puzzleName, err)
+		err = fmt.Errorf("CreatePuzzle: could not create puzzle ss [%v]: %v", puzzleName, err)
 	} else {
 		err = SetDomainWriterPermissions(puzzleSsId)
 		if err != nil {
-			err = fmt.Errorf("CreatePuzzle: could not set permissions for puzzle ss [%v]: %v\n", puzzleSsId, err)
+			err = fmt.Errorf("CreatePuzzle: could not set permissions for puzzle ss [%v]: %v", puzzleSsId, err)
 		}
 	}
 	
@@ -210,7 +210,7 @@ func CreatePuzzle(puzzleName string, roundFolderId string) (puzzleSsId string, p
 }
 
 func CreateRootFile(title string, mimeType string) (fileId string, fileUri string, err error) {
-	log.Logf(l4g.TRACE, "CreateRootFile(title=%v, mimeType=%v)\n", title, mimeType)
+	log.Logf(l4g.TRACE, "CreateRootFile(title=%v, mimeType=%v)", title, mimeType)
 	file := &drive.File{
 		Title:       title,
 		MimeType:    mimeType,
@@ -218,7 +218,7 @@ func CreateRootFile(title string, mimeType string) (fileId string, fileUri strin
 
 	file, err = driveSvc.Files.Insert(file).Do()
 	if err != nil {
-		err = fmt.Errorf("CreateRootFile: an error occurred creating file [%v] mimeType [%v]: %v\n", title, mimeType, err)
+		err = fmt.Errorf("CreateRootFile: an error occurred creating file [%v] mimeType [%v]: %v", title, mimeType, err)
 	}
 	fileId = file.Id
 	fileUri = file.AlternateLink
@@ -227,7 +227,7 @@ func CreateRootFile(title string, mimeType string) (fileId string, fileUri strin
 }
 
 func CreateFile(title string, mimeType string, parentId string) (fileId string, fileUri string, err error) {
-	log.Logf(l4g.TRACE, "CreateFile(title=%v, mimeType=%v, parentId=%v)\n", title, mimeType, parentId)
+	log.Logf(l4g.TRACE, "CreateFile(title=%v, mimeType=%v, parentId=%v)", title, mimeType, parentId)
 	file := &drive.File{
 		Title:       title,
 		MimeType:    mimeType,
@@ -238,7 +238,7 @@ func CreateFile(title string, mimeType string, parentId string) (fileId string, 
 	file.Parents = []*drive.ParentReference{parent}
 	file, err = driveSvc.Files.Insert(file).Do()
 	if err != nil {
-		err = fmt.Errorf("CreateFile: an error occurred creating file [%v] mimeType [%v] parentId [%v]: %v\n", title, mimeType, parentId, err)
+		err = fmt.Errorf("CreateFile: an error occurred creating file [%v] mimeType [%v] parentId [%v]: %v", title, mimeType, parentId, err)
 	} else {
 		fileId = file.Id
 		fileUri = strings.Replace(file.AlternateLink,"stormynight.org","wind-up-birds.org",-1)
@@ -258,10 +258,10 @@ func SetDomainWriterPermissions(fileId string) (err error) {
 		
 		permission, err = driveSvc.Permissions.Insert(fileId, permission).Do()
 		if err != nil {
-			err = fmt.Errorf("setDomainWriterPermissions: an error occurred setting domain writer permissions for fileid [%v]: %v\n", fileId, err)
+			err = fmt.Errorf("setDomainWriterPermissions: an error occurred setting domain writer permissions for fileid [%v]: %v", fileId, err)
 		}
 	} else {
-		log.Logf(l4g.INFO, "setDomainWriterPermissions: googleWriterDomain not set so writer permissions have not been given for fileId [%v]\n", fileId)
+		log.Logf(l4g.INFO, "setDomainWriterPermissions: googleWriterDomain not set so writer permissions have not been given for fileId [%v]", fileId)
 	}
 	
 	return
@@ -272,6 +272,6 @@ type ListError struct {
 	Found int // number of items found
 }
 func (nfe *ListError) Error() string {
-	return fmt.Sprintf("filelist query for [%v] returned %v items\n", nfe.Query, nfe.Found)
+	return fmt.Sprintf("filelist query for [%v] returned %v items", nfe.Query, nfe.Found)
 }
 
