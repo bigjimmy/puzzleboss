@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"database/sql"
 	"time"
-	_ "github.com/Go-SQL-Driver/MySQL"
+	_ "github.com/go-sql-driver/mysql"
 	l4g "code.google.com/p/log4go"
 )
 
@@ -14,7 +14,7 @@ var dbCon *sql.DB
 // Open/Close DB
 func OpenDB(dbUser string, dbPassword string, dbProtocol string, dbHost string, dbPort string, dbName string) {
 	// Connect to database
-	mysqlDsn := dbUser+":"+dbPassword+"@"+dbProtocol+"("+dbHost+":"+dbPort+")/"+dbName
+	mysqlDsn := dbUser+":"+dbPassword+"@"+dbProtocol+"("+dbHost+":"+dbPort+")/"+dbName+"?parseTime=true"
 	var err error
 	dbCon, err = sql.Open("mysql", mysqlDsn)
 	if err != nil {
@@ -61,14 +61,14 @@ func DbGetLastActivityForSolver(solverId string, activityType string) (puzzle st
 	     err = nil
 	     return
 	case err != nil:
-		log.Logf(l4g.ERROR, "DbGetLastInteractionPuzzleForSolver: SELECT unsuccessful for [solver_id=%v]: %v", solverId, err)
+		log.Logf(l4g.ERROR, "DbGetLastActivityForSolver: SELECT unsuccessful for [solver_id=%v]: %v", solverId, err)
 		return
 	}
 	if puzzleNS.Valid {
 		puzzle = puzzleNS.String
 	} else {
 		// null string
-		err = fmt.Errorf("DbGetLastInteractionPuzzleForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
+		err = fmt.Errorf("DbGetLastActivityForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
 	}
 	return
 }

@@ -6,7 +6,7 @@ import (
 	"html"
 	"encoding/json"
 	"strconv"
-	_ "github.com/Go-SQL-Driver/MySQL"
+	_ "github.com/go-sql-driver/mysql"
 	l4g "code.google.com/p/log4go"
 )
 
