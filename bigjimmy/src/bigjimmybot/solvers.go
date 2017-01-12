@@ -29,20 +29,21 @@ func init() {
 	// get solvers from solverChan, shovel them into solvers map, and dispatch to solver activity monitor
 	go func(){
 		for true {
-			log.Logf(l4g.TRACE, "solverChan listener: waiting for new solver")
-			solver := <-solverChan // this will block waiting for new solvers
-			log.Logf(l4g.TRACE, "solverChan listener: got new solver %+v", solver)
+			log.Logf(l4g.TRACE, "solverChan listener: waiting for new/updated solver")
+			solver := <-solverChan // this will block waiting for new/updated solvers
+			log.Logf(l4g.TRACE, "solverChan listener: got new/updated solver %+v", solver)
 			
 			if _, ok := solverActivityMonitorChans[solver.FullName]; !ok {
 			   log.Logf(l4g.TRACE, "solverChan listener: no activity monitor yet for solver.FullName: %v", solver.FullName)
 			   // setup a channel to pass solver updates to solver activity monitor
 			   solverActivityMonitorChans[solver.FullName] = make(chan *Solver, 10)
 			   // start a bigjimmy google drive monitor for this solver
-			   BigJimmySolverActivityMonitor(solver.FullName, solverActivityMonitorChans[solver.FullName])
+			   BigJimmySolverActivityMonitor(solver, solverActivityMonitorChans[solver.FullName])
 			}
 
 			// pass updated solver to existing or just created BigJimmySolverActivityMonitor
 			log.Logf(l4g.TRACE, "solverChan listener: sending solver on activity monitor chan: %+v", solver)
+			// TODO: only send the latest update for each solver in a batch
 			solverActivityMonitorChans[solver.FullName] <- solver
 			log.Logf(l4g.TRACE, "solverChan listener: solver sent: %+v", solver)
 

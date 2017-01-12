@@ -14,60 +14,73 @@ func init() {
 	puzzleRevisionSeenP = make(map[int64] bool, 500) 
 }
 
-func BigJimmySolverActivityMonitor(solverFullName string, solverActivityMonitorChan chan *Solver) {
-	log.Logf(l4g.INFO, "Creating BigJimmySolverActivityMonitor for solver %v", solverFullName)
-	var solver *Solver
+func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan chan *Solver) {
+	log.Logf(l4g.INFO, "Creating BigJimmySolverActivityMonitor for solver=%+v", solver)
 	go func() {
 		for true {
 			// set timer
 			updateTimer := time.NewTimer(10 * time.Minute)
 			
 			// wait for timer or solver update
-			log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solverFullName)
+			log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solver.FullName)
 			
 			select {
 			   case <-updateTimer.C:
-			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): timer went off!", solverFullName)
-			     // if we have a solver, do the activity update
-			     if solver != nil {
-  			       updateSolverActivity(solverFullName, solver)
-			     } else {
-			       log.Logf(l4g.WARNING, "BigJimmySolverActivityMonitor(%v) timer went off before receiving solver", solverFullName)
+			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): timer went off!", solver.FullName)
+			     // get a fresh solver whenever the timer goes off
+			     newSolver := RestGetSolverSync(solver.Name)
+			     if newSolver.FullName != solver.FullName {
+			        log.Logf(l4g.ERROR, "BigJimmySolverActivityMonitor(%v) new solver does not match! newSolver=%+v", solver.FullName, newSolver)
+			        // todo handle this error (need to update channel map)
 			     }
+			     solver = newSolver
+			     updateSolverActivity(solver)
 			   case solver = <-solverActivityMonitorChan:
-			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): have updated solver=%v", solverFullName, solver)
-			     updateSolverActivity(solverFullName, solver)
+			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): have updated solver=%+v", solver.FullName, solver)
+			     updateSolverActivity(solver)
 			}
 		}
 	}()
 }
 
-func updateSolverActivity(solverFullName string, solver *Solver) {
-	log.Logf(l4g.TRACE, "updateSolverActivity(%v): solver=%+v", solverFullName, solver)
-	if solverFullName != solver.FullName {
-	  log.Logf(l4g.ERROR, "updateSolverActivity solver name mismatch: solverFullName=%v solver.Name=%v", solverFullName, solver.FullName)
-	  return
-	}
+func updateSolverActivity(solver *Solver) {
+	log.Logf(l4g.TRACE, "updateSolverActivity(solver=%+v)", solver)
 
-	lastPuzzle, err := DbGetLastRevisedPuzzleForSolver(solver.Id)
+	lastRevisedPuzzle, lastRevisionTime, err := DbGetLastRevisedPuzzleForSolver(solver.Id)
 	if err != nil {
 	  log.Logf(l4g.ERROR, "updateSolverActivity: ERROR getting last revised puzzle for solver %v (%v)", solver.Id, solver.Name)
 	  return
 	}
 
-	if lastPuzzle == "" {
+	if lastRevisedPuzzle == "" {
 	  log.Logf(l4g.TRACE, "updateSolverActivity: no revision activity for solver %v", solver.Name)
 	  return
 	}
 
 
 	switch {
-	case solver.Puzz == lastPuzzle: 
-	  log.Logf(l4g.DEBUG, "updateSolverActivity: the last revision activity by %v was on puzzle %v, which is the puzzle solver is currently working on.", solver.Name, lastPuzzle)
+	case solver.Puzz == lastRevisedPuzzle: 
+	  log.Logf(l4g.DEBUG, "updateSolverActivity: the last revision activity by %v was on puzzle %v, which is the puzzle solver is currently working on.", solver.Name, lastRevisedPuzzle)
 	case solver.Puzz == "":
-	  log.Logf(l4g.INFO, "updateSolverActivity: the last revision activity by %v was on puzzle %v, but solver is not currently working on any puzzle.", solver.Name, lastPuzzle)
-	case solver.Puzz != lastPuzzle: 
-	  log.Logf(l4g.INFO, "updateSolverActivity: the last revision activity by %v was on puzzle %v, but solver is currently working on puzzle %v.", solver.Name, lastPuzzle, solver.Puzz)
+	  log.Logf(l4g.DEBUG, "updateSolverActivity: the last revision activity by %v was on puzzle %v, but solver is not currently working on any puzzle.", solver.Name, lastRevisedPuzzle)
+	  lastInteractedPuzzle, lastInteractionTime, err := DbGetLastInteractionPuzzleForSolver(solver.Id)
+	  if err != nil {
+	    log.Logf(l4g.ERROR, "updateSolverActivity: ERROR getting last interacted puzzle for solver %v (%v)", solver.Id, solver.Name)
+	    return
+	  }
+
+	  if lastInteractedPuzzle == "" {
+	    log.Logf(l4g.INFO, "updateSolverActivity: POSTing to REST - solver %v is now working on %v (revision as of %v, no interactions)!", solver.Name, lastRevisedPuzzle, lastRevisionTime)
+	    PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
+	    return
+	  } 
+
+	  if lastRevisionTime.After(lastInteractionTime) {
+	    log.Logf(l4g.INFO, "updateSolverActivity: POSTing to REST - solver %v is now working on %v! (revision as of %v at %v, last interaction with %v at %v)", solver.Name, lastRevisedPuzzle, lastRevisionTime, lastInteractedPuzzle, lastInteractionTime)
+	    PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
+	  }
+	case solver.Puzz != lastRevisedPuzzle: 
+	  log.Logf(l4g.INFO, "updateSolverActivity: the last revision activity by %v was on puzzle %v, but solver is currently working on puzzle %v.", solver.Name, lastRevisedPuzzle, solver.Puzz)
 	}
 
 	return
@@ -149,7 +162,7 @@ func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 
 func ReportSolverPuzzleActivity(solverFullName string, puzzleName string, modifiedDate string, revisionId int64) {
   log.Logf(l4g.TRACE, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v)", solverFullName, puzzleName, modifiedDate, revisionId)
-  DbReportSolverPuzzleActivity(solverFullName, puzzleName, modifiedDate, revisionId)
+  DbReportSolverPuzzleActivity(solverFullName, puzzleName, modifiedDate, revisionId, "revise")
 
   // notify activity monitor to update for this solver
   select {

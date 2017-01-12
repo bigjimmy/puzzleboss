@@ -17,6 +17,9 @@ var huntFolderTitle, huntFolderId string
 var googleDomain string
 var pbRestUri string
 var maxConcHttpRestReqs int
+var restRequestTimeoutSeconds time.Duration
+var restRequestRetries int
+var restRequestInitialRetryDelay time.Duration
 var logLevel string
 
 // Global for logging
@@ -51,9 +54,14 @@ func init() {
 	// Google domain (otional, will be read from DB)
 	flag.StringVar(&googleDomain, "google_domain", "", "Google Apps Domain")
 	
-	// PB settings (otional, will be read from DB)
+	// PB settings (optional, will be read from DB)
 	flag.StringVar(&pbRestUri, "pb_rest_uri", "", "Puzzlebitch REST interface URI")
 	flag.IntVar(&maxConcHttpRestReqs, "max_concurrent_req", 15, "Maximum concurrest HTTP REST requests")
+
+	// Not yet in DB - TODO: add to config DB
+	flag.DurationVar(&restRequestTimeoutSeconds, "rest_request_timeout", 60 * time.Second, "Timeout for HTTP REST requests")
+	flag.IntVar(&restRequestRetries, "rest_request_retries", 3, "Number of times to retry each REST request")
+	flag.DurationVar(&restRequestInitialRetryDelay, "rest_request_initial_retry_time", 2 * time.Second, "Delay before first retry of a REST request")
 
 	// Log verbosity
 	flag.StringVar(&logLevel, "log_level", "info", "Log level (error, warning, info, debug, trace)")

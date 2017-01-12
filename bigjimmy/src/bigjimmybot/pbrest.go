@@ -5,6 +5,7 @@ import (
 	"github.com/bigjimmy/restclient"
 )
 
+// todo update restclient/napping to v3
 var client *restclient.Client
 
 func init() {
@@ -62,7 +63,7 @@ func PbRestPost(path string, data interface{}) {
 	}
 }
 
-func RestGetRound(name string) {
+func RestGetRound(name string, roundChan chan *Round) {
 	log.Logf(l4g.TRACE, "RestGetRound(name=%v)", name)
 	httpRestReqLimiter<-1 // put a token in the limiting channel
 	defer func() {
@@ -98,7 +99,7 @@ func RestGetRound(name string) {
 
 
 
-func RestGetPuzzle(name string) {
+func RestGetPuzzle(name string, puzzleChan chan *Puzzle) {
 	log.Logf(l4g.DEBUG, "RestGetPuzzle: requesting token to fetch %v", name)
 	httpRestReqLimiter<-1 // put a token in the limiting channel
 	defer func() {
@@ -132,7 +133,15 @@ func RestGetPuzzle(name string) {
 	}
 }
 
-func RestGetSolver(name string) {
+func RestGetSolverSync(name string) (solver *Solver) {
+        mySolverChan := make(chan *Solver)
+	go RestGetSolver(name, mySolverChan)
+	solver = <-mySolverChan
+	close(mySolverChan)
+	return
+}
+
+func RestGetSolver(name string, solverChan chan *Solver) {
 	log.Logf(l4g.DEBUG, "RestGetSolver: requesting token to fetch %v", name)
 	httpRestReqLimiter<-1 // put a token in the limiting channel
 	defer func() {

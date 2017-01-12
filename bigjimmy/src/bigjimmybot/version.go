@@ -23,7 +23,7 @@ var pbGetVersionDiffLimiter chan int
 var versionChan chan int64
 
 func init() {
-	pbGetVersionDiffLimiter = make(chan int, 10) // only ten PbGetVersionDiff allowed to run at a time
+     //	pbGetVersionDiffLimiter = make(chan int, 10) // only ten PbGetVersionDiff allowed to run at a time
 	versionChan = make(chan int64, 500) // up to 500 versions can queue up for processing before we start blocking on the ControlServer
 
 	// get versions from versionChan and process them using PbGetVersionDiff
@@ -53,11 +53,13 @@ func PbGetInitialVersionDiff() (versionDiff *PBVersionDiff, err error) {
 
 func pbGetVersionDiff(pbGetVersionUri string) (versionDiff *PBVersionDiff, err error) {
 	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v)", pbGetVersionUri)
-	pbGetVersionDiffLimiter<-1 // put a token in the limiting channel (this will block if buffer is full)
-	defer func() {
-		log.Logf(l4g.DEBUG, "pbGetVersionDiff: releasing token for pbGetVersionUri=%v", pbGetVersionUri)
-		<-pbGetVersionDiffLimiter // release a token from the limiting channel
-	}()
+//	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v): waiting for rate limiter token", pbGetVersionUri)
+//	pbGetVersionDiffLimiter<-1 // put a token in the limiting channel (this will block if buffer is full)
+//	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v): have rate limiter token", pbGetVersionUri)
+//	defer func() {
+//		log.Logf(l4g.DEBUG, "pbGetVersionDiff: releasing token for pbGetVersionUri=%v", pbGetVersionUri)
+//		<-pbGetVersionDiffLimiter // release a token from the limiting channel
+//	}()
 
 	resp, err := httpClient.Get(pbGetVersionUri)
 	if err != nil {
@@ -65,6 +67,7 @@ func pbGetVersionDiff(pbGetVersionUri string) (versionDiff *PBVersionDiff, err e
 		return
 	}
 	defer resp.Body.Close()
+	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v): have response resp.Body=%v", pbGetVersionUri, resp.Body)
 	
 	// decode JSON
 	err = json.NewDecoder(resp.Body).Decode(&versionDiff)
@@ -72,7 +75,7 @@ func pbGetVersionDiff(pbGetVersionUri string) (versionDiff *PBVersionDiff, err e
 		log.Logf(l4g.ERROR, "pbGetVersionDiff: error decoding JSON from pbrest response: %v", err)
 		return
 	}
-	log.Logf(l4g.DEBUG, "pbGetVersionDiff: processed data from pbrest response: %+v", versionDiff)
+	log.Logf(l4g.TRACE, "pbGetVersionDiff(pbGetVersionUri=%v): processed data from pbrest response: %+v", pbGetVersionUri, versionDiff)
 	
 	// set new version (because we have the diff and are going to process it, so eventually this will be our version)
 	Version, err = strconv.ParseInt(versionDiff.To, 10, 0)
@@ -98,19 +101,19 @@ func pbGetVersionDiff(pbGetVersionUri string) (versionDiff *PBVersionDiff, err e
 					log.Logf(l4g.INFO, "pbGetVersionDiff: have new round name=[%v]", name)
 					RoundCount++
 					roundsAddedP = true
-					go RestGetRound(name)
+					go RestGetRound(name, roundChan)
 				}
 			case "puzzles": {
 					log.Logf(l4g.INFO, "pbGetVersionDiff: have new puzzle name=[%v]", name)
 					PuzzleCount++
 					puzzlesAddedP = true
-					go RestGetPuzzle(name)
+					go RestGetPuzzle(name, puzzleChan)
 				}
 			case "solvers": {
 					log.Logf(l4g.INFO, "pbGetVersionDiff: have new solver name=[%v]", name)
 					SolverCount++
 					solversAddedP = true
-					go RestGetSolver(name)
+					go RestGetSolver(name, solverChan)
 				}
 			}
 		}

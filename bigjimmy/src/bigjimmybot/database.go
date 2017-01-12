@@ -3,6 +3,7 @@ package bigjimmybot
 import (
 	"fmt"
 	"database/sql"
+	"time"
 	_ "github.com/Go-SQL-Driver/MySQL"
 	l4g "code.google.com/p/log4go"
 )
@@ -51,33 +52,42 @@ func DbSetConfig(key string, val string) (err error) {
 	return
 }
 
-
-// Query/Report Activity
-func DbGetLastRevisedPuzzleForSolver(solverId string) (puzzle string, err error) {
+func DbGetLastActivityForSolver(solverId string, activityType string) (puzzle string, timestamp time.Time, err error) {
 	var puzzleNS sql.NullString
-	err = dbCon.QueryRow("SELECT `puzzle`.`name` FROM `activity` JOIN `puzzle` ON `puzzle`.`id` = `activity`.`puzzle_id` WHERE `activity`.`solver_id` = '"+solverId+"' ORDER BY `activity`.`id` DESC LIMIT 1").Scan(&puzzleNS)
+	err = dbCon.QueryRow("SELECT `puzzle`.`name`, `activity`.`time` FROM `activity` JOIN `puzzle` ON `puzzle`.`id` = `activity`.`puzzle_id` WHERE `activity`.`solver_id` = ? AND `activity`.`type` = ? ORDER BY `activity`.`id` DESC LIMIT 1", solverId, activityType).Scan(&puzzleNS, &timestamp)
 	switch {
 	case err == sql.ErrNoRows:
 	     puzzle = ""
 	     err = nil
 	     return
 	case err != nil:
-		log.Logf(l4g.ERROR, "DbGetLastRevisedPuzzleForSolver: SELECT unsuccessful for [solver_id=%v]: %v", solverId, err)
+		log.Logf(l4g.ERROR, "DbGetLastInteractionPuzzleForSolver: SELECT unsuccessful for [solver_id=%v]: %v", solverId, err)
 		return
 	}
 	if puzzleNS.Valid {
 		puzzle = puzzleNS.String
 	} else {
 		// null string
-		err = fmt.Errorf("DbGetLastRevisedPuzzleForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
+		err = fmt.Errorf("DbGetLastInteractionPuzzleForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
 	}
 	return
 }
 
-func DbReportSolverPuzzleActivity(solverName string, puzzleName string, modifiedDate string, revisionId int64) {
-	_, err := dbCon.Exec("INSERT INTO `activity` (`time`, `solver_id`, `puzzle_id`, `source`, `type`, `source_version`) VALUES (?, (SELECT `id` FROM `solver` WHERE `solver`.`fullname` LIKE ?), (SELECT `id` FROM `puzzle` WHERE `puzzle`.`name` LIKE ?), 'google', 'revise', ?)", modifiedDate, solverName, puzzleName, revisionId)
+func DbGetLastInteractionPuzzleForSolver(solverId string) (puzzle string, timestamp time.Time, err error) {
+	puzzle, timestamp, err = DbGetLastActivityForSolver(solverId, "interact")
+	return
+}
+
+// Query/Report Puzzle Revision Activity
+func DbGetLastRevisedPuzzleForSolver(solverId string) (puzzle string, timestamp time.Time, err error) {
+	puzzle, timestamp, err = DbGetLastActivityForSolver(solverId, "revise")
+	return
+}
+
+func DbReportSolverPuzzleActivity(solverFullName string, puzzleName string, modifiedDate string, revisionId int64, activityType string) {
+	_, err := dbCon.Exec("INSERT INTO `activity` (`time`, `solver_id`, `puzzle_id`, `source`, `type`, `source_version`) VALUES (?, (SELECT `id` FROM `solver` WHERE `solver`.`fullname` LIKE ?), (SELECT `id` FROM `puzzle` WHERE `puzzle`.`name` LIKE ?), 'google', ?, ?)", modifiedDate, solverFullName, puzzleName, activityType, revisionId)
 	if err != nil {
-		log.Logf(l4g.ERROR, "ReportSolverPuzzleActivity: INSERT unsuccessful for solverName=[%v] puzzleName=[%v] modifiedDate=[%v] revisionId=[%v]: %v", solverName, puzzleName, modifiedDate, revisionId, err)
+		log.Logf(l4g.ERROR, "ReportSolverPuzzleActivity: INSERT unsuccessful for solverFullName=[%v] puzzleName=[%v] modifiedDate=[%v] revisionId=[%v] activityType=[%v]: %v", solverFullName, puzzleName, modifiedDate, revisionId, activityType, err)
 	}
 	return
 }
