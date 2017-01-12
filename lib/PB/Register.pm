@@ -276,7 +276,7 @@ sub confirm_validation : Runmode {
     # ok, let's create them!
     my $ldap_rval = PB::API::ldap_add_user($username, $firstname, $lastname, $email, $password);
     if($ldap_rval != 0) {
-	$html.=$q->p."Error adding user to LDAP.";
+	$html.=$q->p."<b>ERROR adding user to LDAP. Please report to benoc at alum.mit.edu or puzzleboss<b>";
     } else {
 	$html.=$q->p."User added to $PB::Config::REGISTER_LDAP_O LDAP.";
     }
@@ -284,7 +284,7 @@ sub confirm_validation : Runmode {
     # add to google apps for education
     my $google_rval = PB::API::google_add_user($username, $firstname, $lastname, $password);
     if($google_rval != 0) {
-	$html.=$q->p."Error adding user to google apps for education domain.";
+	$html.=$q->p."<b>ERROR adding user to google apps for education domain. Please report to benoc at alum.mit.edu or puzzleboss</b>";
     } else {
 	$html.=$q->p."User added to google apps for education domain ($PB::Config::REGISTER_LDAP_DOMAIN).";
     }
