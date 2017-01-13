@@ -23,7 +23,7 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 			updateTimer := time.NewTimer(1 * time.Minute)
 			
 			// wait for timer or solver update
-			log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solver.FullName)
+			log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solver.FullName)
 			
 			select {
 			   case <-updateTimer.C:
@@ -37,7 +37,7 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 			     solver = newSolver
 			     updateSolverActivity(solver)
 			   case solver = <-solverActivityMonitorChan:
-			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): have updated solver=%+v", solver.FullName, solver)
+			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): have updated solver=%+v", solver.FullName, solver)
 			     updateSolverActivity(solver)
 			}
 		}
