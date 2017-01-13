@@ -131,6 +131,7 @@ type Revision struct {
 	ModifiedDate string
 }
 
+// N.B. it seems we can only get lumped-together revision lists via the API: http://stackoverflow.com/questions/34955515/google-rest-api-v3-revisionslist-vs-show-more-detailed-revisions#34957303
 func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
 	// fields := "items/id,items/modifiedDate,items/lastModifyingUserName"
 

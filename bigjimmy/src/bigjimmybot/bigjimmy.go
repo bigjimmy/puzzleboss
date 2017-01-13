@@ -79,16 +79,23 @@ func updateSolverActivity(solver *Solver) {
 	  if ok {
 	    log.Logf(l4g.TRACE, "updateSolverActivity: solver %v is working on %v which is %v", solver.Name, puzzle.Name, puzzle.Status)
 	    if puzzle.Status == "Solved" {
+	      log.Logf(l4g.TRACE, "updateSolverActivity(%v): getting solve time for puzzle %v (%v)", solver.Name, puzzle.Id, puzzle.Name)
 	      solveTime, err := DbGetSolveTimeForPuzzle(puzzle.Id)
 	      if err != nil {
   	        log.Logf(l4g.WARNING, "updateSolverActivity(%v): could not get solve time for puzzle %v (%v): %v", solver.Name, puzzle.Id, puzzle.Name, err)
 	      }
+	      log.Logf(l4g.TRACE, "updateSolverActivity(%v): solve time for puzzle %v (%v) is %v (last revision by solver was at %v)", solver.Name, puzzle.Id, puzzle.Name, solveTime, lastRevisionTime)
 	      if lastRevisionTime.After(solveTime) {
 	        if lastRevisionTime.Sub(solveTime) > 5 * time.Minute {
 	          log.Logf(l4g.INFO, "updateSolverActivity: solver %v continued to work on puzzle %v for %v since it was solved", solver.Name, puzzle.Name, lastRevisionTime.Sub(solveTime))
 	          // TODO message solver and let them know the puzzle has been solved and ask them to work on something else or take a break
 	        }
 	      }
+	      timeSinceSolve := time.Since(solveTime)
+	      if timeSinceSolve > 5 * time.Minute {
+	        log.Logf(l4g.INFO, "updateSolverActivity: solver %v is still assigned to a solved puzzle (%v) after %v", solver.Name, solver.Puzz, timeSinceSolve)
+		// TODO message solver to just let them know the puzzle has been solved (only do this once!)
+	      }	 
 	    }
      	  } else {
 	    log.Logf(l4g.WARNING, "updateSolverActivity(%v): no information on puzzle %v yet", solver.Name, solver.Puzz)
@@ -99,8 +106,8 @@ func updateSolverActivity(solver *Solver) {
 	    // TODO: it has been a while since the last revision - is this solver still working or are they taking a break or working offline / out of sheets?
 
 	    // if it has been a very very long time since last revision, just set solver to taking a break
-	    if time.Since(lastRevisionTime) > 18 * time.Hour {
-	      // 18 hours is just took long to work on a puzzle without editing it, set this solver to taking a break (among other things, this should fix pre-hunt assignments)
+	    if time.Since(lastRevisionTime) > 12 * time.Hour {
+	      // 12 hours is just took long to work on a puzzle without editing it, set this solver to taking a break (among other things, this should fix pre-hunt assignments)
 	      log.Logf(l4g.INFO, "BIGJIMMY DECREES: solver %v is taking a break! (has been working on %v with no edits for %v)", solver.Name, solver.Puzz, time.Since(lastRevisionTime))
 	      log.Logf(l4g.DEBUG, "updateSolverActivity: calling PbRestPost to set solver %v to taking a break", solver.Name)
 	      PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: ""})
@@ -114,7 +121,7 @@ func updateSolverActivity(solver *Solver) {
 
 	// if it has been more than 6 hours since the revision, its too late to be useful
 	if time.Since(lastRevisionTime) > 6 * time.Hour {
-	  log.Logf(l4g.INFO, "updateSolverActivity: solver %v has not revised anything in more than six hours, no point checking for interactions (last revision time %v)", solver.FullName, lastRevisionTime)
+	  log.Logf(l4g.TRACE, "updateSolverActivity: solver %v has not revised anything in more than six hours, no point checking for interactions (last revision time %v)", solver.FullName, lastRevisionTime)
 	  return
 	}
 
@@ -157,6 +164,27 @@ func updateSolverActivity(solver *Solver) {
 	      return
 	    }
 	}
+
+	// get the status of the revised puzzle so we can check if it has been solved
+  	log.Logf(l4g.DEBUG, "updateSolverActivity(%v): attempting to lock puzzles for reading", solver.Name)
+ 	puzzles_lock.RLock()
+  	log.Logf(l4g.DEBUG, "updateSolverActivity(%v): have puzzles read lock", solver.Name)
+  	puzzle, ok := puzzles[lastRevisedPuzzle]
+  	puzzles_lock.RUnlock()
+  	log.Logf(l4g.DEBUG, "updateSolverActivity(%v): puzzles read lock released", solver.Name)
+	if ok {
+	  if puzzle.Status == "Solved" {
+	    // solver appears to be working on a solved puzzle, do not assign them to it
+	    log.Logf(l4g.INFO, "updateSolverActivity: solver %v %v %v (BUT THIS PUZZLE IS SOLVED!) (revision as of %v, last interaction was %v at %v), not changing active puzzle.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
+	    // TODO message solver to let them know the puzzle they are now working on is solved
+	    return	  
+	  } else {
+ 	    puzzles_lock.RLock()
+	    log.Logf(l4g.ERROR, "updateSolverActivity(%v): serious inconsistency - solver has revised a puzzle (%v) we don't know about. we know about puzzles: %+v", solver.Name, lastRevisedPuzzle, puzzles)
+  	    puzzles_lock.RUnlock()
+	  }
+	}
+	      
 
 	log.Logf(l4g.INFO, "BIGJIMMY DECREES: solver %v %v %v! (revision as of %v, last interaction was %v at %v), and so it shall be.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
 	log.Logf(l4g.DEBUG, "updateSolverActivity: calling PbRestPost to set solver %v to %v", solver.Name, lastRevisedPuzzle)
