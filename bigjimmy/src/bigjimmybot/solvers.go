@@ -1,6 +1,7 @@
 package bigjimmybot
 
 import (
+	"sync"
 	l4g "code.google.com/p/log4go"
 )
 
@@ -12,6 +13,7 @@ type Solver struct {
 }
 
 var solvers map[string] *Solver
+var solvers_lock sync.RWMutex
 var solverActivityMonitorChans map[string] chan *Solver
 
 var solverChan chan *Solver
@@ -47,7 +49,13 @@ func init() {
 			solverActivityMonitorChans[solver.FullName] <- solver
 			log.Logf(l4g.TRACE, "solverChan listener: solver sent: %+v", solver)
 
+  			log.Logf(l4g.DEBUG, "solverChan listener: attemping to lock solvers for writing")
+			solvers_lock.Lock()
+  			log.Logf(l4g.DEBUG, "solverChan listener: have solvers write lock")
 			solvers[solver.FullName] = solver
+			solvers_lock.Unlock()
+  			log.Logf(l4g.DEBUG, "solverChan listener: solvers write lock released")
+
 			solversArrived++
 			log.Logf(l4g.DEBUG, "solverChan listener: %v >= %v ?", solversArrived, SolverCount)
 			if solversArrived >= SolverCount {

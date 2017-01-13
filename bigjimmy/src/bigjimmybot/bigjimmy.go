@@ -20,7 +20,7 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 	go func() {
 		for true {
 			// set timer
-			updateTimer := time.NewTimer(1 * time.Minute)
+			updateTimer := time.NewTimer(2 * time.Minute)
 			
 			// wait for timer or solver update
 			log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solver.FullName)
@@ -28,13 +28,21 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 			select {
 			   case <-updateTimer.C:
 			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): timer went off!", solver.FullName)
-			     // get a fresh solver whenever the timer goes off
+			     // get a fresh solver whenever the timer goes off just in case it might be out of date
 			     newSolver := RestGetSolverSync(solver.Name)
 			     if newSolver.FullName != solver.FullName {
 			        log.Logf(l4g.ERROR, "BigJimmySolverActivityMonitor(%v) new solver does not match! newSolver=%+v", solver.FullName, newSolver)
 			        // todo handle this error (need to update channel map)
 			     }
 			     solver = newSolver
+			     // commit updated solver to global solvers map
+  			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): attemping to lock solvers for writing", solver.FullName)
+			     solvers_lock.Lock()
+  			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): have solvers write lock", solver.FullName)
+			     solvers[solver.FullName] = solver
+			     solvers_lock.Unlock()
+  			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): solvers write lock released", solver.FullName)
+
 			     updateSolverActivity(solver)
 			   case solver = <-solverActivityMonitorChan:
 			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): have updated solver=%+v", solver.FullName, solver)
@@ -60,8 +68,47 @@ func updateSolverActivity(solver *Solver) {
 	}
 
 	if solver.Puzz == lastRevisedPuzzle {
+	  // get current puzzle for solver so we can check if it has been solved
+  	  log.Logf(l4g.DEBUG, "updateSolverActivity(%v): attempting to lock puzzles for reading", solver.Name)
+ 	  puzzles_lock.RLock()
+  	  log.Logf(l4g.DEBUG, "updateSolverActivity(%v): have puzzles read lock", solver.Name)
+  	  puzzle, ok := puzzles[solver.Puzz]
+  	  puzzles_lock.RUnlock()
+  	  log.Logf(l4g.DEBUG, "updateSolverActivity(%v): puzzles read lock released", solver.Name)
+
+	  if ok {
+	    log.Logf(l4g.TRACE, "updateSolverActivity: solver %v is working on %v which is %v", solver.Name, puzzle.Name, puzzle.Status)
+	    if puzzle.Status == "Solved" {
+	      solveTime, err := DbGetSolveTimeForPuzzle(puzzle.Id)
+	      if err != nil {
+  	        log.Logf(l4g.WARNING, "updateSolverActivity(%v): could not get solve time for puzzle %v (%v): %v", solver.Name, puzzle.Id, puzzle.Name, err)
+	      }
+	      if lastRevisionTime.After(solveTime) {
+	        if lastRevisionTime.Sub(solveTime) > 5 * time.Minute {
+	          log.Logf(l4g.INFO, "updateSolverActivity: solver %v continued to work on puzzle %v for %v since it was solved", solver.Name, puzzle.Name, lastRevisionTime.Sub(solveTime))
+	          // TODO message solver and let them know the puzzle has been solved and ask them to work on something else or take a break
+	        }
+	      }
+	    }
+     	  } else {
+	    log.Logf(l4g.WARNING, "updateSolverActivity(%v): no information on puzzle %v yet", solver.Name, solver.Puzz)
+	  }
+	  
+	  if time.Since(lastRevisionTime) > 3 * time.Hour {
+	    log.Logf(l4g.INFO, "updateSolverActivity: solver %v is supposedly working on %v but has not edited sheets in %v (since %v)", solver.Name, solver.Puzz, time.Since(lastRevisionTime), lastRevisionTime)
+	    // TODO: it has been a while since the last revision - is this solver still working or are they taking a break or working offline / out of sheets?
+
+	    // if it has been a very very long time since last revision, just set solver to taking a break
+	    if time.Since(lastRevisionTime) > 18 * time.Hour {
+	      // 18 hours is just took long to work on a puzzle without editing it, set this solver to taking a break (among other things, this should fix pre-hunt assignments)
+	      log.Logf(l4g.INFO, "BIGJIMMY DECREES: solver %v is taking a break! (has been working on %v with no edits for %v)", solver.Name, solver.Puzz, time.Since(lastRevisionTime))
+	      log.Logf(l4g.DEBUG, "updateSolverActivity: calling PbRestPost to set solver %v to taking a break", solver.Name)
+	      PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: ""})
+	      log.Logf(l4g.DEBUG, "updateSolverActivity: back from PbRestPost setting solver %v to taking a break", solver.Name)
+	    }
+	    return
+	  }
 	  log.Logf(l4g.DEBUG, "updateSolverActivity: the last revision activity by %v was on puzzle %v, which is the puzzle solver is currently working on.", solver.Name, lastRevisedPuzzle)
-	  // TODO could check how long ago this was and contact solver if it has been a very long time to see if they are taking a break or working offline / out of sheets
 	  return
 	}
 
@@ -195,13 +242,21 @@ func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 func ReportSolverPuzzleActivity(solverFullName string, puzzleName string, modifiedDate string, revisionId int64) {
   log.Logf(l4g.TRACE, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v)", solverFullName, puzzleName, modifiedDate, revisionId)
   DbReportSolverPuzzleActivity(solverFullName, puzzleName, modifiedDate, revisionId, "revise")
+  
+  
+  log.Logf(l4g.DEBUG, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): attemping to lock solvers for reading", solverFullName, puzzleName, modifiedDate, revisionId)
+  solvers_lock.RLock()
+  log.Logf(l4g.DEBUG, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): have solvers read lock", solverFullName, puzzleName, modifiedDate, revisionId)
+  solver := solvers[solverFullName]
+  solvers_lock.RUnlock()
+  log.Logf(l4g.DEBUG, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): solvers read lock released", solverFullName, puzzleName, modifiedDate, revisionId)
 
   // notify activity monitor to update for this solver
   select {
-    case solverActivityMonitorChans[solverFullName] <- solvers[solverFullName]:
-      log.Logf(l4g.DEBUG, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): sending solvers[solverFullName]=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solvers[solverFullName])  
+    case solverActivityMonitorChans[solverFullName] <- solver:
+      log.Logf(l4g.DEBUG, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): sending solver=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solver)  
     default:
-      log.Logf(l4g.WARNING, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): failed to send solvers[solverFullName]=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solvers[solverFullName])  
+      log.Logf(l4g.WARNING, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): failed to send solver=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solver)  
   }
 }
 

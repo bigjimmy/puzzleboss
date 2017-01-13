@@ -1,6 +1,7 @@
 package bigjimmybot
 
 import (
+        "sync"
 	l4g "code.google.com/p/log4go"
 	"time"
 )
@@ -23,6 +24,7 @@ type Puzzle struct {
 }
 
 var puzzles map[string] *Puzzle
+var puzzles_lock sync.RWMutex
 var puzzleActivityMonitorChans map[string] chan *Puzzle
 
 var puzzleChan chan *Puzzle
@@ -50,7 +52,12 @@ func init() {
 				
 				// create spreadsheet in Google Drive 
 				// TODO: could be asynchronous?
+                                log.Logf(l4g.DEBUG, "puzzleChan listener: attempting to lock rounds for reading")
+				rounds_lock.RLock()
+                                log.Logf(l4g.DEBUG, "puzzleChan listener: have rounds read lock")
 				round, ok := rounds[puzzle.Round]
+				rounds_lock.RUnlock()
+                                log.Logf(l4g.DEBUG, "puzzleChan listener: rounds read lock released")
 				if !ok {
 					// perhaps puzzle was added to a non-existant round, or round folder creation is still pending
 					// TODO: what to do?  for now, just wait forever for it, blocking the puzzle creation loop
@@ -63,7 +70,12 @@ func init() {
 						log.Logf(l4g.INFO, "puzzleChan listener: retrying search for round [%v] in rounds map", puzzle.Round)
 						
 						// retry the rounds map
+						log.Logf(l4g.DEBUG, "puzzleChan listener (retry): attempting to lock rounds for reading")
+						rounds_lock.RLock()
+                                		log.Logf(l4g.DEBUG, "puzzleChan listener (retry): have rounds read lock")
 						round, ok = rounds[puzzle.Round]
+						rounds_lock.RUnlock()
+                                		log.Logf(l4g.DEBUG, "puzzleChan listener (retry): rounds read lock released")
 					}
 					// now we should have a round with a Drive_id
 				}
@@ -81,8 +93,13 @@ func init() {
 				go PbRestPost("puzzles/"+puzzle.Name+"/drive_uri", PartPost{Data: ssUri})
 			}
 			
-
+  			log.Logf(l4g.DEBUG, "puzzleChan listener: attemping to lock puzzles for writing")
+			puzzles_lock.Lock()
+  			log.Logf(l4g.DEBUG, "puzzleChan listener: have puzzles write lock")
 			puzzles[puzzle.Name] = puzzle
+			puzzles_lock.Unlock()
+  			log.Logf(l4g.DEBUG, "puzzleChan listener: puzzles write lock released")
+
 			puzzlesArrived++
 			log.Logf(l4g.DEBUG, "puzzleChan listener: %v >= %v ?", puzzlesArrived, PuzzleCount)
 			if puzzlesArrived >= PuzzleCount {

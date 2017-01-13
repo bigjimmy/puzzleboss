@@ -1,6 +1,7 @@
 package bigjimmybot
 
 import (
+        "sync"
 	l4g "code.google.com/p/log4go"
 	"time"
 )
@@ -14,7 +15,7 @@ type Round struct {
 }
 
 var rounds map[string] *Round
-
+var rounds_lock sync.RWMutex
 var roundChan chan *Round
 
 var restGetRoundsDone chan int
@@ -63,7 +64,13 @@ func init() {
 				go PbRestPost("rounds/"+round.Name+"/drive_uri", PartPost{Data: roundFolderUri})
 			} 
 
+  			log.Logf(l4g.DEBUG, "roundChan listener: attemping to lock rounds for writing")
+			rounds_lock.Lock()
+  			log.Logf(l4g.DEBUG, "roundChan listener: have rounds write lock")
 			rounds[round.Name] = round
+			rounds_lock.Unlock()
+  			log.Logf(l4g.DEBUG, "roundChan listener: rounds write lock released")
+
 			roundsArrived++
 			
 			log.Logf(l4g.DEBUG, "roundChan listener: %v >= %v ?", roundsArrived, RoundCount)
