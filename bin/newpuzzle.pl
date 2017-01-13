@@ -15,6 +15,9 @@ use Data::Validate::URI qw(is_uri);
 use PB::API;
 use PB::Config;
 
+my %known_errors;
+$known_errors{"-102"} = "Duplicate entry.";
+
 my $puzzid="";
 if(param('puzzid')) {
     $puzzid = param('puzzid');
@@ -62,7 +65,12 @@ if(($puzzid eq "") || ($round eq "") || ($cleanpuzzurl eq "") || ($round eq "Cho
     } else {
 	print header;
 	print start_html(-title=>"Add Puzzle");
-	print "Error adding puzzle $puzzid to round $round with url $cleanpuzzurl please retry. (error $rval)\n";
+	print "Error adding puzzle $puzzid to round $round with url $cleanpuzzurl please retry.\n<br>";
+	if ($known_errors{$rval}){
+	    print "Error: $known_errors{$rval}\n";
+	}else{
+	    print "Unknown error: code=$rval, search logs for \"_add_puzzle_db\" for more information.\n";
+	}
 	print newpuzzform($puzzid, $round, $puzzurl);
     }
     print end_html;

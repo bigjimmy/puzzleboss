@@ -83,7 +83,12 @@ sub _add_puzzle_db {
 	return(1);
     } else {
 	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri\n",0);
-	return(-1);
+	#make the error reporting a bit more descriptive downstream
+	if ($dbh->errstr =~ /Duplicate/){
+	    return (-2);
+	}else{
+	    return(-1);
+	}
     }
 }
 
@@ -105,10 +110,12 @@ sub add_puzzle {
 
     
     my $drive_uri = undef;
+    
+    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri);
 
-    if(_add_puzzle_db($id, $round, $puzzle_uri, $drive_uri) <= 0) {
+    if ($retvalue <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
-	    return(-101);
+	    return(-100+$retvalue);
     }
 
     my $round_drive_id = get_round($round)->{"drive_id"};

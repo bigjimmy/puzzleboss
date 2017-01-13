@@ -49,7 +49,7 @@ sub full_POST : Runmode {
 	} else {
 		# error adding round
 		PB::API::debug_log("Rounds.pm: full_POST: error adding round\n",1);
-		my $errmsg = "could not add $roundid, alphanumeric characters, only, please";
+		my $errmsg = "could not add $roundid, alphanumeric characters, only, please, and don't duplicate existing rounds";
 		print STDERR $errmsg;
 		$error_status = 404;
 		die $errmsg;
