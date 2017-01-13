@@ -39,21 +39,24 @@ print "<body>";
 
 my $activityrows_ref = PB::API::get_puzzle_activity($pid);
 my @activityrows = @$activityrows_ref;
+my $puzzlerow_ref = PB::API::get_puzzle_info($pid);
+my %puzzlerow = %$puzzlerow_ref;
+
+
+print "Google Docs Link: <a href='".$puzzlerow{'drive_uri'}."'>here</a><br>"; 
 
 if (@activityrows < 1){
-print "<body>No activity for puzzle or error fetching</body></html>";
+print "No activity for puzzle or error fetching</body></html>";
 exit;
 }
 
-my $puzzlerow_ref = PB::API::get_puzzle_info($pid);
-my %puzzlerow = %$puzzlerow_ref;
 print "Recent Activity History for puzzle: $puzzlerow{'name'}<br>\n";
 
 print "<table border=1><tr><th>Time</th><th>Solver</th><th>Activity</th></tr>\n";
 foreach my $rowref (@activityrows) {
 my %row = %$rowref;
 
-#Exclude "BigJimmy" robot activity
+#Exclude "BigJimmy" robot activity 
 next if $row{'solver'} eq "BigJimmy";
 print "<tr><td>$row{'time'}</td><td>$row{'solver'}</td><td>$row{'activity'}</td></tr>\n";
 }
