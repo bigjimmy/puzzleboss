@@ -1,7 +1,7 @@
 'use strict';
 
 //var huntstart = new Date("Jan 15 2016 12:00:00 GMT-0500 (EST)");
-var huntstart = new Date("Jan 15 2016 14:00:00 GMT-0500 (EST)");
+var huntstart = new Date("Jan 13 2017 14:00:00 GMT-0500 (EST)");
 var general_channel = 'general';
 
 // For testing
@@ -37,7 +37,8 @@ HuntTime.prototype.queueAnnouncements = function() {
     helper(2 * 24 * 60);
     helper(1 * 24 * 60);
 
-    // 1, 2, 6, and 12 hours before
+    // 1, 2, 6, 12, and 18 hours before
+    helper(18 * 60);
     helper(12 * 60);
     helper(6 * 60);
     helper(2 * 60);
@@ -104,7 +105,7 @@ function splitTime(ms) {
 
 function spelledTime(number, noun) {
 
-    return 'The coin was found by SETEC on Sunday at 6:53pm!\nHunt was 53 hours long.\n';
+    //return 'The coin was found by SETEC on Sunday at 6:53pm!\nHunt was 53 hours long.\n';
 
     var print_number = Math.round(Math.abs(number));
 
