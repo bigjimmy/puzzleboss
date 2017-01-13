@@ -134,7 +134,6 @@ type Revision struct {
 func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
 	// fields := "items/id,items/modifiedDate,items/lastModifyingUserName"
 
-	// FIXME: this call seems to leak goroutines!!!!
 	revisionList, err := driveSvc.Revisions.List(puzzleId).Do()
 
 	if err != nil {

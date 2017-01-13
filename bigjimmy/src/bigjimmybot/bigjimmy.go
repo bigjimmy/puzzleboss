@@ -27,7 +27,7 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 			
 			select {
 			   case <-updateTimer.C:
-			     log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): timer went off!", solver.FullName)
+			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): timer went off!", solver.FullName)
 			     // get a fresh solver whenever the timer goes off
 			     newSolver := RestGetSolverSync(solver.Name)
 			     if newSolver.FullName != solver.FullName {
@@ -127,16 +127,16 @@ func BigJimmyDrivePuzzleMonitor(puzzleName string, puzzleActivityMonitorChan cha
 		for true {
 			iteration++;
 			nGoRoutines := runtime.NumGoroutine()
-			log.Logf(l4g.TRACE, "BigJimmyDrivePuzzleMonitor: start of loop. currently in iteration %v for %v have %v goroutines.", iteration, puzzleName, nGoRoutines)
+			log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor: start of loop. currently in iteration %v for %v have %v goroutines.", iteration, puzzleName, nGoRoutines)
 
 			// set timer
 			updateTimer := time.NewTimer(30 * time.Second)
 			
 			// wait for timer or solver update
-			log.Logf(l4g.TRACE, "BigJimmyDrivePuzzleMonitor(%v): waiting for timer or puzzle update", puzzleName)
+			log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor(%v): waiting for timer or puzzle update", puzzleName)
 			select {
 			   case <-updateTimer.C:
-			     log.Logf(l4g.TRACE, "BigJimmyDrivePuzzleMonitor(%v): timer went off!", puzzleName)
+			     log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor(%v): timer went off!", puzzleName)
 			     // if we have a puzzle, do the activity update
 			     if puzzle != nil {
   			       updateDrivePuzzleActivity(puzzleName, puzzle)
@@ -162,9 +162,9 @@ func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 	
 	// check puzzle revisions and comments
 	if puzzle.Drive_id != "" {
-		log.Logf(l4g.TRACE, "main(): before GetNewPuzzleRevisions, %v goroutines", runtime.NumGoroutine())
+		log.Logf(l4g.DEBUG, "main(): before GetNewPuzzleRevisions, %v goroutines", runtime.NumGoroutine())
 		revisions, err = GetNewPuzzleRevisions(puzzle.Drive_id)
-		log.Logf(l4g.TRACE, "main(): after GetNewPuzzleRevisions, %v goroutines", runtime.NumGoroutine())
+		log.Logf(l4g.DEBUG, "main(): after GetNewPuzzleRevisions, %v goroutines", runtime.NumGoroutine())
 		if err != nil {
 			log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: error getting new puzzle revisions for puzzle [%v] id [%v]: %v", puzzle.Name, puzzle.Drive_id, err)
 			return
@@ -179,9 +179,9 @@ func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 			if revision.LastModifyingFullName != "" {
 				if !puzzleRevisionSeenP[revisionId] {
 					puzzleRevisionSeenP[revisionId] = true
-					log.Logf(l4g.TRACE, "main(): before ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
+					log.Logf(l4g.DEBUG, "main(): before ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
 					ReportSolverPuzzleActivity(revision.LastModifyingFullName, puzzle.Name, revision.ModifiedDate, revisionId)
-					log.Logf(l4g.TRACE, "main(): after ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
+					log.Logf(l4g.DEBUG, "main(): after ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
 				}
 			}
 		}
@@ -199,7 +199,7 @@ func ReportSolverPuzzleActivity(solverFullName string, puzzleName string, modifi
   // notify activity monitor to update for this solver
   select {
     case solverActivityMonitorChans[solverFullName] <- solvers[solverFullName]:
-      log.Logf(l4g.TRACE, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): sending solvers[solverFullName]=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solvers[solverFullName])  
+      log.Logf(l4g.DEBUG, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): sending solvers[solverFullName]=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solvers[solverFullName])  
     default:
       log.Logf(l4g.WARNING, "ReportSolverPuzzleActivity(solverFullName=%v, puzzleName=%v, modifiedDate=%v, revisionId=%v): failed to send solvers[solverFullName]=%+v on channel", solverFullName, puzzleName, modifiedDate, revisionId, solvers[solverFullName])  
   }
