@@ -88,13 +88,13 @@ func updateSolverActivity(solver *Solver) {
 	      if lastRevisionTime.After(solveTime) {
 	        if lastRevisionTime.Sub(solveTime) > 5 * time.Minute {
 	          log.Logf(l4g.INFO, "updateSolverActivity: solver %v continued to work on puzzle %v for %v since it was solved", solver.Name, puzzle.Name, lastRevisionTime.Sub(solveTime))
-	          // TODO message solver and let them know the puzzle has been solved and ask them to work on something else or take a break
+		  SendSlackSolverMessage(solver, fmt.Sprintf("You seem to still be editing a spreadsheet for a solved puzzle (%v)", puzzle.Name))
 	        }
 	      }
 	      timeSinceSolve := time.Since(solveTime)
-	      if timeSinceSolve > 5 * time.Minute {
+	      if timeSinceSolve > 15 * time.Minute {
 	        log.Logf(l4g.INFO, "updateSolverActivity: solver %v is still assigned to a solved puzzle (%v) after %v", solver.Name, solver.Puzz, timeSinceSolve)
-		// TODO message solver to just let them know the puzzle has been solved (only do this once!)
+		  SendSlackSolverMessage(solver, fmt.Sprintf("You are still assigned to a solved puzzle (%v), please update your status at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", puzzle.Name))
 	      }	 
 	    }
      	  } else {
@@ -103,7 +103,7 @@ func updateSolverActivity(solver *Solver) {
 	  
 	  if time.Since(lastRevisionTime) > 3 * time.Hour {
 	    log.Logf(l4g.INFO, "updateSolverActivity: solver %v is supposedly working on %v but has not edited sheets in %v (since %v)", solver.Name, solver.Puzz, time.Since(lastRevisionTime), lastRevisionTime)
-	    // TODO: it has been a while since the last revision - is this solver still working or are they taking a break or working offline / out of sheets?
+	    SendSlackSolverMessage(solver, fmt.Sprintf("Are you still working on %v or are you taking a break? Please update your status at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", solver.Puzz))
 
 	    // if it has been a very very long time since last revision, just set solver to taking a break
 	    if time.Since(lastRevisionTime) > 12 * time.Hour {
@@ -149,10 +149,10 @@ func updateSolverActivity(solver *Solver) {
 	case solver.Puzz == "":
 	    if lastInteractionTime.IsZero() {
 	      solverChangeMessage = "has joined the hunt and is now working on %v"
-	      // TODO: send a welcome message via slack with a URL to overview.pl and instructions on how to take a break
+	      SendSlackSolverMessage(solver, fmt.Sprintf("Welcome to the hunt! I see you are now working on %v. If you decide to take a break, please let us know by changing your status at https://wind-up-birds.org/puzzleboss/bin/overview.pl", lastRevisedPuzzle))
 	    } else {
 	      solverChangeMessage = "is done taking a break and is now working on"
-	      // TODO: if the break was long, could send a welcome back message via slack with hunt status
+	      SendSlackSolverMessage(solver, "Welcome back from your break!")
 	    }
 	case solver.Puzz != lastRevisedPuzzle: 
 	    // revision was to a puzzle other than the one the solver is supposedly currently working on
@@ -176,7 +176,7 @@ func updateSolverActivity(solver *Solver) {
 	  if puzzle.Status == "Solved" {
 	    // solver appears to be working on a solved puzzle, do not assign them to it
 	    log.Logf(l4g.INFO, "updateSolverActivity: solver %v %v %v (BUT THIS PUZZLE IS SOLVED!) (revision as of %v, last interaction was %v at %v), not changing active puzzle.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
-	    // TODO message solver to let them know the puzzle they are now working on is solved
+	    SendSlackSolverMessage(solver, fmt.Sprintf("The puzzle you are working on (%v) has been solved. Find a new puzzle at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", puzzle.Name))
 	    return	  
 	  } else {
  	    puzzles_lock.RLock()
@@ -187,6 +187,7 @@ func updateSolverActivity(solver *Solver) {
 	      
 
 	log.Logf(l4g.INFO, "BIGJIMMY DECREES: solver %v %v %v! (revision as of %v, last interaction was %v at %v), and so it shall be.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
+	SendSlackSolverMessage(solver, fmt.Sprintf("I notice you are working on the spreadsheet for %v, so I'm assigning you to it!", lastRevisedPuzzle))
 	log.Logf(l4g.DEBUG, "updateSolverActivity: calling PbRestPost to set solver %v to %v", solver.Name, lastRevisedPuzzle)
 	PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
 	log.Logf(l4g.DEBUG, "updateSolverActivity: back from PbRestPost setting solver %v to %v", solver.Name, lastRevisedPuzzle)

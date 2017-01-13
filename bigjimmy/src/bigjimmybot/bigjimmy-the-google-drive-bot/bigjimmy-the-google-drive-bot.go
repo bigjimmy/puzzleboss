@@ -20,6 +20,7 @@ var maxConcHttpRestReqs int
 var restRequestTimeoutSeconds time.Duration
 var restRequestRetries int
 var restRequestInitialRetryDelay time.Duration
+var slackToken string
 var logLevel string
 
 // Global for logging
@@ -51,8 +52,11 @@ func init() {
 	flag.StringVar(&huntFolderTitle, "pb_hunt_title", "", "Hunt Folder Title")
 	flag.StringVar(&huntFolderId, "hunt_drive_id", "", "Hunt Folder Drive ID")
 
-	// Google domain (otional, will be read from DB)
+	// Google domain (optional, will be read from DB)
 	flag.StringVar(&googleDomain, "google_domain", "", "Google Apps Domain")
+
+	// slack token (optional , will be read from DB)
+	flag.StringVar(&slackToken, "slack_token", "", "Token for Slack API access")
 	
 	// PB settings (optional, will be read from DB)
 	flag.StringVar(&pbRestUri, "pb_rest_uri", "", "Puzzlebitch REST interface URI")
@@ -133,7 +137,7 @@ func main() {
 	if googleDomain == "" {
 		googleDomain, err = bigjimmybot.DbGetConfig("GOOGLE_DOMAIN")
 		if err != nil {
-			l4g.Crashf("Could not get pb_rest_uri from DB: %v", err)
+			l4g.Crashf("Could not get google_domain from DB: %v", err)
 		}
 	}
 	log.Logf(l4g.TRACE, "main(): before open drive, %v goroutines.", runtime.NumGoroutine())
@@ -230,6 +234,15 @@ func main() {
 		log.Logf(l4g.INFO, "Using http_control_port=%v and http_control_path=%v", httpControlPort, httpControlPath)
 	}
 	log.Logf(l4g.TRACE, "main(): after ensuring httpControlPort and httpControlPath %v goroutines.", runtime.NumGoroutine())
+
+	// Try to get slack_token from DB
+	if slackToken == "" {
+		slackToken, err = bigjimmybot.DbGetConfig("BIGJIMMY_SLACK_TOKEN")
+		if err != nil {
+			l4g.Crashf("Could not get slackToken (BIGJIMMY_SLACK_TOKEN) from DB: %v", err)
+		}
+	}
+	go bigjimmybot.SlackBot(slackToken)
 
 	time.Sleep(5*time.Second)
 	log.Logf(l4g.TRACE, "main(): before bigjimmybot.ControlServer %v goroutines.", runtime.NumGoroutine())
