@@ -54,10 +54,11 @@ func DbSetConfig(key string, val string) (err error) {
 
 func DbGetLastActivityForSolver(solverId string, activityType string) (puzzle string, timestamp time.Time, err error) {
 	var puzzleNS sql.NullString
-	err = dbCon.QueryRow("SELECT `puzzle`.`name`, `activity`.`time` FROM `activity` JOIN `puzzle` ON `puzzle`.`id` = `activity`.`puzzle_id` WHERE `activity`.`solver_id` = ? AND `activity`.`type` = ? ORDER BY `activity`.`id` DESC LIMIT 1", solverId, activityType).Scan(&puzzleNS, &timestamp)
+	err = dbCon.QueryRow("SELECT `puzzle`.`name`, `activity`.`time` FROM `activity` LEFT JOIN `puzzle` ON `puzzle`.`id` = `activity`.`puzzle_id` WHERE `activity`.`solver_id` = ? AND `activity`.`type` = ? ORDER BY `activity`.`time` DESC LIMIT 1", solverId, activityType).Scan(&puzzleNS, &timestamp)
 	switch {
 	case err == sql.ErrNoRows:
 	     puzzle = ""
+	     // returned timestamp will be zero time, which is a very long time ago
 	     err = nil
 	     return
 	case err != nil:
@@ -67,8 +68,10 @@ func DbGetLastActivityForSolver(solverId string, activityType string) (puzzle st
 	if puzzleNS.Valid {
 		puzzle = puzzleNS.String
 	} else {
-		// null string
-		err = fmt.Errorf("DbGetLastActivityForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
+		// the null puzzle is ok
+		log.Logf(l4g.DEBUG, "DbGetLastActivityForSolver: got NULL value for puzzle searching for last activity for solverId=%v", solverId)
+		puzzle = ""
+		return
 	}
 	return
 }

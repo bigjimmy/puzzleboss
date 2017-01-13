@@ -2,6 +2,7 @@ package bigjimmybot
 
 import (
 	l4g "code.google.com/p/log4go"
+	"fmt"
 	"time"
 	"strconv"
 	"runtime"
@@ -19,7 +20,7 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 	go func() {
 		for true {
 			// set timer
-			updateTimer := time.NewTimer(10 * time.Minute)
+			updateTimer := time.NewTimer(1 * time.Minute)
 			
 			// wait for timer or solver update
 			log.Logf(l4g.TRACE, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solver.FullName)
@@ -48,41 +49,72 @@ func updateSolverActivity(solver *Solver) {
 
 	lastRevisedPuzzle, lastRevisionTime, err := DbGetLastRevisedPuzzleForSolver(solver.Id)
 	if err != nil {
-	  log.Logf(l4g.ERROR, "updateSolverActivity: ERROR getting last revised puzzle for solver %v (%v)", solver.Id, solver.Name)
+	  log.Logf(l4g.ERROR, "updateSolverActivity: ERROR getting last revised puzzle for solver %v (%v): %v", solver.Id, solver.Name, err)
 	  return
 	}
 
-	if lastRevisedPuzzle == "" {
+	// if there is no revision activity, no reason to proceed
+	if lastRevisionTime.IsZero() {
 	  log.Logf(l4g.TRACE, "updateSolverActivity: no revision activity for solver %v", solver.Name)
 	  return
 	}
 
-
-	switch {
-	case solver.Puzz == lastRevisedPuzzle: 
+	if solver.Puzz == lastRevisedPuzzle {
 	  log.Logf(l4g.DEBUG, "updateSolverActivity: the last revision activity by %v was on puzzle %v, which is the puzzle solver is currently working on.", solver.Name, lastRevisedPuzzle)
-	case solver.Puzz == "":
-	  log.Logf(l4g.DEBUG, "updateSolverActivity: the last revision activity by %v was on puzzle %v, but solver is not currently working on any puzzle.", solver.Name, lastRevisedPuzzle)
-	  lastInteractedPuzzle, lastInteractionTime, err := DbGetLastInteractionPuzzleForSolver(solver.Id)
-	  if err != nil {
-	    log.Logf(l4g.ERROR, "updateSolverActivity: ERROR getting last interacted puzzle for solver %v (%v)", solver.Id, solver.Name)
-	    return
-	  }
-
-	  if lastInteractedPuzzle == "" {
-	    log.Logf(l4g.INFO, "updateSolverActivity: POSTing to REST - solver %v is now working on %v (revision as of %v, no interactions)!", solver.Name, lastRevisedPuzzle, lastRevisionTime)
-	    PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
-	    return
-	  } 
-
-	  if lastRevisionTime.After(lastInteractionTime) {
-	    log.Logf(l4g.INFO, "updateSolverActivity: POSTing to REST - solver %v is now working on %v! (revision as of %v at %v, last interaction with %v at %v)", solver.Name, lastRevisedPuzzle, lastRevisionTime, lastInteractedPuzzle, lastInteractionTime)
-	    PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
-	  }
-	case solver.Puzz != lastRevisedPuzzle: 
-	  log.Logf(l4g.INFO, "updateSolverActivity: the last revision activity by %v was on puzzle %v, but solver is currently working on puzzle %v.", solver.Name, lastRevisedPuzzle, solver.Puzz)
+	  // TODO could check how long ago this was and contact solver if it has been a very long time to see if they are taking a break or working offline / out of sheets
+	  return
 	}
 
+	// if it has been more than 6 hours since the revision, its too late to be useful
+	if time.Since(lastRevisionTime) > 6 * time.Hour {
+	  log.Logf(l4g.INFO, "updateSolverActivity: solver %v has not revised anything in more than six hours, no point checking for interactions (last revision time %v)", solver.FullName, lastRevisionTime)
+	  return
+	}
+
+	// get last interaction
+	lastInteractedPuzzle, lastInteractionTime, err := DbGetLastInteractionPuzzleForSolver(solver.Id)
+	if err != nil {
+	  log.Logf(l4g.ERROR, "updateSolverActivity: ERROR getting last interacted puzzle for solver %v (%v): %v", solver.Id, solver.Name, err)
+   	  return
+	}
+	lastInteractedDesc := "on puzzle "+lastInteractedPuzzle
+	if lastInteractedPuzzle == "" {
+	  lastInteractedDesc = "taking a break"
+	}
+
+	log.Logf(l4g.DEBUG, "updateSolverActivity: have lastRevisedPuzzle=[%v] lastRevisionTime=[%v] lastInteractedPuzzle=[%v] lastInteractionTime=[%v] lastInteractedDesc=[%v] for solver=[%+v]", lastRevisedPuzzle, lastRevisionTime, lastInteractedPuzzle, lastInteractionTime, lastInteractedDesc, solver)
+
+	// if interaction is more recent than revision, we aren't interested, yo.
+	if !lastRevisionTime.After(lastInteractionTime) {
+	  log.Logf(l4g.DEBUG, "updateSolverActivity: interaction more recent than puzzle revision for solver %v, taking no action", solver.Name)
+	  return
+	}
+
+	solverChangeMessage := ""
+  	switch {
+	case solver.Puzz == "":
+	    if lastInteractionTime.IsZero() {
+	      solverChangeMessage = "has joined the hunt and is now working on %v"
+	      // TODO: send a welcome message via slack with a URL to overview.pl and instructions on how to take a break
+	    } else {
+	      solverChangeMessage = "is done taking a break and is now working on"
+	      // TODO: if the break was long, could send a welcome back message via slack with hunt status
+	    }
+	case solver.Puzz != lastRevisedPuzzle: 
+	    // revision was to a puzzle other than the one the solver is supposedly currently working on
+	    if lastRevisionTime.Sub(lastInteractionTime) > 5 * time.Minute {
+	      solverChangeMessage = fmt.Sprintf("was working on %v but is now working on", solver.Puzz)
+	    } else {
+	      // interaction was within 5 minutes of revision, do not override
+	      log.Logf(l4g.DEBUG, "updateSolverActivity: solver %v had explicit puzzle interaction (%v) just prior to revision (to %v at %v), not making any changes", solver.Name, lastInteractedDesc, lastRevisedPuzzle, lastRevisionTime)
+	      return
+	    }
+	}
+
+	log.Logf(l4g.INFO, "BIGJIMMY DECREES: solver %v %v %v! (revision as of %v, last interaction was %v at %v), and so it shall be.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
+	log.Logf(l4g.DEBUG, "updateSolverActivity: calling PbRestPost to set solver %v to %v", solver.Name, lastRevisedPuzzle)
+	PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
+	log.Logf(l4g.DEBUG, "updateSolverActivity: back from PbRestPost setting solver %v to %v", solver.Name, lastRevisedPuzzle)
 	return
 }
 
