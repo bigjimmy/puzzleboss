@@ -28,7 +28,10 @@ var slackChannelNames_lock sync.RWMutex
 
 var slackBigjimmyChannelId string
 var slackGeneralChannelId string
+
 var slackBigjimmyBotUserId string
+var slackDebugUserId string
+var slackDebugDirectMessageId string
 
 var whitespaceRe *regexp.Regexp
 var nonAZRe *regexp.Regexp
@@ -107,6 +110,20 @@ func SlackBot(slackToken string) (err error) {
 
 	// connect to real-time messaging (RTM)
 	rtm := slackApi.NewRTM()
+
+	// direct message channel to jrandall for debugging
+	slackIdsByName_lock.RLock()
+	slackDebugUserId, ok = slackIdsByName["jrandall"] // todo make this an option
+	slackIdsByName_lock.RUnlock()
+	if !ok {
+		log.Logf(l4g.ERROR, "SlackBot: failed to get slack id for jrandall: %v (EXITING SLACKBOT)", err)
+		return
+	}
+	_, _, slackDebugDirectMessageId, err = rtm.OpenIMChannel(slackDebugUserId)
+	if err != nil {
+		log.Logf(l4g.ERROR, "SlackBot: failed to open an IM channel to id %v: %v (EXITING SLACKBOT)", slackDebugUserId, err)
+		return
+	}
 
 	// start a goroutine to manage the RTM connection
 	go rtm.ManageConnection()
@@ -188,10 +205,10 @@ RTMLoop:
 				log.Logf(l4g.TRACE, "handleMessages: Connecting. Attempt=%v ConnectionCount=%v", ev.Attempt, ev.ConnectionCount)
 
 			case *slack.ConnectedEvent:
-				log.Logf(l4g.INFO, "handleMessages: Connected. Info=%v ConnectionCount=%v", ev.Info, ev.ConnectionCount)
+				log.Logf(l4g.TRACE, "handleMessages: Connected. Info=%v ConnectionCount=%v", ev.Info, ev.ConnectionCount)
 
 			case *slack.DisconnectedEvent:
-				log.Logf(l4g.INFO, "handleMessages: Disconnected. Intentional=%v", ev.Intentional)
+				log.Logf(l4g.TRACE, "handleMessages: Disconnected. Intentional=%v", ev.Intentional)
 
 			case *slack.MessageEvent:
 				log.Logf(l4g.TRACE, "handleMessages: Message: %+v\n", ev)
@@ -227,7 +244,8 @@ RTMLoop:
 			}
 		case msg := <-incomingSlackMessages:
 			log.Logf(l4g.TRACE, "handleMessages: sending message to %v: %v", msg.Id, msg.Text)
-			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, msg.Id))
+//			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, msg.Id))
+			rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("SLACKBOT DEBUG to: %v %v", msg.Id, msg.Text), slackDebugDirectMessageId))
 		case msg := <-incomingSlackDirectMessages:
 			log.Logf(l4g.TRACE, "handleMessages: sending direct message to %v: %v", msg.Id, msg.Text)
 			_, _, id, err := rtm.OpenIMChannel(msg.Id)
@@ -235,8 +253,8 @@ RTMLoop:
 				log.Logf(l4g.ERROR, "handleMessages: failed to open an IM channel to id %v: %v", msg.Id, err)
 			}
 			log.Logf(l4g.TRACE, "handleMessages: sending IM message to id %v for user id %v", id, msg.Id)
-			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, id))
-		}
+//			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, id))
+			rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("SLACKBOT DEBUG to: %v %v", id, msg.Text), slackDebugDirectMessageId))		}
 	}
 	log.Logf(l4g.ERROR, "HandleMessage: exiting (NOT HANDLING SLACK RTM ANYMORE!)")
 	return

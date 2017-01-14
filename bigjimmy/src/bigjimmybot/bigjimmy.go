@@ -6,13 +6,14 @@ import (
 	"time"
 	"strconv"
 	"runtime"
+	"sync"
 )
 
-
-var puzzleRevisionSeenP map[int64] bool
+var puzzleRevisionSeenP map[string] bool
+var puzzleRevisionSeenP_lock sync.RWMutex
 
 func init() {
-	puzzleRevisionSeenP = make(map[int64] bool, 500) 
+     puzzleRevisionSeenP = make(map[string] bool, 10000) 
 }
 
 func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan chan *Solver) {
@@ -43,10 +44,10 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 			     solvers_lock.Unlock()
   			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): solvers write lock released", solver.FullName)
 
-			     updateSolverActivity(solver)
+			     //updateSolverActivity(solver)
 			   case solver = <-solverActivityMonitorChan:
 			     log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): have updated solver=%+v", solver.FullName, solver)
-			     updateSolverActivity(solver)
+			     //updateSolverActivity(solver)
 			}
 		}
 	}()
@@ -88,13 +89,13 @@ func updateSolverActivity(solver *Solver) {
 	      if lastRevisionTime.After(solveTime) {
 	        if lastRevisionTime.Sub(solveTime) > 5 * time.Minute {
 	          log.Logf(l4g.INFO, "updateSolverActivity: solver %v continued to work on puzzle %v for %v since it was solved", solver.Name, puzzle.Name, lastRevisionTime.Sub(solveTime))
-		  SendSlackSolverMessage(solver, fmt.Sprintf("You seem to still be editing a spreadsheet for a solved puzzle (%v)", puzzle.Name))
+		  //SendSlackSolverMessage(solver, fmt.Sprintf("You seem to still be editing a spreadsheet for a solved puzzle (%v)", puzzle.Name))
 	        }
 	      }
 	      timeSinceSolve := time.Since(solveTime)
 	      if timeSinceSolve > 15 * time.Minute {
 	        log.Logf(l4g.INFO, "updateSolverActivity: solver %v is still assigned to a solved puzzle (%v) after %v", solver.Name, solver.Puzz, timeSinceSolve)
-		  SendSlackSolverMessage(solver, fmt.Sprintf("You are still assigned to a solved puzzle (%v), please update your status at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", puzzle.Name))
+		  //SendSlackSolverMessage(solver, fmt.Sprintf("You are still assigned to a solved puzzle (%v), please update your status at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", puzzle.Name))
 	      }	 
 	    }
      	  } else {
@@ -103,7 +104,7 @@ func updateSolverActivity(solver *Solver) {
 	  
 	  if time.Since(lastRevisionTime) > 3 * time.Hour {
 	    log.Logf(l4g.INFO, "updateSolverActivity: solver %v is supposedly working on %v but has not edited sheets in %v (since %v)", solver.Name, solver.Puzz, time.Since(lastRevisionTime), lastRevisionTime)
-	    SendSlackSolverMessage(solver, fmt.Sprintf("Are you still working on %v or are you taking a break? Please update your status at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", solver.Puzz))
+	    //SendSlackSolverMessage(solver, fmt.Sprintf("Are you still working on %v or are you taking a break? Please update your status at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", solver.Puzz))
 
 	    // if it has been a very very long time since last revision, just set solver to taking a break
 	    if time.Since(lastRevisionTime) > 12 * time.Hour {
@@ -149,10 +150,10 @@ func updateSolverActivity(solver *Solver) {
 	case solver.Puzz == "":
 	    if lastInteractionTime.IsZero() {
 	      solverChangeMessage = "has joined the hunt and is now working on %v"
-	      SendSlackSolverMessage(solver, fmt.Sprintf("Welcome to the hunt! I see you are now working on %v. If you decide to take a break, please let us know by changing your status at https://wind-up-birds.org/puzzleboss/bin/overview.pl", lastRevisedPuzzle))
+	      //SendSlackSolverMessage(solver, fmt.Sprintf("Welcome to the hunt! I see you are now working on %v. If you decide to take a break, please let us know by changing your status at https://wind-up-birds.org/puzzleboss/bin/overview.pl", lastRevisedPuzzle))
 	    } else {
 	      solverChangeMessage = "is done taking a break and is now working on"
-	      SendSlackSolverMessage(solver, "Welcome back from your break!")
+	      //SendSlackSolverMessage(solver, "Welcome back from your break!")
 	    }
 	case solver.Puzz != lastRevisedPuzzle: 
 	    // revision was to a puzzle other than the one the solver is supposedly currently working on
@@ -176,18 +177,17 @@ func updateSolverActivity(solver *Solver) {
 	  if puzzle.Status == "Solved" {
 	    // solver appears to be working on a solved puzzle, do not assign them to it
 	    log.Logf(l4g.INFO, "updateSolverActivity: solver %v %v %v (BUT THIS PUZZLE IS SOLVED!) (revision as of %v, last interaction was %v at %v), not changing active puzzle.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
-	    SendSlackSolverMessage(solver, fmt.Sprintf("The puzzle you are working on (%v) has been solved. Find a new puzzle at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", puzzle.Name))
+	    //SendSlackSolverMessage(solver, fmt.Sprintf("The puzzle you are working on (%v) has been solved. Find a new puzzle at: https://wind-up-birds.org/puzzleboss/bin/overview.pl", puzzle.Name))
 	    return	  
-	  } else {
+	  }
+	} else {
  	    puzzles_lock.RLock()
 	    log.Logf(l4g.ERROR, "updateSolverActivity(%v): serious inconsistency - solver has revised a puzzle (%v) we don't know about. we know about puzzles: %+v", solver.Name, lastRevisedPuzzle, puzzles)
   	    puzzles_lock.RUnlock()
-	  }
 	}
-	      
 
 	log.Logf(l4g.INFO, "BIGJIMMY DECREES: solver %v %v %v! (revision as of %v, last interaction was %v at %v), and so it shall be.", solver.Name, solverChangeMessage, lastRevisedPuzzle, lastRevisionTime, lastInteractedDesc, lastInteractionTime)
-	SendSlackSolverMessage(solver, fmt.Sprintf("I notice you are working on the spreadsheet for %v, so I'm assigning you to it!", lastRevisedPuzzle))
+	//SendSlackSolverMessage(solver, fmt.Sprintf("I notice you are working on the spreadsheet for %v, so I'm assigning you to it!", lastRevisedPuzzle))
 	log.Logf(l4g.DEBUG, "updateSolverActivity: calling PbRestPost to set solver %v to %v", solver.Name, lastRevisedPuzzle)
 	PbRestPost("solvers/"+solver.Name+"/puzz", PartPost{Data: lastRevisedPuzzle})
 	log.Logf(l4g.DEBUG, "updateSolverActivity: back from PbRestPost setting solver %v to %v", solver.Name, lastRevisedPuzzle)
@@ -206,7 +206,7 @@ func BigJimmyDrivePuzzleMonitor(puzzleName string, puzzleActivityMonitorChan cha
 			log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor: start of loop. currently in iteration %v for %v have %v goroutines.", iteration, puzzleName, nGoRoutines)
 
 			// set timer
-			updateTimer := time.NewTimer(30 * time.Second)
+			updateTimer := time.NewTimer(10 * time.Minute)
 			
 			// wait for timer or solver update
 			log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor(%v): waiting for timer or puzzle update", puzzleName)
@@ -234,37 +234,49 @@ func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 	  return
 	}
 
-	var revisions []Revision
-	
-	// check puzzle revisions and comments
-	if puzzle.Drive_id != "" {
-		log.Logf(l4g.DEBUG, "main(): before GetNewPuzzleRevisions, %v goroutines", runtime.NumGoroutine())
-		revisions, err = GetNewPuzzleRevisions(puzzle.Drive_id)
-		log.Logf(l4g.DEBUG, "main(): after GetNewPuzzleRevisions, %v goroutines", runtime.NumGoroutine())
-		if err != nil {
-			log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: error getting new puzzle revisions for puzzle [%v] id [%v]: %v", puzzle.Name, puzzle.Drive_id, err)
+	// check latest puzzle revision
+	// todo could also check comments?
+	var revision Revision
+	if puzzle.Drive_id == "" {
+		// can't do anything without drive_id
+		err = fmt.Errorf("updateDrivePuzzleActivity: %v has no drive_id (yet?)", puzzle.Name)
+		return
+	}
+	revision, err = GetLatestPuzzleRevision(puzzle.Drive_id)	
+	if err != nil {
+		log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: failed to get latest revision for puzzle %v", puzzleName)
+		return
+	}
+
+	if revision.LastModifyingFullName == "" {
+		log.Logf(l4g.WARNING, "updateDrivePuzzleActivity: ignoring revision by unknown last modifying user: %v", revision)
+		return		
+	}
+
+	var revisionId int64
+	revisionId, err = strconv.ParseInt(revision.Id, 10, 64)
+	if err != nil {
+		log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: could not parse revision.Id [%v] as int: %v", revision.Id, err)
+		return
+	}
+
+	seenKey := fmt.Sprintf("%s_%s_%s", puzzle.Drive_id, revision.LastModifyingFullName, revision.ModifiedDate)
+	puzzleRevisionSeenP_lock.RLock()
+	_, ok := puzzleRevisionSeenP[seenKey]
+	puzzleRevisionSeenP_lock.RUnlock()
+	if !ok {
+		puzzleRevisionSeenP_lock.Lock()
+		puzzleRevisionSeenP[seenKey] = true
+		puzzleRevisionSeenP_lock.Unlock()
+		if revision.LastModifyingFullName == "Big Jimmy" {
+			log.Logf(l4g.INFO, "updateDrivePuzzleActivity: ignoring revision by Big Jimmy: %v", revision)
 			return
 		}
-		for _, revision := range revisions {
-			var revisionId int64
-			revisionId, err = strconv.ParseInt(revision.Id, 10, 64)
-			if err != nil {
-				log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: could not parse revision.Id [%v] as int: %v", revision.Id, err)
-			}
-			
-			if revision.LastModifyingFullName != "" {
-				if !puzzleRevisionSeenP[revisionId] {
-					puzzleRevisionSeenP[revisionId] = true
-					log.Logf(l4g.DEBUG, "main(): before ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
-					ReportSolverPuzzleActivity(revision.LastModifyingFullName, puzzle.Name, revision.ModifiedDate, revisionId)
-					log.Logf(l4g.DEBUG, "main(): after ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
-				}
-			}
-		}
-	} else {
-		// can't do anything without drive_id
-		log.Logf(l4g.TRACE, "updateDrivePuzzleActivity: %v has no drive_id (yet?)", puzzle.Name)
-	}
+
+		log.Logf(l4g.DEBUG, "main(): before ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
+		ReportSolverPuzzleActivity(revision.LastModifyingFullName, puzzle.Name, revision.ModifiedDate, revisionId)
+		log.Logf(l4g.DEBUG, "main(): after ReportSolverPuzzleActivity, %v goroutines", runtime.NumGoroutine())
+	}		
 	return
 }
 

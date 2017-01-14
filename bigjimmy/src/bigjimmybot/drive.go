@@ -131,6 +131,21 @@ type Revision struct {
 	ModifiedDate string
 }
 
+func GetLatestPuzzleRevision(puzzleId string) (revision Revision, err error) {
+        // forget about listing revisions - during hunt all the changes made by users are lumped into one big merged revision
+        // just retrieve the latest "head" revision and see who is the last to modify it
+        rev, err := driveSvc.Revisions.Get(puzzleId, "head").Do()
+        if err != nil {
+                log.Logf(l4g.ERROR, "GetPuzzleRevisions: an error occurred getting revisions list for puzzleId [%v]: %v", puzzleId, err)
+                return
+        }
+        revision.Id = rev.Id
+        revision.LastModifyingFullName = rev.LastModifyingUserName
+        revision.ModifiedDate = rev.ModifiedDate
+
+	return
+}
+
 // N.B. it seems we can only get lumped-together revision lists via the API: http://stackoverflow.com/questions/34955515/google-rest-api-v3-revisionslist-vs-show-more-detailed-revisions#34957303
 func GetNewPuzzleRevisions(puzzleId string) (revisions []Revision, err error) {
 	// fields := "items/id,items/modifiedDate,items/lastModifyingUserName"
