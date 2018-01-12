@@ -22,7 +22,7 @@ var restGetSolversDone chan int
 
 var solversArrived int = 0
 
-func init() {
+func MonitorSolvers() {
 	solverChan = make(chan *Solver, 10)
 	restGetSolversDone = make(chan int) // must not be buffered!
 	solvers = make(map[string] *Solver, 500) 

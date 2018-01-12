@@ -22,7 +22,7 @@ var restGetRoundsDone chan int
 
 var roundsArrived int = 0
 
-func init() {
+func (d *Drive) MonitorRounds() {
 	roundChan = make(chan *Round, 10)
 	restGetRoundsDone = make(chan int) // must not be buffered!
 	rounds = make(map[string] *Round, 500) 
@@ -37,7 +37,7 @@ func init() {
 			if round.Drive_id == "" {
 				// don't have a drive_id for this round
 				// create round folder in Google Drive 
-				roundFolderId, roundFolderUri, err := CreateRound(round.Name, huntFolderId)
+				roundFolderId, roundFolderUri, err := d.CreateRound(round.Name, huntFolderId)
 				if err != nil {
 					log.Logf(l4g.ERROR, "roundChan listener: could not create round [%v] in huntFolderId=[%v]: %v", round.Name, huntFolderId, err)
 					// retry 3 times
@@ -48,7 +48,7 @@ func init() {
 						// block on timer channel
 						<-roundWaitTimer.C
 						log.Logf(l4g.ERROR, "roundChan listener: retrying CreateRound(%v, %v)", round.Name, huntFolderId)
-						roundFolderId, roundFolderUri, err = CreateRound(round.Name, huntFolderId)
+						roundFolderId, roundFolderUri, err = d.CreateRound(round.Name, huntFolderId)
 						
 					}
 					if err != nil {

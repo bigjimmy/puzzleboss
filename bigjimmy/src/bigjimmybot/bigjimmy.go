@@ -195,7 +195,7 @@ func updateSolverActivity(solver *Solver) {
 }
 
 
-func BigJimmyDrivePuzzleMonitor(puzzleName string, puzzleActivityMonitorChan chan *Puzzle) {
+func (d *Drive) BigJimmyDrivePuzzleMonitor(puzzleName string, puzzleActivityMonitorChan chan *Puzzle) {
 	log.Logf(l4g.INFO, "BigJimmyDrivePuzzleMonitor(%v)", puzzleName)
 	var puzzle *Puzzle
 	go func() {
@@ -215,19 +215,19 @@ func BigJimmyDrivePuzzleMonitor(puzzleName string, puzzleActivityMonitorChan cha
 			     log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor(%v): timer went off!", puzzleName)
 			     // if we have a puzzle, do the activity update
 			     if puzzle != nil {
-  			       updateDrivePuzzleActivity(puzzleName, puzzle)
+  			       d.updateDrivePuzzleActivity(puzzleName, puzzle)
 			     } else {
 			       log.Logf(l4g.WARNING, "BigJimmyDrivePuzzleMonitor(%v) timer went off before receiving solver", puzzleName)
 			     }
 			   case puzzle = <-puzzleActivityMonitorChan:
 			     log.Logf(l4g.TRACE, "BigJimmyDrivePuzzleMonitor(%v): have updated puzzle=%v", puzzleName, puzzle)
-			     updateDrivePuzzleActivity(puzzleName, puzzle)
+			     d.updateDrivePuzzleActivity(puzzleName, puzzle)
 			}
 		}
 	}()
 }
 
-func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
+func (d *Drive) updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 	log.Logf(l4g.TRACE, "updateDrivePuzzleActivity(%v): puzzle=%+v", puzzleName, puzzle)
 	if puzzleName != puzzle.Name {
 	  log.Logf(l4g.ERROR, "updatePuzzleActivity puzzle name mismatch: puzzleName=%v puzzle.Name=%v", puzzleName, puzzleName)
@@ -242,7 +242,7 @@ func updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (err error) {
 		err = fmt.Errorf("updateDrivePuzzleActivity: %v has no drive_id (yet?)", puzzle.Name)
 		return
 	}
-	revision, err = GetLatestPuzzleRevision(puzzle.Drive_id)	
+	revision, err = d.GetLatestPuzzleRevision(puzzle.Drive_id)	
 	if err != nil {
 		log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: failed to get latest revision for puzzle %v", puzzleName)
 		return

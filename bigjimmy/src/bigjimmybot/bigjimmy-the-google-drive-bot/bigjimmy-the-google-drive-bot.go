@@ -140,10 +140,10 @@ func main() {
 			l4g.Crashf("Could not get google_domain from DB: %v", err)
 		}
 	}
+	d := &bigjimmybot.Drive{}
 	log.Logf(l4g.TRACE, "main(): before open drive, %v goroutines.", runtime.NumGoroutine())
-	bigjimmybot.OpenDrive(googleClientId, googleClientSecret, googleDomain, cacheFile)
+	d.OpenDrive(googleClientId, googleClientSecret, googleDomain, cacheFile)
 	log.Logf(l4g.TRACE, "main(): after open drive, %v goroutines.", runtime.NumGoroutine())
-
 
 	// Setup PB REST client
 	// Get pbRestUri if we don't have it
@@ -174,7 +174,7 @@ func main() {
 		// so get hunt folder ID from Google by looking it up by title
 		// or create it if it does not exist
 		log.Logf(l4g.INFO, "looking up google docs folder id for title %v", huntFolderTitle)
-		huntFolderId, err = bigjimmybot.GetFolderIdByTitle(huntFolderTitle)
+		huntFolderId, err = d.GetFolderIdByTitle(huntFolderTitle)
 		if err != nil {
 			if err, ok := err.(*bigjimmybot.ListError); ok {
 				if err.Found > 1 {
@@ -183,7 +183,7 @@ func main() {
 				        //l4g.Crashf("no hunt folder found for %v", huntFolderTitle)
 					log.Logf(l4g.INFO, "no hunt folder found for %v, creating it", huntFolderTitle)
 					var cferr error
-					huntFolderId, _, cferr = bigjimmybot.CreateHunt(huntFolderTitle)
+					huntFolderId, _, cferr = d.CreateHunt(huntFolderTitle)
 					if cferr != nil {
 						l4g.Crashf("could not create hunt folder for title [%v]: %v", huntFolderTitle, cferr)
 					}
@@ -205,6 +205,11 @@ func main() {
 	log.Logf(l4g.TRACE, "main(): after getting hunt folder id, %v goroutines.", runtime.NumGoroutine())
 	// set huntFolderId in bigjimmybot
 	bigjimmybot.SetHuntFolderId(huntFolderId)
+
+	// Start monitoring puzzles, rounds, and solvers
+	d.MonitorRounds()
+	d.MonitorPuzzles()
+	bigjimmybot.MonitorSolvers()
 
 	// get initial version diff
 	log.Logf(l4g.TRACE, "main(): before bigjimmybot.PbGetInitialVersionDiff %v goroutines.", runtime.NumGoroutine())

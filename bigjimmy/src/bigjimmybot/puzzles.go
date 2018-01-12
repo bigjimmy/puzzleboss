@@ -17,7 +17,7 @@ type Puzzle struct {
 	Solvers string
 	Cursolvers string
 	Comments string
-	Uri string
+	Uri string `json:"puzzle_uri"`
 	Drive_uri string
 	Drive_id string
 	Wrong_answers string
@@ -33,7 +33,7 @@ var restGetPuzzlesDone chan int
 
 var puzzlesArrived int = 0
 
-func init() {
+func (d *Drive) MonitorPuzzles() {
 	puzzleChan = make(chan *Puzzle, 10)
 	restGetPuzzlesDone = make(chan int) // must not be buffered!
 	puzzles = make(map[string] *Puzzle, 500) 
@@ -80,7 +80,7 @@ func init() {
 					// now we should have a round with a Drive_id
 				}
 				roundFolderId := round.Drive_id
-				ssId, ssUri, err := CreatePuzzle(puzzle.Name, roundFolderId)
+				ssId, ssUri, err := d.CreatePuzzle(puzzle, roundFolderId)
 				if err != nil {
 					log.Logf(l4g.ERROR, "puzzleChan listener: could not create puzzle [%v] in roundFolderId [%v]: %v", puzzle.Name, roundFolderId, err)
 				}
@@ -111,7 +111,7 @@ func init() {
 			   // setup a channel to pass puzzle updates to puzzle activity monitor
 			   puzzleActivityMonitorChans[puzzle.Name] = make(chan *Puzzle, 10)
 			   // start a bigjimmy google drive monitor for this puzzle
-			   BigJimmyDrivePuzzleMonitor(puzzle.Name, puzzleActivityMonitorChans[puzzle.Name])
+			   d.BigJimmyDrivePuzzleMonitor(puzzle.Name, puzzleActivityMonitorChans[puzzle.Name])
 			}
 
 			// pass updated puzzle to existing (or just created) BigJimmyDrivePuzzleMonitor
