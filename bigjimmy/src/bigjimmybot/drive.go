@@ -327,7 +327,7 @@ func (d *Drive) SetInitialPuzzleSpreadsheetContents(puzzle *Puzzle, spreadsheetI
 					Properties: &sheets.SheetProperties{
 						Title: fmt.Sprintf("%s metadata", puzzle.Name),
 						GridProperties: &sheets.GridProperties{
-							RowCount: 8,
+							RowCount: 7,
 							ColumnCount: 2,
 						},
 						Index: 0,
@@ -409,9 +409,8 @@ func (d *Drive) SetInitialPuzzleSpreadsheetContents(puzzle *Puzzle, spreadsheetI
 			{"Actual Puzzle URL:",	puzzle.Uri},
 			{},
 			{},
-			{"N.B. - This sheet just has links to the puzzle"},
-			{"Please use the other worksheet for work (see below), and feel free to create as many more sheets as you need! (using \"Add Sheet\" button, which is the + symbol below)"},
 			{"No spoilers on this worksheet, please!"},
+			{"Please use a different sheet (see tabs below) for work and create additional sheets as needed to pursue different ideas (or independent solves)"},
 		}
 		rbValues := &sheets.BatchUpdateValuesRequest{
 			ValueInputOption: "USER_ENTERED",
