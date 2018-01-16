@@ -41,7 +41,7 @@ Content-type: text/html
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-        <meta http-equiv="refresh" content="300">
+	<meta http-equiv="refresh" content="300">
 	<title>$title</title>
 	<style type="text/css">
     \@import "$PB::Config::DOJO_ROOT/dijit/themes/tundra/tundra.css";
