@@ -12,8 +12,8 @@ LinksHandler.prototype.canRespond = function(message) {
 };
 
 LinksHandler.prototype.produceResponse = function(message) {
-    return "Latest URL is <http://ysera-iozyrwndwd.muttsteryhunt.com/|ysera-iozyrwndwd.muttsteryhunt.com>" + 
-           "   password for submitting answers: pranjal\n" +
+    return "URL is <https://head-hunters.org|head-hunters.org>" + 
+           " login is cyrilcs, password is updatetetazooglounge\n" +
            "Wiki: <https://wind-up-birds.org|wind-up-birds.org>\n" +
            "<https://wind-up-birds.org/puzzleboss/bin/overview.pl|PuzzleBoss overview>";
 };

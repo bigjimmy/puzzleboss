@@ -1,7 +1,8 @@
 'use strict';
 
 //var huntstart = new Date("Jan 15 2016 12:00:00 GMT-0500 (EST)");
-var huntstart = new Date("Jan 13 2017 14:00:00 GMT-0500 (EST)");
+//var huntstart = new Date("Jan 13 2017 14:00:00 GMT-0500 (EST)");
+var huntstart = new Date("Jan 12 2018 12:00:00 GMT-0500 (EST)");
 var general_channel = 'general';
 
 // For testing
