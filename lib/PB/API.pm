@@ -249,7 +249,7 @@ sub update_puzzle_part {
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
             my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
             my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
-            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
+            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Hey \@here Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
         }
 
         if ($part eq "status" && $val eq "Critical"){
