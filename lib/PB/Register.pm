@@ -160,7 +160,7 @@ sub validation : Runmode {
 	my $matchcount = $result->count();
 
 	if($matchcount > 0) {
-	    $html .= "Username $username already exists!  If you have lost your password, please email someone on the team to get it reset. ";
+	    $html .= "Username $username already exists!  If you have lost your password, please visit <a href='https://wind-up-birds.org/resetaccount/'> self-serve reset form </a> to reset. ";
 	} else {
 	    # username does not already exist, check for email
 	    my $emailresult = $ldap->search( # perform a search
