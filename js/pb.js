@@ -79,14 +79,15 @@ define([
 	
 		var puzzlayout = [
 				     { field: 'round', hidden: true },
-				     { field: 'linkid', width: "12%", name: "Puzzle", formatter: smallfontFormatter},
+				     { field: 'linkid', width: "10%", name: "Puzzle", formatter: smallfontFormatter},
 				     { field: 'status', width: "10%", name: "Status", editable: my_editable, formatter: statusFormatter,
 				       type: cells.Select, options: ['New', 'Being worked', 'Needs eyes', 'Solved', 'Critical', 'Unnecessary', 'WTF']},
 				     { field: 'answer', width: "12%", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
-				     { field: 'xyzloc', width: "10%", name: "Location", editable: my_editable, formatter: smallfontFormatter },
+				     { field: 'xyzloc', width: "10%", name: "Location", editable: true, formatter: smallfontFormatter },
 				     { field: 'cursolvers', width: "20%", name:"Current Solvers", formatter:smallfontFormatter},
+				     { field: 'driveid', width: "7%", name: "Doc", formatter: smallfontFormatter},
 				     { field: 'activity', width: "15%", name: "Recent Gdoc Activity", formatter:smallfontFormatter},
-				     { field: 'comments', width: "20%", name: "PB Notes", editable: my_editable, formatter: smallfontFormatter}
+				     { field: 'comments', width: "15%", name: "Notes", editable: true, formatter: smallfontFormatter}
 				     ];
 	
 	    grid[roundname] = new enhancedgrid({
