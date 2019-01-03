@@ -350,10 +350,7 @@ define([
 						puzzinfo_div.appendChild(domconstruct.create("p",
 							{innerHTML: "All historical solvers: "+ puzzstore.getValue(item,"solvers").split(",").join(", ")}
 						));
-                                                puzzinfo_div.appendChild(domconstruct.create("p",
-							{innerHTML: "Location: "+ puzzstore.getValue(item, "xyzloc")} 
-						));
-					        var comment_div = domconstruct.create("div", {innerHTML: "PB notes: "});
+					        var comment_div = domconstruct.create("div", {innerHTML: "Notes: "});
 					        puzzinfo_div.appendChild(comment_div);
 					        var comment_formtextbox = new formtextbox({
 						    value: puzzstore.getValue(item,"comments"),
@@ -363,6 +360,17 @@ define([
 						    }
 						});
 					        comment_div.appendChild(comment_formtextbox.domNode);
+
+						var location_div = domconstruct.create("div", {innerHTML: "Location: "});
+						puzzinfo_div.appendChild(location_div);
+						var location_formtextbox = new formtextbox({
+						    value: puzzstore.getValue(item, "xyzloc"),
+						    class:"location_formtestbox",
+                                                    onChange: function(){
+							puzzstore.setValue(item,"xyzloc",location_formtextbox.get("value"));
+                                                    }
+                                                });
+                                                location_div.appendChild(location_formtextbox.domNode);
 					}
 			})
 				
