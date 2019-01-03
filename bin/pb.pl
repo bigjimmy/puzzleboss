@@ -33,10 +33,10 @@ my $editable;
 my $title;
 if (param('edit')){
 	$editable = "true";
-	$title = "PuzzleBoss Central$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
+	$title = "PuzzleBoss (ADMIN)$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }else{
 	$editable = "false";
-	$title = "Hunt Status$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
+	$title = "Puzzleboss$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }
 
 my $html = <<"EOF";
