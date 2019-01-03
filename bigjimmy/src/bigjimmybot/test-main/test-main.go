@@ -36,7 +36,7 @@ func init() {
 	flag.StringVar(&dbProtocol, "dbprotocol", "tcp", "Database protocol")
 	flag.StringVar(&dbHost, "dbhost", "localhost", "Database host")
 	flag.StringVar(&dbPort, "dbport", "3306", "Database port")
-	flag.StringVar(&dbName, "dbname", "puzzlebitch", "Database name")
+	flag.StringVar(&dbName, "dbname", "puzzleboss", "Database name")
 	flag.StringVar(&dbUser, "dbuser", "", "Database user")
 	flag.StringVar(&dbPassword, "dbpassword", "", "Database password")
 

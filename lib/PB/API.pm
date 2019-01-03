@@ -13,7 +13,7 @@ use Net::LDAP;
 use DBI;
 use SQL::Yapp;
 
-my $dbh = DBI->connect('DBI:mysql:database=puzzlebitch'.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
+my $dbh = DBI->connect('DBI:mysql:database='.$PB::Config::PB_DATA_DB_NAME.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
 
 my $EXCLUSIVE_LOCK = 2;
 my $UNLOCK = 8;
