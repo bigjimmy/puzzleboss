@@ -1,0 +1,902 @@
+-- MySQL dump 10.13  Distrib 5.5.62, for debian-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: $PB_DATA_DB_NAME
+-- ------------------------------------------------------
+-- Server version	5.5.62-0ubuntu0.14.04.1-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Current Database: `$PB_DATA_DB_NAME`
+--
+
+/*!40000 DROP DATABASE IF EXISTS `$PB_DATA_DB_NAME`*/;
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `$PB_DATA_DB_NAME` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `$PB_DATA_DB_NAME`;
+
+--
+-- Table structure for table `activity`
+--
+
+DROP TABLE IF EXISTS `activity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `activity` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `solver_id` int(11) NOT NULL,
+  `puzzle_id` int(11) DEFAULT NULL,
+  `source` enum('google','pb_auto','pb_manual','bigjimmy','twiki','squid','apache','xmpp') DEFAULT NULL,
+  `type` enum('create','open','revise','comment','interact') DEFAULT NULL,
+  `uri` text,
+  `source_version` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_google_activity_solver1_idx` (`solver_id`),
+  KEY `fk_google_activity_puzzle1_idx` (`puzzle_id`),
+  KEY `time` (`time`),
+  KEY `puzzle_id` (`puzzle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `activity`
+--
+
+LOCK TABLES `activity` WRITE;
+/*!40000 ALTER TABLE `activity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `activity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `audit_puzzle`
+--
+
+DROP TABLE IF EXISTS `audit_puzzle`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `audit_puzzle` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `action` enum('INSERT','UPDATE','DELETE') NOT NULL,
+  `user` varchar(500) DEFAULT NULL,
+  `puzzle_id` int(11) NOT NULL,
+  `old_name` varchar(500) DEFAULT NULL,
+  `new_name` varchar(500) DEFAULT NULL,
+  `old_puzzle_uri` text,
+  `new_puzzle_uri` text,
+  `old_answer` varchar(500) DEFAULT NULL,
+  `new_answer` varchar(500) DEFAULT NULL,
+  `old_pb_comments` text,
+  `new_pb_comments` text,
+  `old_drive_uri` varchar(300) DEFAULT NULL,
+  `new_drive_uri` varchar(300) DEFAULT NULL,
+  `old_drive_id` varchar(100) DEFAULT NULL,
+  `new_drive_id` varchar(100) DEFAULT NULL,
+  `old_round_meta_p` tinyint(1) DEFAULT NULL,
+  `new_round_meta_p` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `fk_audit_puzzle_puzzle1_idx` (`puzzle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `audit_puzzle`
+--
+
+LOCK TABLES `audit_puzzle` WRITE;
+/*!40000 ALTER TABLE `audit_puzzle` DISABLE KEYS */;
+/*!40000 ALTER TABLE `audit_puzzle` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `clientindex`
+--
+
+DROP TABLE IF EXISTS `clientindex`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `clientindex` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `clientindex`
+--
+
+LOCK TABLES `clientindex` WRITE;
+/*!40000 ALTER TABLE `clientindex` DISABLE KEYS */;
+INSERT INTO `clientindex` VALUES (1),(2),(3);
+/*!40000 ALTER TABLE `clientindex` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `config`
+--
+
+DROP TABLE IF EXISTS `config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `config` (
+  `key` varchar(100) NOT NULL,
+  `val` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`key`),
+  UNIQUE KEY `key_UNIQUE` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `config`
+--
+
+LOCK TABLES `config` WRITE;
+/*!40000 ALTER TABLE `config` DISABLE KEYS */;
+INSERT INTO `config` VALUES ('ANSWERSALLCAPS','1'),('BIGJIMMY_BOT_CONTROL_URI','http://wind-up-birds.org:8080/bigjimmy'),('BIGJIMMY_CONTROL_HOST','wind-up-birds.org'),('BIGJIMMY_CONTROL_PASS','fhqwhgads'),('BIGJIMMY_CONTROL_PATH','bigjimmy'),('BIGJIMMY_CONTROL_PORT','8080'),('BIGJIMMY_CONTROL_USER','bigjimmy'),('BIGJIMMY_IP','192.34.83.140'),('BIGJIMMY_SLACK_TOKEN','xoxb-127247340532-WRM8LjsbRTmn8EgCKJKi0WkV'),('DEBUG','1'),('DOJO_ROOT','/puzzlebitch/dojoroot'),('GOOGLE_ADMIN_PASS','fhqwhgads'),('GOOGLE_ADMIN_USER','BigJimmy@stormynight.org'),('GOOGLE_CLIENT_ID','128227795618-4dcs5036pkglhian7l6tu1e6vbgdq3ea.apps.googleusercontent.com'),('GOOGLE_CLIENT_SECRET','YtMXav47TRR6mZmMVQ5GHSHE'),('GOOGLE_DOMAIN','wind-up-birds.org'),('google_hunt_folder_id','16wAO3HIwF93xreoouIep_o_hf_SclEOL'),('GOOGLE_PUZZLE_DOCUMENT_TEMPLATE','/canadia/puzzlebitch/google/google-doc-template.odt'),('INSTALL_PATH','/canadia'),('JS_DEBUG','1'),('METEOR_CONTROL_HOST','series-of-tubes.wind-up-birds.org'),('METEOR_CONTROL_PORT','4671'),('METEOR_HTTP_HOST','series-of-tubes.wind-up-birds.org'),('METEOR_JS_URI','https://series-of-tubes.wind-up-birds.org/meteor.js'),('METEOR_VERSION_CHANNEL','version'),('PBREST_ROOT','/puzzlebitch/bin/pbrest.pl'),('PBREST_URI','https://wind-up-birds.org/puzzleboss/bin/pbrest.pl'),('PB_ADMIN_TOOLS_PATH','/canadia/puzzlebitch/admin-tools'),('PB_ADMIN_TOOLS_REL','/puzzlebitch/admin-tools'),('PB_ADMIN_TOOLS_URI','https://wind-up-birds.org/puzzleboss/admin-tools'),('PB_BIGJIMMY_PATH','/canadia/puzzlebitch/bigjimmy'),('PB_BIN_PATH','/canadia/puzzlebitch/bin'),('PB_BIN_REL','/puzzlebitch/bin'),('PB_BIN_URI','https://wind-up-birds.org/puzzlebitch/bin'),('PB_CSS_PATH','/canadia/puzzlebitch/css'),('PB_CSS_REL','/puzzlebitch/css'),('PB_CSS_URI','https://wind-up-birds.org/puzzlebitch/css'),('PB_DATA_DB_HOST','localhost'),('PB_DATA_DB_NAME','puzzlebitch'),('PB_DATA_DB_PASS','fhqwhgads'),('PB_DATA_DB_PORT','3306'),('PB_DATA_DB_USER','bigjimmy'),('PB_DATA_PATH','/canadia/puzzlebitch/data'),('PB_DATA_READ_DB_OR_FILES','DB'),('PB_DATA_REL','/puzzlebitch/data'),('PB_DATA_URI','https://wind-up-birds.org/puzzleboss/data'),('PB_DATA_WRITE_DB','1'),('PB_DATA_WRITE_FILES','0'),('PB_DEV_VERSION',''),('PB_DEV_VERSION_POSTPAREN',''),('PB_DOJO_PATH','/canadia/puzzlebitch/dojoroot'),('PB_DOJO_REL','/puzzlebitch/dojoroot'),('PB_DOJO_URI','https://wind-up-birds.org/puzzleboss/dojoroot'),('PB_DOMAIN_NAME','wind-up-birds.org'),('PB_GOOGLE_PATH','/canadia/puzzlebitch/google'),('PB_HUNT','MH2019'),('PB_IMAGES_PATH','/canadia/puzzlebitch/images'),('PB_IMAGES_REL','/puzzlebitch/images'),('PB_IMAGES_URI','https://wind-up-birds.org/puzzleboss/images'),('PB_JS_URI','https://wind-up-birds.org/puzzleboss/js'),('PB_PASS','fhqwhgads'),('PB_PATH','/canadia/puzzlebitch'),('PB_REL','/puzzlebitch'),('PB_REST_PATH','/canadia/puzzlebitch/bin/pbrest.pl'),('PB_REST_REL','/puzzlebitch/bin/pbrest.pl'),('PB_REST_URI','https://wind-up-birds.org/puzzleboss/bin/pbrest.pl'),('PB_URI','https://wind-up-birds.org/puzzleboss'),('PB_USER','BigJimmy'),('POOL_FILE','/canadia/puzzlebitch/data/solvers.pool'),('PUZZLES_FILE','/canadia/puzzlebitch/data/puzzles.list'),('REGISTER_DATA_PATH','/canadia/register/data'),('REGISTER_EMAIL_FROM','BigJimmy@wind-up-birds.org'),('REGISTER_LDAP_ADMIN_PASS','fhqwhgads'),('REGISTER_LDAP_ADMIN_USER','admin'),('REGISTER_LDAP_DC','dc=wind-up-birds,dc=org'),('REGISTER_LDAP_DOMAIN','wind-up-birds.org'),('REGISTER_LDAP_HOST','ldap.wind-up-birds.org'),('REGISTER_LDAP_O','Wind Up Birds'),('REGISTER_PATH','/canadia/register'),('REGISTER_URI','https://wind-up-birds.org/register/index.pl'),('ROUNDLIST_TOPIC','WebHome'),('ROUNDS_FILE','/canadia/puzzlebitch/data/rounds.list'),('SOLV_MAP_FILE','/canadia/puzzlebitch/data/solvers-puzz.map'),('TEAM_NAME','Wind Up Birds'),('TWIKI_BIN_URI','https://wind-up-birds.org/twiki/bin'),('TWIKI_DEBUG','1'),('TWIKI_HOST','wind-up-birds.org'),('TWIKI_PROTOCOL','https'),('TWIKI_URI','https://wind-up-birds.org'),('TWIKI_USER','BigJimmy'),('TWIKI_USER_PASS','fhqwhgads'),('TWIKI_WEB','MH2019\r\n');
+/*!40000 ALTER TABLE `config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `log`
+--
+
+DROP TABLE IF EXISTS `log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `log` (
+  `version` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user` varchar(500) DEFAULT NULL,
+  `module` enum('puzzles','rounds','solvers','locations') NOT NULL,
+  `name` varchar(500) DEFAULT NULL,
+  `part` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`version`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `log`
+--
+
+LOCK TABLES `log` WRITE;
+/*!40000 ALTER TABLE `log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `puzzle`
+--
+
+DROP TABLE IF EXISTS `puzzle`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `puzzle` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(500) NOT NULL,
+  `puzzle_uri` text,
+  `drive_uri` varchar(300) DEFAULT NULL,
+  `pb_comments` text,
+  `status` enum('New','Being worked','Needs eyes','Solved','Critical','Unnecessary','WTF') NOT NULL,
+  `answer` varchar(500) DEFAULT NULL,
+  `round_id` int(11) NOT NULL,
+  `drive_id` varchar(100) DEFAULT NULL,
+  `round_meta_p` tinyint(1) DEFAULT NULL,
+  `locations` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`),
+  UNIQUE KEY `drive_id_UNIQUE` (`drive_id`),
+  KEY `fk_puzzles_rounds1_idx` (`round_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `puzzle`
+--
+
+LOCK TABLES `puzzle` WRITE;
+/*!40000 ALTER TABLE `puzzle` DISABLE KEYS */;
+/*!40000 ALTER TABLE `puzzle` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_AINS` AFTER INSERT ON puzzle FOR EACH ROW
+
+BEGIN
+INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'puzzles',NEW.name);
+INSERT INTO `audit_puzzle` 
+	(
+		`action`,
+		`user`,
+		`puzzle_id`,
+		`new_name`,
+		`new_puzzle_uri`,
+		`new_drive_uri`,
+		`new_pb_comments`,
+		`new_answer`,
+		`new_drive_id`,
+		`new_round_meta_p`
+	)
+	VALUES
+	(
+		'INSERT',
+		@user,
+		NEW.id, 
+		NEW.name,
+		NEW.puzzle_uri,
+		NEW.drive_uri,
+		NEW.pb_comments,
+		NEW.answer,
+		NEW.drive_id,
+		NEW.round_meta_p
+	);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_AUPD` AFTER UPDATE ON `puzzle` FOR EACH ROW BEGIN
+IF IFNULL(OLD.name,'') <> IFNULL(NEW.name,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'name');
+END IF;
+IF IFNULL(OLD.puzzle_uri,'') <> IFNULL(NEW.puzzle_uri,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'puzzle_uri');
+END IF;
+IF IFNULL(OLD.drive_uri,'') <> IFNULL(NEW.drive_uri,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'drive_uri');
+END IF;
+IF IFNULL(OLD.pb_comments,'') <> IFNULL(NEW.pb_comments,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'comments');
+END IF;
+IF IFNULL(OLD.answer,'') <> IFNULL(NEW.answer,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'answer');
+END IF;
+IF IFNULL(OLD.status,'') <> IFNULL(NEW.status,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'status');
+END IF;
+IF IFNULL(OLD.locations,'') <> IFNULL(NEW.locations,'') THEN
+    INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'xyzloc');
+END IF;
+INSERT INTO `audit_puzzle` 
+	(
+		`action`,
+		`user`,
+		`puzzle_id`,
+		`old_name`,
+		`new_name`,
+		`old_puzzle_uri`,
+		`new_puzzle_uri`,
+		`old_drive_uri`,
+		`new_drive_uri`,
+		`old_pb_comments`,
+		`new_pb_comments`,
+		`old_answer`,
+		`new_answer`,
+		`old_drive_id`,
+		`new_drive_id`,
+		`old_round_meta_p`,
+		`new_round_meta_p`
+	)
+	VALUES
+	(
+		'UPDATE',
+		@user,
+		OLD.id, 
+		OLD.name,
+		NEW.name,
+		OLD.puzzle_uri,
+		NEW.puzzle_uri,
+		OLD.drive_uri,
+		NEW.drive_uri,
+		OLD.pb_comments,
+		NEW.pb_comments,
+		OLD.answer,
+		NEW.answer,
+		OLD.drive_id,
+		NEW.drive_id,
+		OLD.round_meta_p,
+		NEW.round_meta_p
+	);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_ADEL` AFTER DELETE ON `puzzle` FOR EACH ROW BEGIN
+DELETE FROM `log` WHERE `module`="puzzles" AND `name`=OLD.name;
+INSERT INTO `audit_puzzle` 
+	(
+		`action`,
+		`user`,
+		`puzzle_id`,
+		`old_name`,
+		`old_puzzle_uri`,
+		`old_drive_uri`,
+		`old_pb_comments`,
+		`old_answer`,
+		`old_drive_id`,
+		`old_round_meta_p`
+	) 
+	VALUES 
+	(
+		'DELETE',
+		@user,
+		OLD.id, 
+		OLD.name,
+		OLD.puzzle_uri,
+		OLD.drive_uri,
+		OLD.pb_comments,
+		OLD.answer,
+		OLD.drive_id,
+		OLD.round_meta_p
+	);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary table structure for view `puzzle_cursolver_distinct`
+--
+
+DROP TABLE IF EXISTS `puzzle_cursolver_distinct`;
+/*!50001 DROP VIEW IF EXISTS `puzzle_cursolver_distinct`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `puzzle_cursolver_distinct` (
+  `solver_id` tinyint NOT NULL,
+  `puzzle_id` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `puzzle_cursolvers`
+--
+
+DROP TABLE IF EXISTS `puzzle_cursolvers`;
+/*!50001 DROP VIEW IF EXISTS `puzzle_cursolvers`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `puzzle_cursolvers` (
+  `puzzle_id` tinyint NOT NULL,
+  `cursolvers` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `puzzle_solver`
+--
+
+DROP TABLE IF EXISTS `puzzle_solver`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `puzzle_solver` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `puzzle_id` int(11) DEFAULT NULL,
+  `solver_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_puzzles_solvers_puzzles1_idx` (`puzzle_id`),
+  KEY `fk_puzzles_solvers_solvers1_idx` (`solver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `puzzle_solver`
+--
+
+LOCK TABLES `puzzle_solver` WRITE;
+/*!40000 ALTER TABLE `puzzle_solver` DISABLE KEYS */;
+/*!40000 ALTER TABLE `puzzle_solver` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_solver_BINS` BEFORE INSERT ON `puzzle_solver` FOR EACH ROW BEGIN
+	Set @puzzname = (SELECT `name` FROM `puzzle` WHERE `puzzle`.`id`=NEW.puzzle_id);
+	Set @oldpuzzname = (SELECT `curpuzzle` FROM `solver_curpuzzle` WHERE `solver_id`=NEW.solver_id);
+	Set @solvername = (SELECT `name` FROM `solver` WHERE `solver`.`id`=NEW.solver_id);
+	INSERT	INTO `log` (`user`,`module`,`name`,`part`) 
+			VALUES (@user,'puzzles',@oldpuzzname,'cursolvers');
+	IF ((SELECT COUNT(*) FROM `puzzle_solver` WHERE `puzzle_id`=NEW.puzzle_id AND `solver_id`=NEW.solver_id)=0) THEN
+		INSERT	INTO `log` (`user`,`module`,`name`,`part`) 
+				VALUES (@user,'puzzles',@puzzname,'solvers');
+	END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_solver_AINS` AFTER INSERT ON `puzzle_solver` FOR EACH ROW BEGIN
+	Set @puzzname = (SELECT `name` FROM `puzzle` WHERE `puzzle`.`id`=NEW.puzzle_id);
+	Set @solvername = (SELECT `name` FROM `solver` WHERE `solver`.`id`=NEW.solver_id);
+	INSERT	INTO `log` (`user`,`module`,`name`,`part`) 
+			VALUES (@user,'puzzles',@puzzname,'cursolvers');
+	INSERT	INTO `log` (`user`,`module`,`name`,`part`) 
+			VALUES (@user,'solvers',@solvername,'puzzles');
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary table structure for view `puzzle_solver_distinct`
+--
+
+DROP TABLE IF EXISTS `puzzle_solver_distinct`;
+/*!50001 DROP VIEW IF EXISTS `puzzle_solver_distinct`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `puzzle_solver_distinct` (
+  `puzzle_id` tinyint NOT NULL,
+  `solver_id` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `puzzle_solvers`
+--
+
+DROP TABLE IF EXISTS `puzzle_solvers`;
+/*!50001 DROP VIEW IF EXISTS `puzzle_solvers`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `puzzle_solvers` (
+  `puzzle_id` tinyint NOT NULL,
+  `solvers` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `puzzle_view`
+--
+
+DROP TABLE IF EXISTS `puzzle_view`;
+/*!50001 DROP VIEW IF EXISTS `puzzle_view`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `puzzle_view` (
+  `id` tinyint NOT NULL,
+  `name` tinyint NOT NULL,
+  `status` tinyint NOT NULL,
+  `answer` tinyint NOT NULL,
+  `round` tinyint NOT NULL,
+  `comments` tinyint NOT NULL,
+  `locations` tinyint NOT NULL,
+  `drive_uri` tinyint NOT NULL,
+  `driveid` tinyint NOT NULL,
+  `drive_id` tinyint NOT NULL,
+  `round_meta_p` tinyint NOT NULL,
+  `linkid` tinyint NOT NULL,
+  `puzzle_uri` tinyint NOT NULL,
+  `activity` tinyint NOT NULL,
+  `solvers` tinyint NOT NULL,
+  `cursolvers` tinyint NOT NULL,
+  `xyzloc` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `round`
+--
+
+DROP TABLE IF EXISTS `round`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `round` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(500) NOT NULL,
+  `round_uri` text,
+  `drive_uri` varchar(300) DEFAULT NULL,
+  `drive_id` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`),
+  UNIQUE KEY `drive_uri_UNIQUE` (`drive_uri`),
+  UNIQUE KEY `drive_id_UNIQUE` (`drive_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `round`
+--
+
+LOCK TABLES `round` WRITE;
+/*!40000 ALTER TABLE `round` DISABLE KEYS */;
+/*!40000 ALTER TABLE `round` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `round_AINS` AFTER INSERT ON round FOR EACH ROW
+
+
+BEGIN
+INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'rounds',NEW.name);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `round_ADEL` AFTER DELETE ON round FOR EACH ROW
+
+BEGIN
+	INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'rounds',OLD.name);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Table structure for table `solver`
+--
+
+DROP TABLE IF EXISTS `solver`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `solver` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(500) NOT NULL,
+  `fullname` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uid_UNIQUE` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `solver`
+--
+
+LOCK TABLES `solver` WRITE;
+/*!40000 ALTER TABLE `solver` DISABLE KEYS */;
+/*!40000 ALTER TABLE `solver` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `solver_AINS` AFTER INSERT ON solver FOR EACH ROW
+
+BEGIN
+	INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'solvers',NEW.name);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `solver_AUPD` AFTER UPDATE ON solver FOR EACH ROW
+
+BEGIN
+IF IFNULL(OLD.name,'') <> IFNULL(NEW.name,'') THEN 
+	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'solvers',NEW.name,'name');
+END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `solver_ADEL` AFTER DELETE ON solver FOR EACH ROW
+
+BEGIN
+	INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'solvers',OLD.name);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Temporary table structure for view `solver_curpuzzle`
+--
+
+DROP TABLE IF EXISTS `solver_curpuzzle`;
+/*!50001 DROP VIEW IF EXISTS `solver_curpuzzle`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `solver_curpuzzle` (
+  `solver_id` tinyint NOT NULL,
+  `curpuzzle` tinyint NOT NULL,
+  `curpuzzle_id` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `solver_puzzles`
+--
+
+DROP TABLE IF EXISTS `solver_puzzles`;
+/*!50001 DROP VIEW IF EXISTS `solver_puzzles`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `solver_puzzles` (
+  `solver_id` tinyint NOT NULL,
+  `puzzles` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `solver_view`
+--
+
+DROP TABLE IF EXISTS `solver_view`;
+/*!50001 DROP VIEW IF EXISTS `solver_view`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `solver_view` (
+  `id` tinyint NOT NULL,
+  `name` tinyint NOT NULL,
+  `puzzles` tinyint NOT NULL,
+  `puzz` tinyint NOT NULL,
+  `fullname` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Current Database: `$PB_DATA_DB_NAME`
+--
+
+USE `$PB_DATA_DB_NAME`;
+
+--
+-- Final view structure for view `puzzle_cursolver_distinct`
+--
+
+/*!50001 DROP TABLE IF EXISTS `puzzle_cursolver_distinct`*/;
+/*!50001 DROP VIEW IF EXISTS `puzzle_cursolver_distinct`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `puzzle_cursolver_distinct` AS select distinct `solver`.`id` AS `solver_id`,`ps`.`puzzle_id` AS `puzzle_id` from (`solver` left join `puzzle_solver` `ps` on(((`ps`.`solver_id` = `solver`.`id`) and (`ps`.`puzzle_id` = (select `subps`.`puzzle_id` from `puzzle_solver` `subps` where (`subps`.`solver_id` = `ps`.`solver_id`) order by `subps`.`id` desc limit 1))))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `puzzle_cursolvers`
+--
+
+/*!50001 DROP TABLE IF EXISTS `puzzle_cursolvers`*/;
+/*!50001 DROP VIEW IF EXISTS `puzzle_cursolvers`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `puzzle_cursolvers` AS select `puzzle`.`id` AS `puzzle_id`,group_concat(`solver`.`name` separator ',') AS `cursolvers` from ((`puzzle` left join `puzzle_cursolver_distinct` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `solver` on((`solver`.`id` = `ps`.`solver_id`))) group by `puzzle`.`id` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `puzzle_solver_distinct`
+--
+
+/*!50001 DROP TABLE IF EXISTS `puzzle_solver_distinct`*/;
+/*!50001 DROP VIEW IF EXISTS `puzzle_solver_distinct`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `puzzle_solver_distinct` AS select distinct `puzzle_solver`.`puzzle_id` AS `puzzle_id`,`puzzle_solver`.`solver_id` AS `solver_id` from `puzzle_solver` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `puzzle_solvers`
+--
+
+/*!50001 DROP TABLE IF EXISTS `puzzle_solvers`*/;
+/*!50001 DROP VIEW IF EXISTS `puzzle_solvers`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `puzzle_solvers` AS select `puzzle`.`id` AS `puzzle_id`,group_concat(`solver`.`name` separator ',') AS `solvers` from ((`puzzle` left join `puzzle_solver_distinct` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `solver` on((`solver`.`id` = `ps`.`solver_id`))) group by `puzzle`.`id` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `puzzle_view`
+--
+
+/*!50001 DROP TABLE IF EXISTS `puzzle_view`*/;
+/*!50001 DROP VIEW IF EXISTS `puzzle_view`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `puzzle_view` AS select `puzzle`.`id` AS `id`,`puzzle`.`name` AS `name`,`puzzle`.`status` AS `status`,`puzzle`.`answer` AS `answer`,`round`.`name` AS `round`,`puzzle`.`pb_comments` AS `comments`,`puzzle`.`locations` AS `locations`,`puzzle`.`drive_uri` AS `drive_uri`,concat('<a href="',`puzzle`.`drive_uri`,'">DOC</a>') AS `driveid`,`puzzle`.`drive_id` AS `drive_id`,`puzzle`.`round_meta_p` AS `round_meta_p`,concat('<a href="',`puzzle`.`puzzle_uri`,'"target="',`puzzle`.`name`,'">',`puzzle`.`name`,'</a>') AS `linkid`,`puzzle`.`puzzle_uri` AS `puzzle_uri`,concat('<a href="gdochist.pl?pid=',`puzzle`.`id`,'" target=NEW>Activity</a>') AS `activity`,`ps`.`solvers` AS `solvers`,`cps`.`cursolvers` AS `cursolvers`,`puzzle`.`locations` AS `xyzloc` from (((`puzzle` join `round` on((`round`.`id` = `puzzle`.`round_id`))) left join `puzzle_solvers` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `puzzle_cursolvers` `cps` on((`cps`.`puzzle_id` = `puzzle`.`id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `solver_curpuzzle`
+--
+
+/*!50001 DROP TABLE IF EXISTS `solver_curpuzzle`*/;
+/*!50001 DROP VIEW IF EXISTS `solver_curpuzzle`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `solver_curpuzzle` AS select `solver`.`id` AS `solver_id`,`puzzle`.`name` AS `curpuzzle`,`puzzle`.`id` AS `curpuzzle_id` from ((`solver` left join `puzzle_cursolver_distinct` `sp` on((`sp`.`solver_id` = `solver`.`id`))) left join `puzzle` on((`puzzle`.`id` = `sp`.`puzzle_id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `solver_puzzles`
+--
+
+/*!50001 DROP TABLE IF EXISTS `solver_puzzles`*/;
+/*!50001 DROP VIEW IF EXISTS `solver_puzzles`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `solver_puzzles` AS select `solver`.`id` AS `solver_id`,group_concat(`puzzle`.`name` separator ',') AS `puzzles` from ((`solver` left join `puzzle_solver_distinct` `ps` on((`ps`.`solver_id` = `solver`.`id`))) left join `puzzle` on((`puzzle`.`id` = `ps`.`puzzle_id`))) group by `solver`.`id` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `solver_view`
+--
+
+/*!50001 DROP TABLE IF EXISTS `solver_view`*/;
+/*!50001 DROP VIEW IF EXISTS `solver_view`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `solver_view` AS select `solver`.`id` AS `id`,`solver`.`name` AS `name`,`sp`.`puzzles` AS `puzzles`,`csp`.`curpuzzle` AS `puzz`,`solver`.`fullname` AS `fullname` from ((`solver` left join `solver_puzzles` `sp` on((`sp`.`solver_id` = `solver`.`id`))) left join `solver_curpuzzle` `csp` on((`csp`.`solver_id` = `solver`.`id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-01-03  4:13:52
