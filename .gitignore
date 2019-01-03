@@ -13,6 +13,7 @@ admin-tools/domain
 admin-tools/ldapdc
 admin-tools/pw
 bigjimmy/bigjimmy-oauth-cache.json
+bigjimmy/src/bigjimmybot/bigjimmy-the-google-drive-bot/bigjimmy-oauth-cache.json
 bigjimmy/bin
 bin/junk/
 bin/mod_perl_startup.pl
@@ -26,3 +27,9 @@ googcredentials
 bigjimmy/QQQQ-bigjimmy-oauth-cache.json
 bigjimmy/QQQQ2-bigjimmy-oauth-cache.json
 puzzlebitch-2017jan8.ls-lR
+bigjimmy/src/bigjimmybot/bigjimmy-the-google-drive-bot/bigjimmy-the-google-drive-bot
+bigjimmy/src/bigjimmybot/test-main/
+bigjimmy/src/cloud.google.com/
+bigjimmy/src/github.com/
+bigjimmy/src/golang.org/
+bigjimmy/src/google.golang.org/
