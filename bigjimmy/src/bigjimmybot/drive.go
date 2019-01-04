@@ -225,7 +225,7 @@ func (d *Drive) CreateRound(roundName string, huntFolderId string) (roundFolderI
 	return 
 }
 
-func (d *Drive) CreatePuzzle(puzzle *Puzzle, roundFolderId string) (puzzleSsId string, puzzleUri string, err error) {
+func (d *Drive) CreatePuzzle(puzzle *Puzzle, roundFolderId string) (puzzleSsId string, puzzleUri string, puzzleDlink string, err error) {
 	log.Logf(l4g.TRACE, "CreatePuzzle(puzzle.Name=%v, roundFolderId=%v)", puzzle.Name, roundFolderId)
 	puzzleSsId, puzzleUri, err = d.CreateFile(puzzle.Name, "application/vnd.google-apps.spreadsheet", roundFolderId)
 	if err != nil {
@@ -244,6 +244,7 @@ func (d *Drive) CreatePuzzle(puzzle *Puzzle, roundFolderId string) (puzzleSsId s
 		err = fmt.Errorf("CreatePuzzle: failed to set initial puzzle spreadsheet contents for [%v]: %v", puzzle.Name, err)
 		return
 	}
+	puzzleDlink = "<a href='"+puzzleUri+"'>DOC</a>"
 	return 
 }
 

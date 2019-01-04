@@ -20,6 +20,7 @@ type Puzzle struct {
 	Uri string `json:"puzzle_uri"`
 	Drive_uri string
 	Drive_id string
+	Drive_link string
 	Wrong_answers string
 }
 
@@ -80,17 +81,19 @@ func (d *Drive) MonitorPuzzles() {
 					// now we should have a round with a Drive_id
 				}
 				roundFolderId := round.Drive_id
-				ssId, ssUri, err := d.CreatePuzzle(puzzle, roundFolderId)
+				ssId, ssUri, ssDlink, err := d.CreatePuzzle(puzzle, roundFolderId)
 				if err != nil {
 					log.Logf(l4g.ERROR, "puzzleChan listener: could not create puzzle [%v] in roundFolderId [%v]: %v", puzzle.Name, roundFolderId, err)
 				}
-				log.Logf(l4g.INFO, "puzzleChan listener: created puzzle [%v] with ssId=[%v] ssUri[%v]", puzzle.Name, ssId, ssUri)
+				log.Logf(l4g.INFO, "puzzleChan listener: created puzzle [%v] with ssId=[%v] ssUri[%v] ssDlink[%v]", puzzle.Name, ssId, ssUri, ssDlink)
 				
-				// update local and remote drive_id and drive_uri
+				// update local and remote drive_id and drive_uri and drive_link
 				puzzle.Drive_id = ssId
 				go PbRestPost("puzzles/"+puzzle.Name+"/drive_id", PartPost{Data: ssId})
 				puzzle.Drive_uri = ssUri
 				go PbRestPost("puzzles/"+puzzle.Name+"/drive_uri", PartPost{Data: ssUri})
+				puzzle.Drive_link = ssDlink
+				go PbRestPost("puzzles/"+puzzle.Name+"/drive_link", PartPost{Data: ssDlink})
 			}
 			
   			log.Logf(l4g.DEBUG, "puzzleChan listener: attemping to lock puzzles for writing")

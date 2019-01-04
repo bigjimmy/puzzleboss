@@ -85,7 +85,7 @@ define([
 				     { field: 'answer', width: "12%", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
 				     { field: 'xyzloc', width: "10%", name: "Location", editable: true, formatter: smallfontFormatter },
 				     { field: 'cursolvers', width: "20%", name:"Current Solvers", formatter:smallfontFormatter},
-				     { field: 'driveid', width: "7%", name: "Doc", formatter: smallfontFormatter},
+				     { field: 'drive_link', width: "7%", name: "Doc", formatter: smallfontFormatter},
 				     { field: 'activity', width: "15%", name: "Recent Gdoc Activity", formatter:smallfontFormatter},
 				     { field: 'comments', width: "15%", name: "Notes", editable: true, formatter: smallfontFormatter}
 				     ];
@@ -175,7 +175,7 @@ define([
 	    win.body().removeChild(dom.byId("waitDiv"));
 		win.body().appendChild(domconstruct.create("p",{innerHTML: "I'm sorry, a catastrophic error occurred: "}));
 		win.body().appendChild(domconstruct.create("p",{innerHTML: msg}));
-		win.body().appendChild(domconstruct.create("p",{innerHTML: "Perhaps jcrandall@alum.mit.edu or jcbarret@alum.mit.edu could help?"}));
+		win.body().appendChild(domconstruct.create("p",{innerHTML: "Perhaps benoc@alum.mit.edu could help?"}));
 	}
 
 	
