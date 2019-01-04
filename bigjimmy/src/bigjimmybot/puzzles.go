@@ -94,6 +94,7 @@ func (d *Drive) MonitorPuzzles() {
 				go PbRestPost("puzzles/"+puzzle.Name+"/drive_uri", PartPost{Data: ssUri})
 				puzzle.Drive_link = ssDlink
 				go PbRestPost("puzzles/"+puzzle.Name+"/drive_link", PartPost{Data: ssDlink})
+				log.Logf(l4g.INFO, "puzzleChan listener: sent pbrestpost puzzles/"+puzzle.Name+"/drive_link with datai of"+ssDlink)
 			}
 			
   			log.Logf(l4g.DEBUG, "puzzleChan listener: attemping to lock puzzles for writing")
