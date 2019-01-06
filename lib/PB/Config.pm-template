@@ -7,23 +7,20 @@ use strict;
 ##############################################################################
 
 ##############################################################################
-# It is essential to edit this section
+# You probably need to edit part of this section every year and then push to DB
 ##############################################################################
-our $PB_HUNT = "MH2013";
-our $PB_USER = "ExampleUser"; 
+our $PB_HUNT = "MH2525";
+our $PB_USER = "BigJimmy"; 
 our $PB_PASS = "password";
-our $PB_DOMAIN_NAME = "example.com";
-our $TEAM_NAME = "Example Team Name";
-our $INSTALL_PATH = "/canadia";
-our $BIGJIMMY_IP = "0.0.0.0"; # IP for bigjimmy (can access pbrest without auth)
-our $GOOGLE_ADMIN_USER = 'AdminUser@googleappsdomain.org';
-our $GOOGLE_CLIENT_ID = "123456789012.apps.googleusercontent.com";
-our $GOOGLE_CLIENT_SECRET = "AAAAAAAAAAAA-AAAAAAAAAAA";
+our $PB_DOMAIN_NAME = "www.domainname.org";
+our $TEAM_NAME = "My Team Name";
 
 
 ##############################################################################
-# You may not need to edit this section
+# You may not need to edit this section every year
 ##############################################################################
+our $SLACK_CHANNEL = "pbslackchannel";
+our $BIGJIMMY_IP = "127.0.0.1"; # IP for bigjimmy (can access pbrest without auth)
 our $REGISTER_LDAP_ADMIN_USER = "admin";
 our $PB_DATA_DB_HOST = "localhost";
 our $PB_DATA_DB_PORT = "3306";
@@ -31,14 +28,19 @@ our $PB_DATA_DB_USER = lc($PB_USER);
 our $PB_DATA_DB_PASS = $PB_PASS;
 our $METEOR_HTTP_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
 our $METEOR_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
-our $BIGJIMMY_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
+our $BIGJIMMY_CONTROL_HOST = "localhost";
 our $BIGJIMMY_CONTROL_PORT = "8080";
+our $INSTALL_PATH = "/canadia";
+our $GOOGLE_ADMIN_USER = 'BigJimmy@stormynight.org';
+our $GOOGLE_CLIENT_ID = "blahblahblah.apps.googleusercontent.com";
+our $GOOGLE_CLIENT_SECRET = "blahblahblahsecretblah";
+our $BIGJIMMY_SLACK_TOKEN = "DISABLED";
+our $ANSWERSALLCAPS = 1;
 
 
 ##############################################################################
 # You do not need to edit this section unless you need to debug
 ##############################################################################
-our $ANSWERSALLCAPS = 1;
 our $DEBUG = 1;
 our $TWIKI_DEBUG = 1;
 our $JS_DEBUG = 1;
@@ -52,25 +54,27 @@ our $PB_DEV_VERSION = "";
 if(exists($ENV{'PB_DEV_VERSION'})) {
     $PB_DEV_VERSION = $ENV{'PB_DEV_VERSION'};
 } else {
-    if($0 =~ m/puzzlebitch(\-.+?)\// ||
-       (exists($ENV{'REQUEST_URI'}) && ($ENV{'REQUEST_URI'} =~ m/puzzlebitch(\-.+?)\//)) ||
-       (exists($ENV{'SCRIPT_NAME'}) && ($ENV{'SCRIPT_NAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
-       (exists($ENV{'SCRIPT_FILENAME'}) && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzlebitch(\-.+?)\//)) ||
-       (exists($ENV{'SCRIPT_URL'}) && ($ENV{'SCRIPT_URL'} =~ m/puzzlebitch(\-.+?)\//)) 
+    if($0 =~ m/puzzleboss(\-.+?)\// ||
+       (exists($ENV{'REQUEST_URI'}) && ($ENV{'REQUEST_URI'} =~ m/puzzleboss(\-.+?)\//)) ||
+       (exists($ENV{'SCRIPT_NAME'}) && ($ENV{'SCRIPT_NAME'} =~ m/puzzleboss(\-.+?)\//)) ||
+       (exists($ENV{'SCRIPT_FILENAME'}) && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzleboss(\-.+?)\//)) ||
+       (exists($ENV{'SCRIPT_URL'}) && ($ENV{'SCRIPT_URL'} =~ m/puzzleboss(\-.+?)\//)) 
 	) {
 	$PB_DEV_VERSION = $1;
-    }
+    }:w
+
 }
+
 
 our $TWIKI_WEB = $PB_HUNT;
 our $TWIKI_USER = $PB_USER;
 our $TWIKI_USER_PASS = $PB_PASS;
 our $TWIKI_HOST = "$PB_DOMAIN_NAME";
-our $ROUNDLIST_TOPIC = "WebHome";
 
 our $METEOR_CONTROL_PORT = "4671";
 our $METEOR_VERSION_CHANNEL = "version$PB_DEV_VERSION";
 our $METEOR_JS_URI = "https://$METEOR_HTTP_HOST/meteor.js";
+#our $METEOR_JS_URI = "http://$METEOR_HTTP_HOST:4670/meteor.js";
 
 our $BIGJIMMY_CONTROL_PATH = "bigjimmy$PB_DEV_VERSION";
 our $BIGJIMMY_CONTROL_USER = lc($PB_USER);
@@ -80,7 +84,7 @@ our $BIGJIMMY_BOT_CONTROL_URI = "http://".$BIGJIMMY_CONTROL_HOST.":".$BIGJIMMY_C
 our $PB_DATA_WRITE_FILES = 0;
 our $PB_DATA_WRITE_DB = 1;
 our $PB_DATA_READ_DB_OR_FILES = "DB";
-our $PB_DATA_DB_NAME = "puzzlebitch$PB_DEV_VERSION";
+our $PB_DATA_DB_NAME = "puzzleboss$PB_DEV_VERSION";
 
 our $REGISTER_LDAP_HOST = "ldap.$PB_DOMAIN_NAME";
 our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $PB_DOMAIN_NAME));
@@ -99,17 +103,20 @@ if($PB_DEV_VERSION ne "") {
 
 our $REGISTER_PATH = $INSTALL_PATH . "/register";
 our $REGISTER_DATA_PATH = $REGISTER_PATH . "/data";
+our $RESET_PATH = $INSTALL_PATH . "/resetaccount";
+our $RESET_DATA_PATH = $RESET_PATH . "/data";
 
 our $TWIKI_PROTOCOL = "https";
 our $TWIKI_URI = "$TWIKI_PROTOCOL://$TWIKI_HOST";
 our $TWIKI_BIN_URI = $TWIKI_URI . "/twiki/bin";
 our $REGISTER_URI = $TWIKI_URI . "/register/index.pl";
+our $RESET_URI = $TWIKI_URI . "/resetaccount/index.pl";
 
 our $TWIKI_PATH = $INSTALL_PATH . "/twiki";
 our $TWIKI_DATA_PATH = $TWIKI_PATH . "/data";
 our $TWIKI_BIN_PATH = $TWIKI_PATH . "/bin";
 
-our $PB_REL = "/puzzlebitch" . $PB_DEV_VERSION;
+our $PB_REL = "/puzzleboss" . $PB_DEV_VERSION;
 our $PB_PATH = $INSTALL_PATH . $PB_REL;
 our $PB_URI = $TWIKI_URI . $PB_REL;
 
@@ -135,7 +142,7 @@ our $PB_IMAGES_REL = "$PB_REL/images";
 our $PB_IMAGES_PATH = "$PB_PATH/images";
 our $PB_IMAGES_URI = "$PB_URI/images";
 
-our $PB_GOOGLE_PATH = "$PB_PATH/google";
+our $PB_GOOGLE_PATH = "$PB_PATH/newgoogle";
 our $PB_BIGJIMMY_PATH = "$PB_PATH/bigjimmy";
 
 our $PB_DOJO_REL = "$PB_REL/dojoroot";
