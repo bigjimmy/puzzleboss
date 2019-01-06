@@ -25,15 +25,19 @@ before things will work:
    puzzleboss in the dev version, otherwise set PB_DEV_VERSION="".
  * export PB_DEV_VERSION="-dev"
 
-6. Install the bigjimmy bot init script (and start it)
- * Copy from ./bigjimmy/init-script/bigjimmy 
-
-7. Run the following admin-tools:
+6. Run the following admin-tools:
  * ./admin-tools/init-db.sh  (initializes the mysql database)
  * ./admin-tools/add_all_ldap_users_as_solvers.pl (adds all users in LDAP to the PB database)
 
-8. Edit, and then link the apache config in ./apache-conf/sites/canadia-apache.conf in to the apache2 sites-enabled conf dir, 
+7. Edit, and then link the apache config in ./apache-conf/sites/canadia-apache.conf in to the apache2 sites-enabled conf dir, 
    and restart apache (currently support apache 2.2).
+
+8. Install the bigjimmy bot init script (and start it)
+ * Copy from ./bigjimmy/init-script/bigjimmy 
+
+9. Get meteor server working:
+ * How? (FIXME) What config?
+ * Configure meteor server info in Config.pm
 
 ---
 
