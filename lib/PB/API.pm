@@ -13,6 +13,10 @@ use Net::LDAP;
 use DBI;
 use SQL::Yapp;
 
+use LWP::Simple;
+use JSON qw( decode_json );
+use URI::Escape;
+
 my $dbh = DBI->connect('DBI:mysql:database='.$PB::Config::PB_DATA_DB_NAME.$PB::Config::PB_DEV_VERSION.';host='.$PB::Config::PB_DATA_DB_HOST.';port='.$PB::Config::PB_DATA_DB_PORT, $PB::Config::PB_DATA_DB_USER, $PB::Config::PB_DATA_DB_PASS) || die "Could not connect to database: $DBI::errstr";
 
 my $EXCLUSIVE_LOCK = 2;
@@ -65,6 +69,7 @@ sub _add_puzzle_db {
     my $round = shift;
     my $puzzle_uri = shift;
     my $drive_uri = shift;
+    my $slack_channel_id = shift;
 
     debug_log("add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri drive_uri=$drive_uri \n", 4);
 
@@ -73,8 +78,8 @@ sub _add_puzzle_db {
 	$drive_uri = undef;
     }
 
-    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, 'New');";
-    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri);
+    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `slack_channel_id`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, ?, 'New');";
+    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri, $slack_channel_id);
     
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
@@ -108,10 +113,12 @@ sub add_puzzle {
 
     debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2);
 
+    # create slack channel so we have the id to insert
+    my $slack_channel_id = slack_create_channel_for_puzzle($id);
     
     my $drive_uri = undef;
     
-    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri);
+    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $slack_channel_id);
 
     if ($retvalue <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
@@ -120,8 +127,11 @@ sub add_puzzle {
 
     my $round_drive_id = get_round($round)->{"drive_id"};
 
+    # set slack channel topic
+    slack_set_channel_topic($slack_channel_id, $id, $round, $puzzle_uri, $drive_uri);
+
     #Announce puzzle in general slack
-    slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: https://drive.google.com/drive/u/2/folders/$round_drive_id");
+    slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: https://drive.google.com/drive/u/2/folders/$round_drive_id \n Slack Channel: <#$slack_channel_id>");
 
     #Announce puzzle in giphy slack with giphy
     #commenting out because this is dumb
@@ -953,6 +963,47 @@ sub slack_say_something {
     return(0);
 }
 
+sub slack_create_channel_for_puzzle {
+    my $puzzle_name = shift;
+
+    debug_log("slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n", 2);
+
+    # invoke API call to create channel
+    my $channels_create_url = "https://slack.com/api/channels.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&validate=true&pretty=1";
+    my $response = get(channels_create_url);
+    
+    unless defined($response) {
+        debug_log("get request to $channels_create_url failed");
+        return "";
+    }
+
+    # extract channel id
+    my $json = decode_json($response)
+    unless ($json->{ok}) {
+        debug_log("Slack API: channels.create failed with error: $json->{error}");
+        return "";
+    }
+
+    my $channel_id = $json->{channel}->{id};
+    unless defined($channel_id) {
+        return "";
+    }
+    return $channel_id;
+}
+
+sub slack_set_channel_topic {
+    my $channel_id = shift;
+    my $puzzle_name = shift;
+    my $round_name = shift;
+    my $puzzle_uri = shift;
+    my $google_sheet_uri = shift;
+
+    my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Sheet: $google_sheet_uri");
+    my $channels_set_topic_url = "https://slack.com/api/channels.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&validate=true&pretty=1";
+    get(channels_set_topic_url);    
+    
+    return $channel_id;
+}
 
 1;
 
