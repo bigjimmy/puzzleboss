@@ -1,4 +1,0 @@
-
-ldapsearch -xLLL -b "dc=stormynight,dc=org" 
-
-ldapdelete -x -D cn=admin,dc=stormynight,dc=org -w the_admin_password "uid=XXXXXXXX,ou=people,dc=stormynight,dc=org"
