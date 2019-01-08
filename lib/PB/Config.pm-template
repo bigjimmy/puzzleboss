@@ -35,6 +35,7 @@ our $GOOGLE_ADMIN_USER = 'BigJimmy@stormynight.org';
 our $GOOGLE_CLIENT_ID = "blahblahblah.apps.googleusercontent.com";
 our $GOOGLE_CLIENT_SECRET = "blahblahblahsecretblah";
 our $BIGJIMMY_SLACK_TOKEN = "DISABLED";
+our $SLACK_API_USER_TOKEN = "DISABLED";
 our $ANSWERSALLCAPS = 1;
 
 
