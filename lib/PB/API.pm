@@ -970,22 +970,27 @@ sub slack_create_channel_for_puzzle {
 
     # invoke API call to create channel
     my $channels_create_url = "https://slack.com/api/channels.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&validate=true&pretty=1";
-    my $response = get(channels_create_url);
+    my $response;
+
+    $response = get($channels_create_url);
+    debug_log("slack channel creation url: $channels_create_url\n", 2);
+    debug_log("slack response: $response\n", 2);
     
-    unless defined($response) {
-        debug_log("get request to $channels_create_url failed");
+    unless (defined($response)) {
+        debug_log("get request to $channels_create_url failed\n");
         return "";
     }
 
     # extract channel id
-    my $json = decode_json($response)
+    my $json = decode_json($response);
     unless ($json->{ok}) {
-        debug_log("Slack API: channels.create failed with error: $json->{error}");
+        debug_log("Slack API: channels.create failed with error: $json->{error}\n");
         return "";
     }
 
-    my $channel_id = $json->{channel}->{id};
-    unless defined($channel_id) {
+    my $channel_id;
+    $channel_id = $json->{channel}->{id};
+    unless (defined($channel_id)) {
         return "";
     }
     return $channel_id;
@@ -1000,7 +1005,7 @@ sub slack_set_channel_topic {
 
     my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Sheet: $google_sheet_uri");
     my $channels_set_topic_url = "https://slack.com/api/channels.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&validate=true&pretty=1";
-    get(channels_set_topic_url);    
+    get($channels_set_topic_url);
     
     return $channel_id;
 }
