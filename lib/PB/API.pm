@@ -128,7 +128,7 @@ sub add_puzzle {
     my $round_drive_id = get_round($round)->{"drive_id"};
 
     # set slack channel topic
-    slack_set_channel_topic($slack_channel_id, $id, $round, $puzzle_uri, $drive_uri);
+    slack_set_channel_topic($slack_channel_id, $id, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
 
     #Announce puzzle in general slack
     slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: https://drive.google.com/drive/u/2/folders/$round_drive_id \n Slack Channel: <#$slack_channel_id>");
@@ -1001,9 +1001,9 @@ sub slack_set_channel_topic {
     my $puzzle_name = shift;
     my $round_name = shift;
     my $puzzle_uri = shift;
-    my $google_sheet_uri = shift;
+    my $google_docs_folder = shift;
 
-    my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Sheet: $google_sheet_uri");
+    my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder");
     my $channels_set_topic_url = "https://slack.com/api/channels.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&pretty=1";
     get($channels_set_topic_url);
     
