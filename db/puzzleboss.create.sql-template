@@ -141,6 +141,7 @@ CREATE TABLE `puzzle` (
   `puzzle_uri` text,
   `drive_uri` varchar(300) DEFAULT NULL,
   `slack_channel_id` varchar(500) DEFAULT NULL,
+  `slack_channel_name` varchar(500) DEFAULT NULL,
   `pb_comments` text,
   `status` enum('New','Being worked','Needs eyes','Solved','Critical','Unnecessary','WTF') NOT NULL,
   `answer` varchar(500) DEFAULT NULL,
@@ -464,6 +465,7 @@ SET character_set_client = utf8;
   `locations` tinyint NOT NULL,
   `drive_uri` tinyint NOT NULL,
   `drive_id` tinyint NOT NULL,
+  `slack_channel_name` tinyint DEFAULT NULL,
   `round_meta_p` tinyint NOT NULL,
   `linkid` tinyint NOT NULL,
   `puzzle_uri` tinyint NOT NULL,
@@ -750,7 +752,7 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `puzzle_view` AS select `puzzle`.`id` AS `id`,`puzzle`.`name` AS `name`,`puzzle`.`drive_link` AS `drive_link`,`puzzle`.`status` AS `status`,`puzzle`.`answer` AS `answer`,`round`.`name` AS `round`,`puzzle`.`pb_comments` AS `comments`,`puzzle`.`locations` AS `locations`,`puzzle`.`drive_uri` AS `drive_uri`,`puzzle`.`drive_id` AS `drive_id`,`puzzle`.`round_meta_p` AS `round_meta_p`,concat('<a href="',`puzzle`.`puzzle_uri`,'"target="',`puzzle`.`name`,'">',`puzzle`.`name`,'</a>') AS `linkid`,`puzzle`.`puzzle_uri` AS `puzzle_uri`,concat('<a href="gdochist.pl?pid=',`puzzle`.`id`,'" target=NEW>Activity</a>') AS `activity`,`ps`.`solvers` AS `solvers`,`cps`.`cursolvers` AS `cursolvers`,`puzzle`.`locations` AS `xyzloc` from (((`puzzle` join `round` on((`round`.`id` = `puzzle`.`round_id`))) left join `puzzle_solvers` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `puzzle_cursolvers` `cps` on((`cps`.`puzzle_id` = `puzzle`.`id`))) */;
+/*!50001 VIEW `puzzle_view` AS select `puzzle`.`id` AS `id`,`puzzle`.`name` AS `name`,`puzzle`.`drive_link` AS `drive_link`,`puzzle`.`slack_channel_name` AS `slack_channel_name`,`puzzle`.`status` AS `status`,`puzzle`.`answer` AS `answer`,`round`.`name` AS `round`,`puzzle`.`pb_comments` AS `comments`,`puzzle`.`locations` AS `locations`,`puzzle`.`drive_uri` AS `drive_uri`,`puzzle`.`drive_id` AS `drive_id`,`puzzle`.`round_meta_p` AS `round_meta_p`,concat('<a href="',`puzzle`.`puzzle_uri`,'"target="',`puzzle`.`name`,'">',`puzzle`.`name`,'</a>') AS `linkid`,`puzzle`.`puzzle_uri` AS `puzzle_uri`,concat('<a href="gdochist.pl?pid=',`puzzle`.`id`,'" target=NEW>Activity</a>') AS `activity`,`ps`.`solvers` AS `solvers`,`cps`.`cursolvers` AS `cursolvers`,`puzzle`.`locations` AS `xyzloc` from (((`puzzle` join `round` on((`round`.`id` = `puzzle`.`round_id`))) left join `puzzle_solvers` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `puzzle_cursolvers` `cps` on((`cps`.`puzzle_id` = `puzzle`.`id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

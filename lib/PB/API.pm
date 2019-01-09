@@ -70,6 +70,7 @@ sub _add_puzzle_db {
     my $puzzle_uri = shift;
     my $drive_uri = shift;
     my $slack_channel_id = shift;
+    my $slack_channel_name = shift;
 
     debug_log("add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri drive_uri=$drive_uri \n", 4);
 
@@ -78,8 +79,8 @@ sub _add_puzzle_db {
 	$drive_uri = undef;
     }
 
-    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `slack_channel_id`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, ?, 'New');";
-    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri, $slack_channel_id);
+    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `slack_channel_id`, `slack_channel_name`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, ?, ?, 'New');";
+    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri, $slack_channel_id, $slack_channel_name);
     
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
@@ -114,11 +115,19 @@ sub add_puzzle {
     debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2);
 
     # create slack channel so we have the id to insert
-    my $slack_channel_id = slack_create_channel_for_puzzle($id);
+    my $slack_channel = slack_create_channel_for_puzzle($id);
+    my $slack_channel_id = "";
+    my $slack_chnanel_name = "";
+    if (defined($slack_channel->{slack_channel_id})) {
+        $slack_channel_id = $slack_channel->{slack_channel_id};
+    }
+    if (defined($slack_channel->{slack_channel_name})) {
+        $slack_channel_name = $slack_channel->{slack_channel_name};
+    }
     
     my $drive_uri = undef;
     
-    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $slack_channel_id);
+    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $slack_channel_id, $slack_channel_name);
 
     if ($retvalue <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
@@ -978,22 +987,26 @@ sub slack_create_channel_for_puzzle {
     
     unless (defined($response)) {
         debug_log("get request to $channels_create_url failed\n");
-        return "";
+        return;
     }
 
     # extract channel id
     my $json = decode_json($response);
     unless ($json->{ok}) {
         debug_log("Slack API: channels.create failed with error: $json->{error}\n");
-        return "";
+        return;
     }
 
     my $channel_id;
     $channel_id = $json->{channel}->{id};
-    unless (defined($channel_id)) {
-        return "";
+    $channel_name = $json->{channel}->{name};
+    unless (defined($channel_id) && defined($channel_name)) {
+        return;
     }
-    return $channel_id;
+    return {
+        channel_id => $channel_id,
+        channel_name => $channel_name
+    };
 }
 
 sub slack_set_channel_topic {
