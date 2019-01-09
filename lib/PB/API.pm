@@ -969,7 +969,7 @@ sub slack_create_channel_for_puzzle {
     debug_log("slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n", 2);
 
     # invoke API call to create channel
-    my $channels_create_url = "https://slack.com/api/channels.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&validate=true&pretty=1";
+    my $channels_create_url = "https://slack.com/api/channels.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&pretty=1";
     my $response;
 
     $response = get($channels_create_url);
@@ -1004,7 +1004,7 @@ sub slack_set_channel_topic {
     my $google_sheet_uri = shift;
 
     my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Sheet: $google_sheet_uri");
-    my $channels_set_topic_url = "https://slack.com/api/channels.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&validate=true&pretty=1";
+    my $channels_set_topic_url = "https://slack.com/api/channels.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&pretty=1";
     get($channels_set_topic_url);
     
     return $channel_id;
