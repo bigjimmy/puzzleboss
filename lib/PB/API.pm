@@ -72,7 +72,7 @@ sub _add_puzzle_db {
     my $slack_channel_id = shift;
     my $slack_channel_name = shift;
 
-    debug_log("add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri drive_uri=$drive_uri \n", 4);
+    debug_log("add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name \n", 4);
 
     # convert drive_uri to null (undef) if not set
     if($drive_uri eq '') {
@@ -85,10 +85,10 @@ sub _add_puzzle_db {
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
 	_send_data_version();
-	debug_log("_add_puzzle_db: dbh->do returned success: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri\n",4);
+	debug_log("_add_puzzle_db: dbh->do returned success: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name\n",4);
 	return(1);
     } else {
-	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri\n",0);
+	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name\n",0);
 	#make the error reporting a bit more descriptive downstream
 	if ($dbh->errstr =~ /Duplicate/){
 	    return (-2);
@@ -117,12 +117,12 @@ sub add_puzzle {
     # create slack channel so we have the id to insert
     my $slack_channel = slack_create_channel_for_puzzle($id);
     my $slack_channel_id = "";
-    my $slack_chnanel_name = "";
-    if (defined($slack_channel->{slack_channel_id})) {
-        $slack_channel_id = $slack_channel->{slack_channel_id};
+    my $slack_channel_name = "";
+    if (defined($slack_channel->{channel_id})) {
+        $slack_channel_id = $slack_channel->{channel_id};
     }
-    if (defined($slack_channel->{slack_channel_name})) {
-        $slack_channel_name = $slack_channel->{slack_channel_name};
+    if (defined($slack_channel->{channel_name})) {
+        $slack_channel_name = $slack_channel->{channel_name};
     }
     
     my $drive_uri = undef;
@@ -999,6 +999,7 @@ sub slack_create_channel_for_puzzle {
 
     my $channel_id;
     $channel_id = $json->{channel}->{id};
+    my $channel_name;
     $channel_name = $json->{channel}->{name};
     unless (defined($channel_id) && defined($channel_name)) {
         return;
