@@ -267,22 +267,25 @@ sub update_puzzle_part {
 	if ($part eq "status" && $val eq "Needs eyes"){
 	    my $eyespuzzref = get_puzzle($id);
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
-            my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
-            my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
-            my $eyespuzzle_message = "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc";
-            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, $eyespuzzle_message);
-            slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, $eyespuzzle_message);
-        }
+        my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
+        my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
+        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
+        slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "This puzzle NEEDS EYES");
+    }
 
-        if ($part eq "status" && $val eq "Critical"){
-            my $critpuzzref = get_puzzle($id);
-            my $critpuzzle_name = $critpuzzref->{"name"};
-            my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
-            my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
-            my $critpuzzle_message = "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc";
-            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, $critpuzzle_message);
-            slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, $critpuzzle_message);
-        }
+    if ($part eq "status" && $val eq "Critical"){
+        my $critpuzzref = get_puzzle($id);
+        my $critpuzzle_name = $critpuzzref->{"name"};
+        my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
+        my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
+        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
+        slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "This puzzle is CRITICAL");
+    }
+
+    if ($part eq "status" && $val eq "Unnecessary"){
+        my $unnecessarypuzzref = get_puzzle($id);
+        slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "This puzzle is no longer necessary");
+    }
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
 
