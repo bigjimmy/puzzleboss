@@ -161,8 +161,9 @@ sub puzzle_solved {
 	assign_solver_puzzle("", $solver);
     }
 
-    slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL,"PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:");
-    
+    my $message = "PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:";
+    slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, message);
+    slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, message);
 }
 
 sub delete_puzzle {
@@ -268,7 +269,9 @@ sub update_puzzle_part {
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
             my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
             my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
-            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Hey \@here Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
+            my $eyespuzzle_message = "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc";
+            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, $eyespuzzle_message);
+            slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, $eyespuzzle_message);
         }
 
         if ($part eq "status" && $val eq "Critical"){
@@ -276,7 +279,9 @@ sub update_puzzle_part {
             my $critpuzzle_name = $critpuzzref->{"name"};
             my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
             my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
-            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
+            my $critpuzzle_message = "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc";
+            slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, $critpuzzle_message);
+            slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, $critpuzzle_message);
         }
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
