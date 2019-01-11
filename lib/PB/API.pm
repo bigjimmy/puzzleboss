@@ -286,7 +286,7 @@ sub update_puzzle_part {
 
     if ($part eq "status" && $val eq "Unnecessary"){
         my $unnecessarypuzzref = get_puzzle($id);
-        slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "This puzzle is no longer necessary");
+        slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "This puzzle is UNNECESSARY");
     }
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
