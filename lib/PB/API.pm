@@ -269,7 +269,8 @@ sub update_puzzle_part {
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
         my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
         my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
-        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
+        my $eyespuzzle_slackchannelid = $eyespuzzref->{"slack_channel_id"};
+        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
         slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "This puzzle NEEDS EYES");
     }
 
@@ -278,7 +279,8 @@ sub update_puzzle_part {
         my $critpuzzle_name = $critpuzzref->{"name"};
         my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
         my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
-        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
+        my $critpuzzle_slackchannelid = $critpuzzref->{"slack_channel_id"};
+        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
         slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "This puzzle is CRITICAL");
     }
 
