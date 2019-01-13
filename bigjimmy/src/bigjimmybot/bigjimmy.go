@@ -21,7 +21,7 @@ func BigJimmySolverActivityMonitor(solver *Solver, solverActivityMonitorChan cha
 	go func() {
 		for true {
 			// set timer
-			updateTimer := time.NewTimer(2 * time.Minute)
+			updateTimer := time.NewTimer(3 * time.Minute)
 			
 			// wait for timer or solver update
 			log.Logf(l4g.DEBUG, "BigJimmySolverActivityMonitor(%v): waiting for timer or solver update", solver.FullName)
