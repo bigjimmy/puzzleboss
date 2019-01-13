@@ -160,8 +160,9 @@ sub puzzle_solved {
     foreach my $solver (@cursolvers){
 	assign_solver_puzzle("", $solver);
     }
+    my $theanswer = $puzzref->{"answer"};
 
-    my $message = "PUZZLE $idin HAS BEEN SOLVED! \n Way to go team! :doge:";
+    my $message = "PUZZLE $idin HAS BEEN SOLVED! (ANSWER: $theanswer) \n Way to go team! :doge:";
     slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, $message);
     slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, $message);
 }
