@@ -80,7 +80,7 @@ func SlackBot(slackToken string) (err error) {
 	// set my own id
 	var ok bool
 	slackIdsByName_lock.RLock()
-	slackBigjimmyBotUserId, ok = slackIdsByName["bigjimmybot"]
+	slackBigjimmyBotUserId, ok = slackIdsByName["slackapiuser"]
 	slackIdsByName_lock.RUnlock()
 	if !ok {
 		log.Logf(l4g.ERROR, "SlackBot: failed to get slack id for bigjimmybot: %v (EXITING SLACKBOT)", err)
@@ -102,7 +102,7 @@ func SlackBot(slackToken string) (err error) {
 	}
 
 	// get bigjimmy channel
-	slackBigjimmyChannelId, err = GetSlackIdForChannel("bigjimmy")
+	slackBigjimmyChannelId, err = GetSlackIdForChannel("puzzleboss-tech")
 	if err != nil {
 		log.Logf(l4g.ERROR, "SlackBot: failed to update channels: %v (EXITING SLACKBOT)", err)
 		return
@@ -135,7 +135,7 @@ func SlackBot(slackToken string) (err error) {
 	slackReady = true
 
 	log.Logf(l4g.INFO, "SlackBot: telling the world I'm back in action")
-	SendSlackChannelMessage("bigjimmy", "I'm back in action!")
+	SendSlackChannelMessage("puzzleboss-tech", "I'm back in action!")
 	SendSlackUserMessage("jrandall", "Hello Master, I'm back in action!")
 
 	return

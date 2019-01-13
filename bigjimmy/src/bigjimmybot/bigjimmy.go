@@ -206,7 +206,7 @@ func (d *Drive) BigJimmyDrivePuzzleMonitor(puzzleName string, puzzleActivityMoni
 			log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor: start of loop. currently in iteration %v for %v have %v goroutines.", iteration, puzzleName, nGoRoutines)
 
 			// set timer
-			updateTimer := time.NewTimer(10 * time.Minute)
+			updateTimer := time.NewTimer(12 * time.Minute)
 			
 			// wait for timer or solver update
 			log.Logf(l4g.DEBUG, "BigJimmyDrivePuzzleMonitor(%v): waiting for timer or puzzle update", puzzleName)
@@ -242,6 +242,8 @@ func (d *Drive) updateDrivePuzzleActivity(puzzleName string, puzzle *Puzzle) (er
 		err = fmt.Errorf("updateDrivePuzzleActivity: %v has no drive_id (yet?)", puzzle.Name)
 		return
 	}
+	// sleep for 1 second to throttle for API
+	time.Sleep(1 * time.Second)
 	revision, err = d.GetLatestPuzzleRevision(puzzle.Drive_id)	
 	if err != nil {
 		log.Logf(l4g.ERROR, "updateDrivePuzzleActivity: failed to get latest revision for puzzle %v", puzzleName)
