@@ -6,6 +6,8 @@ admin_pass=`cat pw`
 domain=`cat domain`
 ldapdc=`cat ldapdc`
 
+eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
+
 if [[ -n "${username}" ]]; then
     ldif=`ldapsearch -x -D cn=admin,dc=wind-up-birds,dc=org -w ${admin_pass} -LLL -b "dc=${ldapdc}" uid=${username} uid sn givenName userPassword`
     if [[ -n "${ldif}" ]]; then
@@ -20,7 +22,7 @@ if [[ -n "${username}" ]]; then
 	if [[ -n "${googleargs}" && -n "${password16}" ]]; then
 	    echo "creating google user with args: ${googleargs} --passwordhash ${password16}"
 	    # TODO path and domain should come from config
-	    (cd /canadia/puzzlebitch/google && ./AddDomainUser.sh --domain "${domain}"  ${googleargs} --passwordhash "${password16}")
+	    (cd $PB_PATH/google && ./AddDomainUser.sh --domain "${domain}"  ${googleargs} --passwordhash "${password16}")
 	else
 	    echo "could not change ldap password"
 	    exit 3
