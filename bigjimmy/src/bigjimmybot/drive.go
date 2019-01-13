@@ -403,12 +403,13 @@ func (d *Drive) SetInitialPuzzleSpreadsheetContents(puzzle *Puzzle, spreadsheetI
 			return err
 		}
 
-		valueRange := fmt.Sprintf("%s metadata!A1:B8", puzzle.Name)
+		valueRange := fmt.Sprintf("%s metadata!A1:B9", puzzle.Name)
 		values := [][]interface{}{
 			{"Round:",		puzzle.Round},
 			{"Puzzle:",		puzzle.Name},
 			{"Actual Puzzle URL:",	puzzle.Uri},
 			{"Slack Channel:", "#" + puzzle.Slack_channel_name},
+			{"Slack Channel Link:", "http://importanthuntpoll.slack.com/archives/" + puzzle.Slack_channel_id},
 			{},
 			{"No spoilers on this worksheet, please!"},
 			{"Please use a different sheet (see tabs below) for work and create additional sheets as needed to pursue different ideas (or independent solves)"},

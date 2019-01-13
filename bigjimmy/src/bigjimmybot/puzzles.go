@@ -23,6 +23,7 @@ type Puzzle struct {
 	Drive_link string
 	Wrong_answers string
 	Slack_channel_name string
+	Slack_channel_id string
 }
 
 var puzzles map[string] *Puzzle
