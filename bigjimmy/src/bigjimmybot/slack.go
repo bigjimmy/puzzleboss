@@ -244,8 +244,8 @@ RTMLoop:
 			}
 		case msg := <-incomingSlackMessages:
 			log.Logf(l4g.TRACE, "handleMessages: sending message to %v: %v", msg.Id, msg.Text)
-//			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, msg.Id))
-			rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("SLACKBOT DEBUG to: %v %v", msg.Id, msg.Text), slackDebugDirectMessageId))
+			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, msg.Id))
+//			rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("SLACKBOT DEBUG to: %v %v", msg.Id, msg.Text), slackDebugDirectMessageId))
 		case msg := <-incomingSlackDirectMessages:
 			log.Logf(l4g.TRACE, "handleMessages: sending direct message to %v: %v", msg.Id, msg.Text)
 			_, _, id, err := rtm.OpenIMChannel(msg.Id)
@@ -253,8 +253,9 @@ RTMLoop:
 				log.Logf(l4g.ERROR, "handleMessages: failed to open an IM channel to id %v: %v", msg.Id, err)
 			}
 			log.Logf(l4g.TRACE, "handleMessages: sending IM message to id %v for user id %v", id, msg.Id)
-//			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, id))
-			rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("SLACKBOT DEBUG to: %v %v", id, msg.Text), slackDebugDirectMessageId))		}
+			rtm.SendMessage(rtm.NewOutgoingMessage(msg.Text, id))					
+//			rtm.SendMessage(rtm.NewOutgoingMessage(fmt.Sprintf("SLACKBOT DEBUG to: %v %v", id, msg.Text), slackDebugDirectMessageId))		}
+			}
 	}
 	log.Logf(l4g.ERROR, "HandleMessage: exiting (NOT HANDLING SLACK RTM ANYMORE!)")
 	return
