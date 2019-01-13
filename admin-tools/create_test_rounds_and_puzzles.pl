@@ -18,6 +18,7 @@ foreach my $roundnum ( $round_from .. $round_to ) {
     foreach my $puzznum ( $puzzle_from .. $puzzle_to ) {
 	my $puzz = "TestPuzzR".$roundnum."P".$puzznum;
 	PB::API::add_puzzle($puzz, $round, 'http://google.com/?q='.$puzz);
+	sleep(4);
     }
 }
 
