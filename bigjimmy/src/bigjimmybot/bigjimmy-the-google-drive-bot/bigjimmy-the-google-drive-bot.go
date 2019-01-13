@@ -242,9 +242,9 @@ func main() {
 
 	// Try to get slack_token from DB
 	if slackToken == "" {
-		slackToken, err = bigjimmybot.DbGetConfig("BIGJIMMY_SLACK_TOKEN")
+		slackToken, err = bigjimmybot.DbGetConfig("SLACK_API_USER_TOKEN")
 		if err != nil {
-			l4g.Crashf("Could not get slackToken (BIGJIMMY_SLACK_TOKEN) from DB: %v", err)
+			l4g.Crashf("Could not get slackToken (SLACK_API_USER_TOKEN) from DB: %v", err)
 		}
 	}
 	go bigjimmybot.SlackBot(slackToken)
