@@ -247,7 +247,7 @@ func main() {
 			l4g.Crashf("Could not get slackToken (SLACK_API_USER_TOKEN) from DB: %v", err)
 		}
 	}
-	go bigjimmybot.SlackBot(slackToken)
+	//go bigjimmybot.SlackBot(slackToken)
 
 	time.Sleep(5*time.Second)
 	log.Logf(l4g.TRACE, "main(): before bigjimmybot.ControlServer %v goroutines.", runtime.NumGoroutine())
