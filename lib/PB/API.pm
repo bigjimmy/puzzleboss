@@ -954,14 +954,13 @@ sub slack_say_something {
     my $username = shift;
     my $channel = shift;
     my $message = shift;
-    my $giphy = shift;
 
     chdir $PB::Config::PB_GOOGLE_PATH;
 
     print STDERR "Running slackcat.py from $PB::Config::PB_GOOGLE_PATH\n";
 
     # Prepare command
-    my $cmd = "./slackcat.py -c $channel -n $username $giphy -t '$message' |";
+    my $cmd = "./slackcat.py -c $channel -n $username -t '$message' |";
     my $cmdout="";
 
     # Execute command
