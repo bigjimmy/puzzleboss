@@ -1,6 +1,8 @@
+use Cwd qw( abs_path );
+use File::Basename qw( dirname );
+use lib dirname(abs_path($0));
 package PB::REST::Puzzles;
 use base 'CGI::Application';
-
 use CGI::Application::Plugin::AutoRunmode;
 use PB::Config;
 use PB::API;

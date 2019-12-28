@@ -9,7 +9,7 @@ import urllib
 import requests # pip install requests if you don't have it
 
 
-WEBHOOK_URL = 'https://hooks.slack.com/services/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'
+WEBHOOK_URL = 'https://hooks.slack.com/services/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'
 
 def post_to_slack(url, text, channel, user, emoji, quiet):
     headers = {'content-type':'application/json'}
