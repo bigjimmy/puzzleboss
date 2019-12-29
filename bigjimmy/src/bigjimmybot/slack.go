@@ -163,7 +163,7 @@ func SendSlackUserMessage(user string, text string) {
 		return
 	}
 	// get user id for message
-	userId, err := GetSlackIdForSolver(&Solver{Name: user, FullName: user, Puzz: "", Id: ""}) // FIXME HACK
+	userId, err := GetSlackIdForSolver(&Solver{Name: user, FullName: user, Puzz: "", Id: 0}) // FIXME HACK
 	if err != nil {
 		log.Logf(l4g.ERROR, "RelayMessage: failed to get slack id for %v", user)
 		return

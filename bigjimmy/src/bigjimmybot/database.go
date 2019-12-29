@@ -52,7 +52,7 @@ func DbSetConfig(key string, val string) (err error) {
 	return
 }
 
-func DbGetSolveTimeForPuzzle(puzzleId string) (solveTime time.Time, err error) {
+func DbGetSolveTimeForPuzzle(puzzleId int) (solveTime time.Time, err error) {
 	err = dbCon.QueryRow("SELECT `audit_puzzle`.`time` FROM `audit_puzzle` WHERE `old_answer` IS NULL AND `new_answer` IS NOT NULL AND `puzzle_id` = ? ORDER BY `time` DESC LIMIT 1", puzzleId).Scan(&solveTime)
 	switch {
 	case err == sql.ErrNoRows:
@@ -66,7 +66,7 @@ func DbGetSolveTimeForPuzzle(puzzleId string) (solveTime time.Time, err error) {
 	return
 }
 
-func DbGetLastActivityForSolver(solverId string, activityType string) (puzzle string, timestamp time.Time, err error) {
+func DbGetLastActivityForSolver(solverId int, activityType string) (puzzle string, timestamp time.Time, err error) {
 	var puzzleNS sql.NullString
 	err = dbCon.QueryRow("SELECT `puzzle`.`name`, `activity`.`time` FROM `activity` LEFT JOIN `puzzle` ON `puzzle`.`id` = `activity`.`puzzle_id` WHERE `activity`.`solver_id` = ? AND `activity`.`type` = ? ORDER BY `activity`.`time` DESC LIMIT 1", solverId, activityType).Scan(&puzzleNS, &timestamp)
 	switch {
@@ -90,13 +90,13 @@ func DbGetLastActivityForSolver(solverId string, activityType string) (puzzle st
 	return
 }
 
-func DbGetLastInteractionPuzzleForSolver(solverId string) (puzzle string, timestamp time.Time, err error) {
+func DbGetLastInteractionPuzzleForSolver(solverId int) (puzzle string, timestamp time.Time, err error) {
 	puzzle, timestamp, err = DbGetLastActivityForSolver(solverId, "interact")
 	return
 }
 
 // Query/Report Puzzle Revision Activity
-func DbGetLastRevisedPuzzleForSolver(solverId string) (puzzle string, timestamp time.Time, err error) {
+func DbGetLastRevisedPuzzleForSolver(solverId int) (puzzle string, timestamp time.Time, err error) {
 	puzzle, timestamp, err = DbGetLastActivityForSolver(solverId, "revise")
 	return
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Round struct {
-	Id string
+	Id int
 	Name string
 	Round_uri string
 	Drive_uri string

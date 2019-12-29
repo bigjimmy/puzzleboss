@@ -6,7 +6,7 @@ import (
 )
 
 type Solver struct {
-	Id string
+	Id int
 	Name string
 	FullName string
 	Puzz string

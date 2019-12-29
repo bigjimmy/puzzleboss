@@ -7,7 +7,7 @@ import (
 )
 
 type Puzzle struct {
-	Id string
+	Id int
 	Name string
 	Round string
 	Status string
