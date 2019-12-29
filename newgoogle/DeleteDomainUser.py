@@ -5,10 +5,12 @@ import os
 import sys
 import argparse
 
-from apiclient import discovery
+import googleapiclient
+from googleapiclient import discovery
 import oauth2client
 from oauth2client import client
 from oauth2client import tools
+from oauth2client import file
 
 
 SCOPES = 'https://www.googleapis.com/auth/admin.directory.user'
@@ -36,10 +38,7 @@ def get_credentials():
     if not credentials or credentials.invalid:
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
-        if flags:
-            credentials = tools.run_flow(flow, store, flags)
-        else: # Needed only for compatibility with Python 2.6
-            credentials = tools.run(flow, store)
+        credentials = tools.run_flow(flow, store, flags)
         print('Storing credentials to ' + credential_path)
     return credentials
 

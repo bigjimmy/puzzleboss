@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PERL5LIB='.:/canadia/puzzleboss/lib'
+
 eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
 
 deleteuser=`echo $1 | perl -pi -e 's/[[:space:]*]//g'`

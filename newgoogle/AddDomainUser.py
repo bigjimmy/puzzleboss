@@ -6,11 +6,13 @@ import argparse
 import hashlib
 import json
 
+import httplib2
 import googleapiclient
 from googleapiclient import discovery
 import oauth2client
 from oauth2client import client
 from oauth2client import tools
+from oauth2client import file
 
 
 SCOPES = 'https://www.googleapis.com/auth/admin.directory.user'
