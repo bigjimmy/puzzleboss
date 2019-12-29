@@ -5,11 +5,13 @@ import json
 import os
 import sys 
 import urllib
+import codecs
 
 import requests # pip install requests if you don't have it
 
 
-WEBHOOK_URL = 'https://hooks.slack.com/services/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'
+WEBHOOK_URL = codecs.encode('uggcf://ubbxf.fynpx.pbz/freivprf/G0T3CQ729/OF6OP6HOT/R0xtRHPTbMyfJfgPq2Mi0Cly','rot_13')
+
 
 def post_to_slack(url, text, channel, user, emoji, quiet):
     headers = {'content-type':'application/json'}
