@@ -940,10 +940,10 @@ sub _send_data_version {
     my $ret = 1;
 
     # Send to bigjimmy bot
-    #if(PB::BigJimmy::send_version($dataversion) <= 0) {
-    # 	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
-    #$ret = -1;
-    #}
+    if(PB::BigJimmy::send_version($dataversion) <= 0) {
+     	debug_log("PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",0);
+    $ret = -1;
+    }
 
     # Send to meteor
     debug_log("PB::API::_send_data_version() sending version ".$dataversion." to meteor\n",4);
