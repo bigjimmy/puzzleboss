@@ -161,9 +161,10 @@ func RestGetSolver(name string, solverChan chan *Solver) {
 	if err != nil {
 		log.Logf(l4g.ERROR, "RestGetSolver: error %v", err)
 		// TODO: do something... retry?
-		l4g.Crashf("RestGetSolver: could not get solver [%v] - bailing out", name)
+		// l4g.Crashf("RestGetSolver: could not get solver [%v] - bailing out", name)
+	} else {
+		log.Logf(l4g.DEBUG, "RestGetSolver: received response for %v", name)
 	}
-	log.Logf(l4g.DEBUG, "RestGetSolver: received response for %v", name)
 	if status == 200 {
 		// send result on solverChan
 		log.Logf(l4g.DEBUG, "RestGetSolver: sending solver on solverChan for %v", name)
@@ -171,7 +172,7 @@ func RestGetSolver(name string, solverChan chan *Solver) {
 	} else {
 		log.Logf(l4g.ERROR, "RestGetSolver: got status %v", status)
 		// TODO: do something... retry?
-		l4g.Crashf("RestGetSolver: could not get solver [%v] - bailing out", name)
+		// l4g.Crashf("RestGetSolver: could not get solver [%v] - bailing out", name)
 	}
 }
 
