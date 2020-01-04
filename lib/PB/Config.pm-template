@@ -22,13 +22,14 @@ our $TEAM_NAME = "My Team Name";
 our $SLACK_CHANNEL = "pbslackchannel";
 our $BIGJIMMY_IP = "127.0.0.1"; # IP for bigjimmy (can access pbrest without auth)
 our $REGISTER_LDAP_ADMIN_USER = "admin";
+our $REGISTER_LDAP_ADMIN_PASS = "secret";
 our $PB_DATA_DB_HOST = "localhost";
 our $PB_DATA_DB_PORT = "3306";
 our $PB_DATA_DB_USER = lc($PB_USER);
 our $PB_DATA_DB_PASS = $PB_PASS;
 our $METEOR_HTTP_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
-our $METEOR_CONTROL_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
-our $BIGJIMMY_CONTROL_HOST = "localhost";
+our $METEOR_CONTROL_HOST = "series-of-tubes-internal.$PB_DOMAIN_NAME";
+our $BIGJIMMY_CONTROL_HOST = "series-of-tubes-internal.$PB_DOMAIN_NAME";
 our $BIGJIMMY_CONTROL_PORT = "8080";
 our $INSTALL_PATH = "/canadia";
 our $GOOGLE_ADMIN_USER = 'BigJimmy@stormynight.org';
@@ -36,6 +37,7 @@ our $GOOGLE_CLIENT_ID = "blahblahblah.apps.googleusercontent.com";
 our $GOOGLE_CLIENT_SECRET = "blahblahblahsecretblah";
 our $BIGJIMMY_SLACK_TOKEN = "DISABLED";
 our $SLACK_API_USER_TOKEN = "DISABLED";
+our $SLACK_API_URL = "https://hooks.slack.com/services/SEKRIT";
 our $ANSWERSALLCAPS = 1;
 
 
@@ -90,7 +92,6 @@ our $PB_DATA_DB_NAME = "puzzleboss$PB_DEV_VERSION";
 our $REGISTER_LDAP_HOST = "ldap.$PB_DOMAIN_NAME";
 our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $PB_DOMAIN_NAME));
 our $REGISTER_LDAP_DOMAIN = "$PB_DOMAIN_NAME";
-our $REGISTER_LDAP_ADMIN_PASS = $PB_PASS;
 our $REGISTER_LDAP_O = $TEAM_NAME;
 our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
 

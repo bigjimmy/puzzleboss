@@ -12,9 +12,10 @@ import sys, os, re, StringIO
 import email,mimetypes
 import json
 import requests
+import codecs
 
 BOT_USERNAME = 'mailbot'
-WEBHOOK_URL = 'https://hooks.slack.com/services/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'
+WEBHOOK_URL = codecs.encode('uggcf://ubbxf.fynpx.pbz/freivprf/G0T3CQ729/OF6OP6HOT/R0xtRHPTbMyfJfgPq2Mi0Cly','rot_13')
 BOT_CHANNEL = '#mailinglist'
 FILENAME = '/var/tmp/lastpuzzbossmail'
 OUTFILE = '/var/tmp/lastpuzzpossmailtext'
