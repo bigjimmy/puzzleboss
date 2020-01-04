@@ -165,7 +165,7 @@ CREATE TABLE `puzzle` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_AINS` AFTER INSERT ON puzzle FOR EACH ROW
+/*!50003 CREATE*/ /*!50003 TRIGGER `puzzle_AINS` AFTER INSERT ON puzzle FOR EACH ROW
 
 BEGIN
 INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'puzzles',NEW.name);
@@ -210,7 +210,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_AUPD` AFTER UPDATE ON `puzzle` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50003 TRIGGER `puzzle_AUPD` AFTER UPDATE ON `puzzle` FOR EACH ROW BEGIN
 IF IFNULL(OLD.name,'') <> IFNULL(NEW.name,'') THEN 
 	INSERT INTO `log` (`user`,`module`,`name`,`part`) VALUES (@user,'puzzles',NEW.name,'name');
 END IF;
@@ -290,7 +290,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_ADEL` AFTER DELETE ON `puzzle` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50003 TRIGGER `puzzle_ADEL` AFTER DELETE ON `puzzle` FOR EACH ROW BEGIN
 DELETE FROM `log` WHERE `module`="puzzles" AND `name`=OLD.name;
 INSERT INTO `audit_puzzle` 
 	(
@@ -379,7 +379,7 @@ CREATE TABLE `puzzle_solver` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_solver_BINS` BEFORE INSERT ON `puzzle_solver` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50003 TRIGGER `puzzle_solver_BINS` BEFORE INSERT ON `puzzle_solver` FOR EACH ROW BEGIN
 	Set @puzzname = (SELECT `name` FROM `puzzle` WHERE `puzzle`.`id`=NEW.puzzle_id);
 	Set @oldpuzzname = (SELECT `curpuzzle` FROM `solver_curpuzzle` WHERE `solver_id`=NEW.solver_id);
 	Set @solvername = (SELECT `name` FROM `solver` WHERE `solver`.`id`=NEW.solver_id);
@@ -404,7 +404,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `puzzle_solver_AINS` AFTER INSERT ON `puzzle_solver` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50003 TRIGGER `puzzle_solver_AINS` AFTER INSERT ON `puzzle_solver` FOR EACH ROW BEGIN
 	Set @puzzname = (SELECT `name` FROM `puzzle` WHERE `puzzle`.`id`=NEW.puzzle_id);
 	Set @solvername = (SELECT `name` FROM `solver` WHERE `solver`.`id`=NEW.solver_id);
 	INSERT	INTO `log` (`user`,`module`,`name`,`part`) 
@@ -504,7 +504,7 @@ CREATE TABLE `round` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `round_AINS` AFTER INSERT ON round FOR EACH ROW
+/*!50003 CREATE*/ /*!50003 TRIGGER `round_AINS` AFTER INSERT ON round FOR EACH ROW
 
 
 BEGIN
@@ -524,7 +524,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `round_ADEL` AFTER DELETE ON round FOR EACH ROW
+/*!50003 CREATE*/ /*!50003 TRIGGER `round_ADEL` AFTER DELETE ON round FOR EACH ROW
 
 BEGIN
 	INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'rounds',OLD.name);
@@ -559,7 +559,7 @@ CREATE TABLE `solver` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `solver_AINS` AFTER INSERT ON solver FOR EACH ROW
+/*!50003 CREATE*/ /*!50003 TRIGGER `solver_AINS` AFTER INSERT ON solver FOR EACH ROW
 
 BEGIN
 	INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'solvers',NEW.name);
@@ -578,7 +578,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `solver_AUPD` AFTER UPDATE ON solver FOR EACH ROW
+/*!50003 CREATE*/ /*!50003 TRIGGER `solver_AUPD` AFTER UPDATE ON solver FOR EACH ROW
 
 BEGIN
 IF IFNULL(OLD.name,'') <> IFNULL(NEW.name,'') THEN 
@@ -599,7 +599,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ALLOW_INVALID_DATES,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`bigjimmy`@`localhost`*/ /*!50003 TRIGGER `solver_ADEL` AFTER DELETE ON solver FOR EACH ROW
+/*!50003 CREATE*/ /*!50003 TRIGGER `solver_ADEL` AFTER DELETE ON solver FOR EACH ROW
 
 BEGIN
 	INSERT INTO `log` (`user`,`module`,`name`) VALUES (@user,'solvers',OLD.name);
@@ -675,7 +675,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `puzzle_cursolver_distinct` AS select distinct `solver`.`id` AS `solver_id`,`ps`.`puzzle_id` AS `puzzle_id` from (`solver` left join `puzzle_solver` `ps` on(((`ps`.`solver_id` = `solver`.`id`) and (`ps`.`puzzle_id` = (select `subps`.`puzzle_id` from `puzzle_solver` `subps` where (`subps`.`solver_id` = `ps`.`solver_id`) order by `subps`.`id` desc limit 1))))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -694,7 +693,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `puzzle_cursolvers` AS select `puzzle`.`id` AS `puzzle_id`,group_concat(`solver`.`name` separator ',') AS `cursolvers` from ((`puzzle` left join `puzzle_cursolver_distinct` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `solver` on((`solver`.`id` = `ps`.`solver_id`))) group by `puzzle`.`id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -713,7 +711,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `puzzle_solver_distinct` AS select distinct `puzzle_solver`.`puzzle_id` AS `puzzle_id`,`puzzle_solver`.`solver_id` AS `solver_id` from `puzzle_solver` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -732,7 +729,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `puzzle_solvers` AS select `puzzle`.`id` AS `puzzle_id`,group_concat(`solver`.`name` separator ',') AS `solvers` from ((`puzzle` left join `puzzle_solver_distinct` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `solver` on((`solver`.`id` = `ps`.`solver_id`))) group by `puzzle`.`id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -751,7 +747,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `puzzle_view` AS select `puzzle`.`id` AS `id`,`puzzle`.`name` AS `name`,`puzzle`.`drive_link` AS `drive_link`,`puzzle`.`status` AS `status`,`puzzle`.`answer` AS `answer`,`round`.`name` AS `round`,`puzzle`.`pb_comments` AS `comments`,`puzzle`.`locations` AS `locations`,`puzzle`.`drive_uri` AS `drive_uri`,`puzzle`.`slack_channel_name` AS `slack_channel_name`,`puzzle`.`slack_channel_id` AS `slack_channel_id`,`puzzle`.`drive_id` AS `drive_id`,`puzzle`.`round_meta_p` AS `round_meta_p`,concat('<a href="',`puzzle`.`puzzle_uri`,'"target="',`puzzle`.`name`,'">',`puzzle`.`name`,'</a>') AS `linkid`,`puzzle`.`puzzle_uri` AS `puzzle_uri`,concat('<a href="gdochist.pl?pid=',`puzzle`.`id`,'" target=NEW>Activity</a>') AS `activity`,`ps`.`solvers` AS `solvers`,`cps`.`cursolvers` AS `cursolvers`,`puzzle`.`locations` AS `xyzloc` from (((`puzzle` join `round` on((`round`.`id` = `puzzle`.`round_id`))) left join `puzzle_solvers` `ps` on((`ps`.`puzzle_id` = `puzzle`.`id`))) left join `puzzle_cursolvers` `cps` on((`cps`.`puzzle_id` = `puzzle`.`id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -770,7 +765,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `solver_curpuzzle` AS select `solver`.`id` AS `solver_id`,`puzzle`.`name` AS `curpuzzle`,`puzzle`.`id` AS `curpuzzle_id` from ((`solver` left join `puzzle_cursolver_distinct` `sp` on((`sp`.`solver_id` = `solver`.`id`))) left join `puzzle` on((`puzzle`.`id` = `sp`.`puzzle_id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -789,7 +783,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bigjimmy`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `solver_puzzles` AS select `solver`.`id` AS `solver_id`,group_concat(`puzzle`.`name` separator ',') AS `puzzles` from ((`solver` left join `puzzle_solver_distinct` `ps` on((`ps`.`solver_id` = `solver`.`id`))) left join `puzzle` on((`puzzle`.`id` = `ps`.`puzzle_id`))) group by `solver`.`id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -808,7 +801,6 @@ USE `$PB_DATA_DB_NAME`;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `solver_view` AS select `solver`.`id` AS `id`,`solver`.`name` AS `name`,`sp`.`puzzles` AS `puzzles`,`csp`.`curpuzzle` AS `puzz`,`solver`.`fullname` AS `fullname` from ((`solver` left join `solver_puzzles` `sp` on((`sp`.`solver_id` = `solver`.`id`))) left join `solver_curpuzzle` `csp` on((`csp`.`solver_id` = `solver`.`id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
