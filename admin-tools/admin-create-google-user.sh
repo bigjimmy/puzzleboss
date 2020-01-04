@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PERL5LIB='.:/canadia/puzzleboss/lib'
+
 username=$1
 
 admin_pass=`cat pw`

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PERL5LIB='.:/canadia/puzzleboss/lib'
+
 export PERL5LIB=/canadia/puzzleboss/lib:/canadia/puzzleboss/bin
 
 eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')

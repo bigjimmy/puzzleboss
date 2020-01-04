@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PERL5LIB='.:/canadia/puzzleboss/lib'
+
 echo "==WARNING!!!===WARNING!!!===WARNING!!!===WARNING=="
 echo "Running this command will ERASE ALL PROGRESS AND DATA FROM PB."
 echo "DO NOT DO THIS DURING HUNT!"
@@ -20,6 +22,7 @@ fi
 
 eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
 
+#dump to sql file
 cat $PB_PATH/db/puzzleboss.create.sql-template | perl -pi -e 's/\$PB_DATA_DB_NAME/'$PB_DATA_DB_NAME'/g' | mysql -h $PB_DATA_DB_HOST -P $PB_DATA_DB_PORT -u $PB_DATA_DB_USER -p$PB_DATA_DB_PASS
 
 
