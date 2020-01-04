@@ -958,7 +958,7 @@ sub slack_say_something {
     my $username = shift;
     my $channel = shift;
     my $message = shift;
-    my $apiurl = $PB::Config::SLACK_API_URL
+    my $apiurl = $PB::Config::SLACK_API_URL;
 
     chdir $PB::Config::PB_GOOGLE_PATH;
 
