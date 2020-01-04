@@ -10,7 +10,7 @@ import codecs
 import requests # pip install requests if you don't have it
 
 
-WEBHOOK_URL = codecs.encode('uggcf://ubbxf.fynpx.pbz/freivprf/G0T3CQ729/OF6OP6HOT/R0xtRHPTbMyfJfgPq2Mi0Cly','rot_13')
+
 
 
 def post_to_slack(url, text, channel, user, emoji, quiet):
@@ -41,13 +41,10 @@ def post_to_slack(url, text, channel, user, emoji, quiet):
 
 
 def parse_args():
-    # try getting Webhook url from env variable
-    webhook_url = WEBHOOK_URL
 
     parser = argparse.ArgumentParser(description='Talk to Slack')
     parser.add_argument('-u','--url', 
-        help='Slack Incoming Webhooks integration webhook URL.', required=webhook_url is None, 
-        default=webhook_url) 
+        help='Slack Incoming Webhooks integration webhook URL.', required=True) 
     parser.add_argument('-c','--channel', help='Channel to post to', required=True)
     parser.add_argument('-n','--user', help='Name of the user to post as',
         required=True)
@@ -80,10 +77,10 @@ def main():
         text = args['text'] or "cat"
         giphydata = json.loads(urllib.urlopen("http://api.giphy.com/v1/gifs/search?q="+text+"&api_key=dc6zaTOxFJmzC").read())
 	text = giphydata['data'][0]['images']['original']['url']
-	post_to_slack(WEBHOOK_URL, text, args['channel'], args['user'], args['emoji'], args['quiet'])
+	post_to_slack(args['url'], text, args['channel'], args['user'], args['emoji'], args['quiet'])
     else:
         text = args['text'] or sys.stdin.read()
-        post_to_slack(WEBHOOK_URL, text, args['channel'], args['user'], args['emoji'], args['quiet'])
+        post_to_slack(args['url'], text, args['channel'], args['user'], args['emoji'], args['quiet'])
 
 
 if __name__ == "__main__":

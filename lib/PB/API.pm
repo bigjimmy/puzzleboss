@@ -964,7 +964,7 @@ sub slack_say_something {
     print STDERR "Running slackcat.py from $PB::Config::PB_GOOGLE_PATH\n";
 
     # Prepare command
-    my $cmd = "./slackcat.py -c $channel -n $username -t '$message' |";
+    my $cmd = "./slackcat.py -u $PB::Config::SLACK_API_URL -c $channel -n $username -t '$message' |";
     my $cmdout="";
 
     # Execute command
