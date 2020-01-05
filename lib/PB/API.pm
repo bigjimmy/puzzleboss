@@ -144,7 +144,7 @@ sub add_puzzle {
     slack_set_channel_topic($slack_channel_id, $id, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
 
     #Announce puzzle in general slack
-    slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: https://drive.google.com/drive/u/2/folders/$round_drive_id \n Slack Channel: <#$slack_channel_id>");
+    slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$slack_channel_id>");
 
     #Announce puzzle in giphy slack with giphy
     #commenting out because this is dumb

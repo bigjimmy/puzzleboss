@@ -170,7 +170,7 @@ define([
 
 
 		// add slack link
-		var slack_uri = encodeURI(puzzstore.getValue(item,"slack_channel_id"));
+		var slack_uri = "http://importanthuntpoll.slack.com/archive/" + encodeURI(puzzstore.getValue(item,"slack_channel_id"));
                 var slack_link = domconstruct.create("a",{id: "pi_links_slack_"+name, class: "pi_slack_link", target: "_slack", innerHTML: "<img class=\"pi_icon\" src=\"../images/slack.png\" title=\"Slack\" alt=\"slack\">"});
                 if(slack_uri != "") {
                     slack_link.href = slack_uri;
