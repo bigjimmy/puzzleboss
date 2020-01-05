@@ -703,7 +703,7 @@ sub google_change_password {
 sub ldap_get_user_list {
     debug_log("ldap_get_user_list() using LDAP\n",2);
     
-    my $ldap = Net::LDAP->new ("localhost") or die "$@";
+    my $ldap = Net::LDAP->new ("ldap.wind-up-birds.org") or die "$@";
     my $mesg = $ldap->search ( base => "ou=people,dc=wind-up-birds,dc=org",
 			       scope   => "sub",
 			       filter  => "sn=*",

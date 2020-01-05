@@ -168,6 +168,17 @@ define([
 		}
 	        links_span.appendChild(puzz_link);
 
+
+		// add slack link
+		var slack_uri = encodeURI(puzzstore.getValue(item,"slack_channel_id"));
+                var slack_link = domconstruct.create("a",{id: "pi_links_slack_"+name, class: "pi_slack_link", target: "_slack", innerHTML: "<img class=\"pi_icon\" src=\"../images/slack.png\" title=\"Slack\" alt=\"slack\">"});
+                if(slack_uri != "") {
+                    slack_link.href = slack_uri;
+                } else {
+                    domclass.add(slack_link,"missing_link");
+                }
+                links_span.appendChild(slack_link);
+
 	        puzzinfo.appendChild(links_span);
 
 		//the answer 

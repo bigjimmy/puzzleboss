@@ -85,8 +85,9 @@ define([
 				     { field: 'answer', width: "12%", name: "Answer", editable: my_editable, formatter: fixedwidthFormatter},
 				     { field: 'xyzloc', width: "10%", name: "Location", editable: true, formatter: smallfontFormatter },
 				     { field: 'cursolvers', width: "20%", name:"Current Solvers", formatter:smallfontFormatter},
-				     { field: 'drive_link', width: "7%", name: "Doc", formatter: smallfontFormatter},
-				     { field: 'activity', width: "15%", name: "Recent Gdoc Activity", formatter:smallfontFormatter},
+				     { field: 'drive_link', width: "5%", name: "Doc", formatter: smallfontFormatter},
+			             { field: 'slack_link', width: "10%", name: "Slack", formatter: smallfontFormatter},
+				     { field: 'activity', width: "7%", name: "Recent Gdoc Activity", formatter:smallfontFormatter},
 				     { field: 'comments', width: "15%", name: "Notes", editable: true, formatter: smallfontFormatter}
 				     ];
 	
