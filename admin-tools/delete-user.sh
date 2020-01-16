@@ -15,12 +15,12 @@ else
 #    /canadia/puzzleboss/admin-tools/ldapdeleteuserfromgroup $deleteuser HuntTeam
 
     echo "deleting user $deleteuser"
-    deletedn=`ldapsearch -xLLL -b "${REGISTER_LDAP_DC}" uid=$deleteuser dn|cut -d':' -f2|head -n 1|perl -pi -e 's/[[:space:]*]//g'`
+    deletedn=`ldapsearch -h ${REGISTER_LDAP_HOST} -xLLL -b "${REGISTER_LDAP_DC}" uid=$deleteuser dn|cut -d':' -f2|head -n 1|perl -pi -e 's/[[:space:]*]//g'`
     if [ -z "$deletedn" ]; then
 	echo "ldap user does not exist"
     else 
 	echo "deleting ldap dn $deletedn"
-	ldapdelete -x -D cn=${REGISTER_LDAP_ADMIN_USER},${REGISTER_LDAP_DC} -w ${REGISTER_LDAP_ADMIN_PASS} $deletedn
+	ldapdelete -h ${REGISTER_LDAP_HOST} -x -D cn=${REGISTER_LDAP_ADMIN_USER},${REGISTER_LDAP_DC} -w ${REGISTER_LDAP_ADMIN_PASS} $deletedn
     fi
 
 
