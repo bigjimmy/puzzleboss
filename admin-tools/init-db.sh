@@ -17,7 +17,7 @@ fi
 
 #STOP everything!
 /etc/init.d/apache2 stop
-/etc/init.d/bigjimmy stop
+ssh series-of-tubes-internal.wind-up-birds.org "/etc/init.d/bigjimmy stop"
 
 
 eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
@@ -31,11 +31,11 @@ $PB_ADMIN_TOOLS_PATH/set-db-config.sh
 
 #Reset meteor log index and restart
 $PB_ADMIN_TOOLS_PATH/reset-log-index.sh
-/etc/init.d/meteord stop
-/etc/init.d/meteord start
+ssh series-of-tubes-internal.wind-up-birds.org "sudo /etc/init.d/meteord stop"
+ssh series-of-tubes-internal.wind-up-birds.org "sudo /etc/init.d/meteord start"
 
 #Start up bigjimmy the google drive monitor
-/etc/init.d/bigjimmy start
+ssh series-of-tubes-internal.wind-up-birds.org "sudo /etc/init.d/bigjimmy start"
 
 #restart apache for good measure
 /etc/init.d/apache2 start
