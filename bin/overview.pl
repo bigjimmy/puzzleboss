@@ -70,10 +70,12 @@ Content-type: text/html
 </head>
 <body class="tundra">
     <b>$title</b><br>
-    <ul>
-    <li><a href="/wiki">Wiki</a></li>
-    <li><a href="pb.pl">More Complete Puzzle Information Page</a></li>
-    </ul>
+    
+	<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
+
+	<div id="summary_layout"></div>
+	
+	<div id="statuscontainer"></div>
     <div id="adminDiv">Hello, $remote_user. 
       <span id="solver_active_p" class="solver_inactive">
         <span id="no_current_puzzle">I don't think you are currently working on anything.</span>
@@ -97,12 +99,6 @@ Content-type: text/html
 	WTF (<img width=20 height=20 valign="middle" src="../images/hazard.png" alt=WTF>)
       </span>
     </div>
-    
-	<div id="waitDiv"><b>Please wait, while data loads. (This could take a while!)</b></br></div>
-
-	<div id="summary_layout"></div>
-	
-	<div id="statuscontainer"></div>
 	
 	</span>
 </body>
