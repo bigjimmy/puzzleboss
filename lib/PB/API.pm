@@ -125,6 +125,11 @@ sub add_puzzle {
     if (defined($slack_channel->{channel_id})) {
         $slack_channel_id = $slack_channel->{channel_id};
     }
+    else {
+        debug_log("add_puzzle: puzzle never got a slack channel_id");
+	return(-200);
+    }
+
     if (defined($slack_channel->{channel_name})) {
         $slack_channel_name = $slack_channel->{channel_name};
     }
@@ -989,12 +994,12 @@ sub slack_say_something {
 }
 
 sub slack_create_channel_for_puzzle {
-    my $puzzle_name = shift;
+    my $puzzle_name = lc shift;
 
     debug_log("slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n", 2);
 
     # invoke API call to create channel
-    my $channels_create_url = "https://slack.com/api/channels.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&pretty=1";
+    my $channels_create_url = "https://slack.com/api/conversations.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&pretty=1";
     my $response;
 
     $response = get($channels_create_url);
@@ -1003,14 +1008,12 @@ sub slack_create_channel_for_puzzle {
     
     unless (defined($response)) {
         debug_log("get request to $channels_create_url failed\n");
-        return;
     }
 
     # extract channel id
     my $json = decode_json($response);
     unless ($json->{ok}) {
         debug_log("Slack API: channels.create failed with error: $json->{error}\n");
-        return;
     }
 
     my $channel_id;
@@ -1018,7 +1021,7 @@ sub slack_create_channel_for_puzzle {
     my $channel_name;
     $channel_name = $json->{channel}->{name};
     unless (defined($channel_id) && defined($channel_name)) {
-        return;
+        channel_id => -1;
     }
     return {
         channel_id => $channel_id,
@@ -1034,7 +1037,7 @@ sub slack_set_channel_topic {
     my $google_docs_folder = shift;
 
     my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder");
-    my $channels_set_topic_url = "https://slack.com/api/channels.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&pretty=1";
+    my $channels_set_topic_url = "https://slack.com/api/conversations.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&pretty=1";
     get($channels_set_topic_url);
     
     return $channel_id;

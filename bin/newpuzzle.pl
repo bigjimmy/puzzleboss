@@ -20,6 +20,7 @@ use PB::Config;
 
 my %known_errors;
 $known_errors{"-102"} = "Duplicate entry.";
+$known_errors{"-200"} = "Slack creation failure.";
 
 my $puzzid="";
 if(param('puzzid')) {
