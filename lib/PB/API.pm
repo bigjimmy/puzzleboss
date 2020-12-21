@@ -1038,6 +1038,7 @@ sub slack_set_channel_topic {
 
     my $topic_url_param = uri_escape ("Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder");
     my $channels_set_topic_url = "https://slack.com/api/conversations.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&pretty=1";
+    debug_log("setting channel topic for channel id: $channel_id via url param: $topic_url_param", 2);
     get($channels_set_topic_url);
     
     return $channel_id;
