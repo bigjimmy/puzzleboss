@@ -158,7 +158,7 @@ func main() {
 	// Get huntFolderId (either from command-line, from database, or from Google Drive if we have title)
 	// Ensure we can get huntFolderId (from command-line arg, DB, or via huntFolderTitle)
 	if huntFolderId == "" {
-		huntFolderId, _ = bigjimmybot.DbGetConfig("google_hunt_folder_id")
+		huntFolderId, _ = bigjimmybot.DbGetConfig("GOOGLE_HUNT_FOLDER_ID")
 	}
 	if huntFolderId == "" && huntFolderTitle == "" {
 		// still don't have huntFolderId, and we don't have title either
@@ -196,7 +196,7 @@ func main() {
 		log.Logf(l4g.INFO, "hunt_folder_id: %v", huntFolderId)
 		// DB doesn't yet have huntFolderId, set it if we have it 
 		if huntFolderId != "" {
-			err = bigjimmybot.DbSetConfig("google_hunt_folder_id", huntFolderId)
+			err = bigjimmybot.DbSetConfig("GOOGLE_HUNT_FOLDER_ID", huntFolderId)
 			if err != nil {
 				l4g.Crashf("could not set hunt_folder_id in DB")
 			}
