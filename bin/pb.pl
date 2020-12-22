@@ -123,7 +123,7 @@ To add a new puzzle:
 <li>Whenever a new puzzle becomes available, go to actual puzzle page (so you are looking at the puzzle) and click the "post new puzzle" bookmarklet that you should have in your browser toolbar. (note: if a single puzzle is composed of multiple HTML pages, it would be appropriate to use the first page you come to)</li>
 <li>Select the round that the puzzle belongs to (you must have already added the round before clicking on the bookmark</li>
 <li>Only if necessary, edit the Puzzle ID so that it uniquely represents the name of the puzzle (by default this will be automatically taken from the title of the HTML page and in most cases should not be changed from that unless there is a good reason to do so). This ID will be used in the name of the page for the puzzle.</li>
-<li>Problems should be addressed to Benoc or Josh Randall (if he's around)</li>
+<li>Problems should be addressed to Benoc or the appropriate help channel in chat.</li>
 </ul>
 </td></tr></table>
 
