@@ -20,13 +20,14 @@ sudo /etc/init.d/apache2 stop
 ssh -t series-of-tubes-internal.wind-up-birds.org "sudo /etc/init.d/bigjimmy stop"
 
 
+#Load current config
 eval $(perl -MPB::Config -e 'PB::Config::export_to_bash();')
 
-#dump to sql file
+#Drop and Re-create database using the sql template
 cat $PB_PATH/db/puzzleboss.create.sql-template | perl -pi -e 's/\$PB_DATA_DB_NAME/'$PB_DATA_DB_NAME'/g' | mysql -h $PB_DATA_DB_HOST -P $PB_DATA_DB_PORT -u $PB_DATA_DB_USER -p$PB_DATA_DB_PASS
 
 
-#Initialize config (in database) from Config.pm
+#Initialize config (in database) 
 $PB_ADMIN_TOOLS_PATH/set-db-config.sh
 
 #Reset meteor log index and restart
