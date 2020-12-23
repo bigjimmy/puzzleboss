@@ -118,25 +118,26 @@ sub add_puzzle {
 
     debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2);
 
-    # create slack channel so we have the id to insert
-    my $slack_channel = slack_create_channel_for_puzzle($id);
-    my $slack_channel_id = "";
-    my $slack_channel_name = "";
-    if (defined($slack_channel->{channel_id})) {
-        $slack_channel_id = $slack_channel->{channel_id};
+    # create channel so we have the id to insert
+    #my $channel = slack_create_channel_for_puzzle($id);
+    my $channel = discord_create_channel_for_puzzle($id, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
+    my $channel_id = "";
+    my $channel_name = "";
+    if (defined($channel->{channel_id})) {
+        $channel_id = $channel->{channel_id};
     }
     else {
-        debug_log("add_puzzle: puzzle never got a slack channel_id");
+        debug_log("add_puzzle: puzzle never got a channel_id");
 	return(-200);
     }
 
-    if (defined($slack_channel->{channel_name})) {
-        $slack_channel_name = $slack_channel->{channel_name};
+    if (defined($channel->{channel_name})) {
+        $channel_name = $channel->{channel_name};
     }
     
     my $drive_uri = undef;
     
-    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $slack_channel_id, $slack_channel_name);
+    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $channel_id, $channel_name);
 
     if ($retvalue <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
@@ -145,11 +146,13 @@ sub add_puzzle {
 
     my $round_drive_id = get_round($round)->{"drive_id"};
 
-    # set slack channel topic
-    slack_set_channel_topic($slack_channel_id, $id, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
+    # set channel topic
+    #slack_set_channel_topic($channel_id, $id, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
 
     #Announce puzzle in general slack
-    slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$slack_channel_id>");
+    #slack_say_something ("slackannouncebot",$PB::Config::ANNOUNCE_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$channel_id>");
+    discord_announce ("NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Discord Channel: <#$channel_name>");
+
 
     #Announce puzzle in giphy slack with giphy
     #commenting out because this is dumb
@@ -172,8 +175,10 @@ sub puzzle_solved {
     my $theanswer = $puzzref->{"answer"};
 
     my $message = "PUZZLE $idin HAS BEEN SOLVED! (ANSWER: $theanswer) \n Way to go team! :doge:";
-    slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, $message);
-    slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, $message);
+    #slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, $message);
+    #slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, $message);
+    discord_announce ($message);
+    discord_say_something ($puzzref->{"slack_channel_id"}, $message);
 }
 
 sub delete_puzzle {
@@ -280,8 +285,10 @@ sub update_puzzle_part {
         my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
         my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
         my $eyespuzzle_slackchannelid = $eyespuzzref->{"slack_channel_id"};
-        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
-        slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "Puzzle *$eyespuzzle_name* NEEDS EYES");
+	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
+	#slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "Puzzle *$eyespuzzle_name* NEEDS EYES");
+	discord_announce ("Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Channel: <#$eyespuzzle_slackchannelid>");
+	discord_say_something ($eyespuzzref->{"slack_channel_id"}, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
     }
 
     if ($part eq "status" && $val eq "Critical"){
@@ -290,14 +297,18 @@ sub update_puzzle_part {
         my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
         my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
         my $critpuzzle_slackchannelid = $critpuzzref->{"slack_channel_id"};
-        slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
-        slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "Puzzle *$critpuzzle_name* is CRITICAL");
+	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
+	#slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "Puzzle *$critpuzzle_name* is CRITICAL");
+	discord_announce ("Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Channel: <#$critpuzzle_slackchannelid>");
+	discord_say_something ($critpuzzle_slackchannelid, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
     }
 
     if ($part eq "status" && $val eq "Unnecessary"){
         my $unnecessarypuzzref = get_puzzle($id);
         my $unnecessarypuzzle_name = $unnecessarypuzzref->{"name"};
-        slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
+	#slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
+	discord_announce ("Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
+	discord_say_something ($unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
     }
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
@@ -433,7 +444,8 @@ sub add_round {
 		return $rval;
 	}
 
-        slack_say_something ("puzzannouncebot",$PB::Config::SLACK_CHANNEL,"New Round Added! $new_round");
+	#slack_say_something ("puzzannouncebot",$PB::Config::SLACK_CHANNEL,"New Round Added! $new_round");
+	discord_announce ("New Round Added! $new_round");
 
 	return 0; # success
 }
@@ -993,6 +1005,68 @@ sub slack_say_something {
     return(0);
 }
 
+sub discord_announce {
+    my $message = shift;
+    my $apiurl = $PB::Config::DISCORD_API_URL;
+
+    chdir $PB::Config::PB_GOOGLE_PATH;
+
+    print STDERR "Running discordcat.py from $PB::Config::PB_GOOGLE_PATH with url $apiurl\n";
+
+    # Prepare command
+    my $cmd = "./discordcat.py -u $apiurl -t '$message' |";
+    my $cmdout="";
+
+    # Execute command
+    if(open SLACKSAY, $cmd) {
+        # success, check output
+        while(<SLACKSAY>) {
+            $cmdout .= $_;
+        }
+    } else {
+        # failure
+        debug_log("_discord_announce: could not open command\n",1);
+        return -100;
+    }
+    close SLACKSAY;
+    if(($?>>8) != 0) {
+        debug_log("_discord_announce: exit value ".($?>>8)."\n",1);
+        return ($?>>8);
+    }
+
+    return(0);
+}
+
+sub discord_say_something {
+    my $channel_id = shift;
+    my $message = shift;
+
+    chdir $PB::Config::DISCORD_API_PATH;
+
+    print STDERR "Running puzzcord api message\n";
+
+    my $cmd = "./api message $channel_id '$message' |";
+    my $cmdout = "";
+
+    if(open DISCORDSAY, $cmd) {
+        # success
+	while(<DISCORDSAY>) {
+            $cmdout .= $_;
+	}
+    } else {
+	#failure
+	debug_log("_discord_say_something: could not open command\n", 1);
+	return -100
+    }
+    close DISCORDSAY;
+    if(($?>>8) != 0) {
+        debug_log("_discord_say_something: exit value ".($?>>8)."\n",1);
+        return ($?>>8);
+    }
+
+    return(0);
+}
+
 sub slack_create_channel_for_puzzle {
     my $puzzle_name = lc shift;
 
@@ -1028,6 +1102,39 @@ sub slack_create_channel_for_puzzle {
         channel_name => $channel_name
     };
 }
+
+sub discord_create_channel_for_puzzle {
+    my $puzzle_name = shift;
+    my $round_name = shift;
+    my $puzzle_uri = shift;
+    my $google_docs_folder = shift;
+
+    debug_log("discord_create_channel_for_puzzle: puzzle_name=$puzzle_name, round_name=$round_name, puzzle_uri=$puzzle_uri, google_docs_folder=$google_docs_folder\n",2);
+
+    chdir $PB::Config::DISCORD_API_PATH;
+
+    print STDERR "Running puzzcord api create\n";
+
+    my $topic = "Puzzle: $puzzle_name Round: $round_name Puzzle URL: $puzzle_uri Google Docs Folder: $google_docs_folder";
+
+    my $cmd = "./api create $channel_id '$topic' |";
+    my $cmdout = "";
+
+    if(open DISCORDSAY, $cmd) {
+        # success
+        while(<DISCORDSAY>) {
+            $cmdout .= $_;
+        }
+    } else {
+        #failure
+        debug_log("_discord_create_channel_for_puzzle: could not open command\n", 1);
+        return -100
+    }
+    close DISCORDSAY;
+    if(($?>>8) != 0) {
+        debug_log("_discord_create_channel_for_puzzle: exit value ".($?>>8)."\n",1);
+        return ($?>>8);
+    }
 
 sub slack_set_channel_topic {
     my $channel_id = shift;
