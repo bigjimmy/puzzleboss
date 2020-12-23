@@ -409,7 +409,7 @@ func (d *Drive) SetInitialPuzzleSpreadsheetContents(puzzle *Puzzle, spreadsheetI
 			{"Puzzle:",		puzzle.Name},
 			{"Actual Puzzle URL:",	puzzle.Uri},
 			{"Slack Channel:", "#" + puzzle.Slack_channel_name},
-			{"Slack Channel Link:", "http://importanthuntpoll.slack.com/archives/" + puzzle.Slack_channel_id},
+			{"Slack Channel Link:", puzzle.Slack_channel_link},
 			{},
 			{"No spoilers on this worksheet, please!"},
 			{"Please use a different sheet (see tabs below) for work and create additional sheets as needed to pursue different ideas (or independent solves)"},
