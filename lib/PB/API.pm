@@ -26,22 +26,11 @@ my $dbh = DBI->connect('DBI:mysql:database='.$PB::Config::PB_DATA_DB_NAME.$PB::C
 my $EXCLUSIVE_LOCK = 2;
 my $UNLOCK = 8;
 
-my %PUZZDATA = (
-    round => 1,
-    puzzle_uri => 2,
-    drive_uri => 3,
-    comments => 4,
-    status => 5,
-    xyzloc => 6,
-    answer => 7,
-    past_solvers => 8,
-    wrong_answers => 9,
-    );
-
 sub debug_log {
     my $message = shift;
     my $level = shift;
-    print STDERR $message if($PB::Config::DEBUG>$level);
+
+    print STDERR $message if($PB::Config::DEBUG > $level);
 }
 
 ########
@@ -75,6 +64,7 @@ sub _add_puzzle_db {
     my $drive_uri = shift;
     my $slack_channel_id = shift;
     my $slack_channel_name = lc shift;
+    my $slack_channel_link = shift;
 
     debug_log("add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri slack_channel_name=$slack_channel_name \n", 4);
 
@@ -83,16 +73,16 @@ sub _add_puzzle_db {
 	$drive_uri = undef;
     }
 
-    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `slack_channel_id`, `slack_channel_name`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, ?, ?, 'New');";
-    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri, $slack_channel_id, $slack_channel_name);
+    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `slack_channel_id`, `slack_channel_name`, `slack_channel_link`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, ?, ?, ?, 'New');";
+    my $c = $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri, $slack_channel_id, $slack_channel_name, $slack_channel_link);
     
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
 	_send_data_version();
-	debug_log("_add_puzzle_db: dbh->do returned success: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name\n",4);
+	debug_log("_add_puzzle_db: dbh->do returned success: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name slack_channel_link=$slack_channel_link\n",4);
 	return(1);
     } else {
-	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name\n",0);
+	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name, slack_channel_link=$slack_channel_link\n",0);
 	#make the error reporting a bit more descriptive downstream
 	if ($dbh->errstr =~ /Duplicate/){
 	    return (-2);
@@ -120,21 +110,34 @@ sub add_puzzle {
 
     my $round_drive_id = get_round($round)->{"drive_id"};
     my $channel_name = lc $id;
+    my $channel_id = -1;
+    my $channel_link = "";
 
     # create channel so we have the id to insert
     #my $channel = slack_create_channel_for_puzzle($id);
-    my $channel_id = discord_create_channel_for_puzzle($channel_name, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
+    my $channel = discord_create_channel_for_puzzle($channel_name, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
+
+    if (defined($channel->{channel_id})) {
+        $channel_id = $channel->{channel_id};
+    }
+    else {
+        debug_log("add_puzzle:  puzzle never got chat channel id! ABORTING ADD");
+	return(-200);
+    }
     $channel_id =~ s/\n//g;
     $channel_id =~ s/\W//g;
+
 
     if ($channel_id < 0) {
         debug_log("add_puzzle: puzzle never got a channel_id");
 	return(-200);
     }
-
-    my $drive_uri = undef;
     
-    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $channel_id, $channel_name);
+    $channel_link = $channel->{channel_link};
+
+    my $drive_uri = "";
+    
+    my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $channel_id, $channel_name, $channel_link);
 
     if ($retvalue <= 0) {
 	    debug_log("add_puzzle: couldn't add to db!\n",0);
@@ -147,7 +150,8 @@ sub add_puzzle {
 
     #Announce puzzle in general slack
     #slack_say_something ("slackannouncebot",$PB::Config::ANNOUNCE_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$channel_id>");
-    discord_announce ("NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Discord Channel: #$channel_name");
+
+    discord_announce ("NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Discord Channel: $channel_link");
 
 
     #Announce puzzle in giphy slack with giphy
@@ -174,8 +178,8 @@ sub puzzle_solved {
     #slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, $message);
     #slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, $message);
     discord_announce ($message);
-    discord_say_something ($puzzref->{"slack_channel_id"}, $message);
-    discord_archive_puzzle ($puzzref->{"slack_channel_id"});
+    #discord_say_something ($puzzref->{"slack_channel_id"}, $message);
+    discord_archive_puzzle ($puzzref->{"slack_channel_id"}, $puzzref->{"answer"});
 }
 
 sub delete_puzzle {
@@ -285,7 +289,7 @@ sub update_puzzle_part {
 	my $eyespuzzle_channelname = $eyespuzzref->{"slack_channel_name"};
 	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
 	#slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "Puzzle *$eyespuzzle_name* NEEDS EYES");
-	discord_announce ("Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n #$eyespuzzle_channelname");
+	discord_announce ("Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n $eyespuzzref->{'slack_channel_link'}");
 	discord_say_something ($eyespuzzref->{"slack_channel_id"}, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
     }
 
@@ -297,7 +301,7 @@ sub update_puzzle_part {
         my $critpuzzle_slackchannelid = $critpuzzref->{"slack_channel_id"};
 	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
 	#slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "Puzzle *$critpuzzle_name* is CRITICAL");
-	discord_announce ("Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Channel: #$critpuzzle_name");
+	discord_announce ("Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Channel: $critpuzzref->{'slack_channel_link'}");
 	discord_say_something ($critpuzzle_slackchannelid, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
     }
 
@@ -1068,10 +1072,11 @@ sub discord_say_something {
 
 sub discord_archive_puzzle {
     my $channel_id = shift;
+    my $answer = shift;
 
     chdir $PB::Config::DISCORD_API_PATH;
 
-    my $cmd = "./api archive $channel_id |";
+    my $cmd = "./api archive $channel_id $answer |";
     debug_log("_discord_archive_puzzle: running $cmd", 2);
 
     my $cmdout = "";
@@ -1122,9 +1127,7 @@ sub slack_create_channel_for_puzzle {
     $channel_id = $json->{channel}->{id};
     my $channel_name;
     $channel_name = $json->{channel}->{name};
-    unless (defined($channel_id) && defined($channel_name)) {
-        channel_id => -1;
-    }
+
     return {
         channel_id => $channel_id,
         channel_name => $channel_name
@@ -1145,7 +1148,7 @@ sub discord_create_channel_for_puzzle {
 
     my $topic = "\nPuzzle: $puzzle_name \nRound: $round_name \nPuzzle URL: $puzzle_uri \nGoogle Docs Folder: $google_docs_folder";
 
-    my $cmd = "./api create $puzzle_name '$topic' |";
+    my $cmd = "./api create_json $puzzle_name '$topic' |";
     debug_log("discord_create_channel_for_puzzle: running: $cmd");
     my $cmdout = "";
 
@@ -1164,9 +1167,19 @@ sub discord_create_channel_for_puzzle {
         debug_log("_discord_create_channel_for_puzzle: exit value ".($?>>8)."\n",1);
         return (-1*($?>>8));
     }
-    debug_log("api create returned our puzzle id: $cmdout");
+    debug_log("api create returned our puzzle id: $cmdout", 3);
 
-    return $cmdout;
+    my $json = decode_json($cmdout);
+    unless ($json->{id}) {
+	    debug_log("DISCORD API FAILED TO CREATE CHANNEL!")
+    }
+
+    my $channel_id = $json->{id};
+    my $channel_link = $json->{url};
+    return {
+	    channel_id => $channel_id,
+	    channel_link => $channel_link,
+    };
 }
 
 sub slack_set_channel_topic {
