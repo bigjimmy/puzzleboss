@@ -1,1 +1,5 @@
 Options -Indexes
+
+# Slightly shorter redirect links
+RewriteEngine On
+RewriteRule ^puzzleboss/doc/([^/]*)$ /puzzleboss/bin/doc.pl?pid=$1 [L]
