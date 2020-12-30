@@ -151,7 +151,7 @@ sub add_puzzle {
     #Announce puzzle in general slack
     #slack_say_something ("slackannouncebot",$PB::Config::ANNOUNCE_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$channel_id>");
 
-    discord_announce ("NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Discord Channel: $channel_link");
+    discord_announce ("NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Discord Channel: <#$channel_id>");
 
 
     #Announce puzzle in giphy slack with giphy
@@ -289,7 +289,7 @@ sub update_puzzle_part {
 	my $eyespuzzle_channelname = $eyespuzzref->{"slack_channel_name"};
 	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
 	#slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "Puzzle *$eyespuzzle_name* NEEDS EYES");
-	discord_announce ("Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n $eyespuzzref->{'slack_channel_link'}");
+	discord_announce ("Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Channel: <#$eyespuzzref->{'slack_channel_id'}>");
 	discord_say_something ($eyespuzzref->{"slack_channel_id"}, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
     }
 
@@ -301,7 +301,7 @@ sub update_puzzle_part {
         my $critpuzzle_slackchannelid = $critpuzzref->{"slack_channel_id"};
 	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
 	#slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "Puzzle *$critpuzzle_name* is CRITICAL");
-	discord_announce ("Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Channel: $critpuzzref->{'slack_channel_link'}");
+	discord_announce ("Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Channel: <#$critpuzzref->{'slack_channel_id'}>");
 	discord_say_something ($critpuzzle_slackchannelid, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
     }
 
