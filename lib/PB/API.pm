@@ -278,6 +278,8 @@ sub update_puzzle_part {
             }
 	}
 
+	my $rval = _update_puzzle_part_db($id, $part, $val);
+
 	if ($part eq "status" && $val eq "Needs eyes"){
 	    my $eyespuzzref = get_puzzle($id);
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
@@ -301,7 +303,6 @@ sub update_puzzle_part {
 	#slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
     }
 
-	my $rval = _update_puzzle_part_db($id, $part, $val);
 
 	# If an answer is submitted, automatically mark the puzzle as solved
 	if ($part eq "answer" && $val ne ""){
