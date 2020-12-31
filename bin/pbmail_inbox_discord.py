@@ -296,7 +296,7 @@ if __name__ == "__main__":
            print ('[File attached]')
         if attach.is_body=='text/plain':
             payload, used_charset=decode_text(attach.payload, attach.charset, 'auto')
-            for line in payload.split('\n')[:25]:
+            for line in payload.split('\n')[:75]:
                 if line:
 		    if not (re.match("^>", line)):
                         if not (re.match("^On\ .*\<.*@.*>.*:$", line)):
