@@ -18,6 +18,7 @@ my $pid = 0;
 if (param('pid')) {
   $pid = param('pid');
 } else {
+  print "Content-type: text/html\n\n";
   print "<!doctype html><html><body>No Puzzle-ID parameter supplied</body></html>";
   exit;
 }
@@ -29,6 +30,10 @@ my $doc_link = $puzzlerow{'drive_uri'};
 
 if ($doc_link) {
   print "Location: $doc_link\n\n";
+  exit;
+} else {
+  print "Content-type: text/html\n\n";
+  print "<!doctype html><html><body>No doc link found for puzzle id $pid</body></html>";
   exit;
 }
 
