@@ -151,8 +151,7 @@ sub add_puzzle {
     #Announce puzzle in general slack
     #slack_say_something ("slackannouncebot",$PB::Config::ANNOUNCE_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$channel_id>");
 
-    discord_announce ("NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Discord Channel: <#$channel_id>");
-
+    discord_announce_new($id);
 
     #Announce puzzle in giphy slack with giphy
     #commenting out because this is dumb
@@ -177,9 +176,7 @@ sub puzzle_solved {
     my $message = "PUZZLE $idin HAS BEEN SOLVED! (ANSWER: $theanswer) \n Way to go team! :doge:";
     #slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, $message);
     #slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, $message);
-    discord_announce ($message);
-    #discord_say_something ($puzzref->{"slack_channel_id"}, $message);
-    discord_archive_puzzle ($puzzref->{"slack_channel_id"}, $puzzref->{"answer"});
+    discord_announce_solve($idin);
 }
 
 sub delete_puzzle {
@@ -283,34 +280,24 @@ sub update_puzzle_part {
 	if ($part eq "status" && $val eq "Needs eyes"){
 	    my $eyespuzzref = get_puzzle($id);
 	    my $eyespuzzle_name = $eyespuzzref->{"name"};
-        my $eyespuzzle_uri = $eyespuzzref->{"puzzle_uri"};
-        my $eyespuzzle_googdoc = $eyespuzzref->{"drive_uri"};
-        my $eyespuzzle_slackchannelid = $eyespuzzref->{"slack_channel_id"};
-	my $eyespuzzle_channelname = $eyespuzzref->{"slack_channel_name"};
+	    discord_announce_attention($eyespuzzle_name);
 	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
 	#slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "Puzzle *$eyespuzzle_name* NEEDS EYES");
-	discord_announce ("Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Channel: <#$eyespuzzref->{'slack_channel_id'}>");
-	discord_say_something ($eyespuzzref->{"slack_channel_id"}, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc");
     }
 
     if ($part eq "status" && $val eq "Critical"){
         my $critpuzzref = get_puzzle($id);
         my $critpuzzle_name = $critpuzzref->{"name"};
-        my $critpuzzle_uri = $critpuzzref->{"puzzle_uri"};
-        my $critpuzzle_googdoc = $critpuzzref->{"drive_uri"};
-        my $critpuzzle_slackchannelid = $critpuzzref->{"slack_channel_id"};
+        discord_announce_attention($critpuzzle_name);
 	#slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
 	#slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "Puzzle *$critpuzzle_name* is CRITICAL");
-	discord_announce ("Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Channel: <#$critpuzzref->{'slack_channel_id'}>");
-	discord_say_something ($critpuzzle_slackchannelid, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc");
     }
 
     if ($part eq "status" && $val eq "Unnecessary"){
         my $unnecessarypuzzref = get_puzzle($id);
         my $unnecessarypuzzle_name = $unnecessarypuzzref->{"name"};
+        discord_announce_attention($unnecessarypuzzle_name);
 	#slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
-	discord_announce ("Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
-	discord_say_something ($unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
     }
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
@@ -1040,14 +1027,30 @@ sub discord_announce {
     return(0);
 }
 
-sub discord_say_something {
-    my $channel_id = shift;
-    my $message = shift;
+sub discord_announce_new {
+    my $id = shift;
+    return discord_announce_impl('_new', $id);
+}
+
+sub discord_announce_solve {
+    my $id = shift;
+    return discord_announce_impl('_solve', $id);
+}
+
+sub discord_announce_attention {
+    my $id = shift;
+    return discord_announce_impl('_attention', $id);
+}
+
+# Tell Puzzcord API an announcement command
+sub discord_announce_impl {
+    my $command = shift;
+    my $id = shift;
 
     chdir $PB::Config::DISCORD_API_PATH;
 
-    my $cmd = "./api message $channel_id '$message' |";
-    debug_log("_discord_say_something: running: $cmd\n",2);
+    my $cmd = "./api $command $id |";
+    debug_log("_discord_announce$command: running: $cmd\n",2);
 
     my $cmdout = "";
 
@@ -1058,42 +1061,12 @@ sub discord_say_something {
 	}
     } else {
 	#failure
-	debug_log("_discord_say_something: could not open command\n", 1);
+	debug_log("_discord_announce$command: could not open command\n", 1);
 	return -100
     }
     close DISCORDSAY;
     if(($?>>8) != 0) {
-        debug_log("_discord_say_something: exit value ".($?>>8)."\n",1);
-        return ($?>>8);
-    }
-
-    return(0);
-}
-
-sub discord_archive_puzzle {
-    my $channel_id = shift;
-    my $answer = shift;
-
-    chdir $PB::Config::DISCORD_API_PATH;
-
-    my $cmd = "./api archive $channel_id $answer |";
-    debug_log("_discord_archive_puzzle: running $cmd", 2);
-
-    my $cmdout = "";
-
-    if(open DISCORDSAY, $cmd) {
-        # success
-        while(<DISCORDSAY>) {
-            $cmdout .= $_;
-        }
-    } else {
-        #failure
-        debug_log("_discord_archive_puzzle not open command\n", 1);
-        return -100
-    }
-    close DISCORDSAY;
-    if(($?>>8) != 0) {
-        debug_log("_discord_archive_puzzle value ".($?>>8)."\n",1);
+        debug_log("_discord_announce$command: exit value ".($?>>8)."\n",1);
         return ($?>>8);
     }
 
