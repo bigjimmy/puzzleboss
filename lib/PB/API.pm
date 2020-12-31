@@ -135,7 +135,8 @@ sub add_puzzle {
     
     $channel_link = $channel->{channel_link};
 
-    my $drive_uri = "";
+    # Initially populate the drive uri with a script that will look it up and do a redirect
+    my $drive_uri = "$PB::Config::PB_BIN_URI/doc.pl?pid=$id";
     
     my $retvalue = _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $channel_id, $channel_name, $channel_link);
 
