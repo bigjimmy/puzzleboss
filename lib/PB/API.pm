@@ -256,9 +256,6 @@ sub update_puzzle_part {
 	my $part = shift;
 	my $val = shift;
 
-	#We need special handling for a puzzle part update which imples the puzzle is solved
-	#This might be either a status change to "Solved", or an answer change to non-null
-	#Our accepted logic, system wide, is that only both of these things represent a solved puzzle
         my $answer = undef;
 	
 	# Don't actually enter status change to "solved" without answer
@@ -279,6 +276,12 @@ sub update_puzzle_part {
 	}
 
 	my $rval = _update_puzzle_part_db($id, $part, $val);
+
+	if ($part eq "xyzloc"){
+          my $puzzref = get_puzzle($id);
+	  my $channel_id = $puzzref->{'slack_channel_id'};
+	  discord_say_something($channel_id, "ATTENTION: puzzle $id is being worked on at $val");
+        }
 
 	if ($part eq "status" && $val eq "Needs eyes"){
 	    my $eyespuzzref = get_puzzle($id);
@@ -1044,14 +1047,25 @@ sub discord_announce_attention {
     return discord_announce_impl('_attention', $id);
 }
 
+sub discord_say_something {
+    my $id = shift;
+    my $message = shift;
+    return discord_announce_impl('message', $id, $message);
+}
+
 # Tell Puzzcord API an announcement command
 sub discord_announce_impl {
     my $command = shift;
     my $id = shift;
+    my $param = shift;
+    
+    if ($param eq undef) {
+	    $param = '';
+    }
 
     chdir $PB::Config::DISCORD_API_PATH;
 
-    my $cmd = "./api $command $id |";
+    my $cmd = "./api $command $id $param |";
     debug_log("_discord_announce$command: running: $cmd\n",2);
 
     my $cmdout = "";
