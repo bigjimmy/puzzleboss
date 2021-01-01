@@ -28,7 +28,7 @@ my $UNLOCK = 8;
 
 sub debug_log {
     my $message = shift;
-    my $level = shift;
+    my $level = shift || 0;
 
     print STDERR $message if($PB::Config::DEBUG > $level);
 }
@@ -79,7 +79,7 @@ sub _add_puzzle_db {
     if(defined($c)) {
 	debug_log("_add_puzzle_db: dbh->do returned $c\n",2);
 	_send_data_version();
-	debug_log("_add_puzzle_db: dbh->do returned success: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name slack_channel_link=$slack_channel_link\n",4);
+	debug_log("_add_puzzle_db: dbh->do returned success for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name slack_channel_link=$slack_channel_link\n",4);
 	return(1);
     } else {
 	debug_log("_add_puzzle_db: dbh->do returned error: ".$dbh->errstr." for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name, slack_channel_link=$slack_channel_link\n",0);
@@ -1057,11 +1057,7 @@ sub discord_say_something {
 sub discord_announce_impl {
     my $command = shift;
     my $id = shift;
-    my $param = shift;
-    
-    if ($param eq undef) {
-	    $param = '';
-    }
+    my $param = shift || '';
 
     chdir $PB::Config::DISCORD_API_PATH;
 
