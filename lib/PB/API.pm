@@ -306,6 +306,12 @@ sub update_puzzle_part {
 	#slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
     }
 
+    if ($part eq "status" && $val eq "WTF"){
+        my $wtfpuzzref = get_puzzle($id);
+        my $wtfpuzzle_name = $wtfpuzzref->{"name"};
+        discord_announce_attention($wtfpuzzle_name);
+    }
+
 
 	# If an answer is submitted, automatically mark the puzzle as solved
 	if ($part eq "answer" && $val ne ""){
@@ -439,7 +445,7 @@ sub add_round {
 	}
 
 	#slack_say_something ("puzzannouncebot",$PB::Config::SLACK_CHANNEL,"New Round Added! $new_round");
-	discord_announce ("New Round Added! $new_round");
+	discord_announce_round ($new_round);
 
 	return 0; # success
 }
@@ -999,37 +1005,9 @@ sub slack_say_something {
     return(0);
 }
 
-sub discord_announce {
-    my $message = shift;
-    my $apiurl = $PB::Config::DISCORD_HOOK_URL;
-
-    chdir $PB::Config::PB_GOOGLE_PATH;
-
-    print STDERR "Running discordcat.py from $PB::Config::PB_GOOGLE_PATH with url $apiurl\n";
-
-    # Prepare command
-    my $cmd = "./discordcat.py -u $apiurl -t '$message' |";
-    debug_log("discord_announce: running command: $cmd",2);
-    my $cmdout="";
-
-    # Execute command
-    if(open SLACKSAY, $cmd) {
-        # success, check output
-        while(<SLACKSAY>) {
-            $cmdout .= $_;
-        }
-    } else {
-        # failure
-        debug_log("_discord_announce: could not open command\n",1);
-        return -100;
-    }
-    close SLACKSAY;
-    if(($?>>8) != 0) {
-        debug_log("_discord_announce: exit value ".($?>>8)."\n",1);
-        return ($?>>8);
-    }
-
-    return(0);
+sub discord_announce_round {
+    my $id = shift;
+    return discord_announce_impl('_round', $id);
 }
 
 sub discord_announce_new {
