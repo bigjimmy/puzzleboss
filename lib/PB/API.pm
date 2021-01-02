@@ -57,7 +57,13 @@ sub _get_puzzle_list_db {
 
     my $res;
     if ( defined($roundfilter) ) {
-        my $sql = "SELECT `puzzle`.`name` AS 'puzzle_name' FROM `puzzle` JOIN `round` ON `round`.`id`=`puzzle`.`round_id` WHERE `round`.`name` REGEXP ?";
+        my $sql = "
+            SELECT `puzzle`.`name` AS 'puzzle_name'
+            FROM `puzzle`
+            JOIN `round`
+            ON `round`.`id`=`puzzle`.`round_id`
+            WHERE `round`.`name` REGEXP ?
+        ";
         $res = $dbh->selectcol_arrayref( $sql, undef, $roundfilter );
     }
     else {
@@ -77,7 +83,8 @@ sub _add_puzzle_db {
     my $slack_channel_link = shift;
 
     debug_log(
-        "add_puzzle_db params: id=$id round=$round puzzle_uri=$puzzle_uri slack_channel_name=$slack_channel_name \n",
+        "add_puzzle_db params: id=$id round=$round"
+          . " puzzle_uri=$puzzle_uri slack_channel_name=$slack_channel_name \n",
         4
     );
 
@@ -86,7 +93,27 @@ sub _add_puzzle_db {
         $drive_uri = undef;
     }
 
-    my $sql = "INSERT INTO `puzzle` (`name`, `round_id`, `puzzle_uri`, `drive_uri`, `slack_channel_id`, `slack_channel_name`, `slack_channel_link`, `status`) VALUES (?, (SELECT id FROM `round` WHERE `round`.`name`=?), ?, ?, ?, ?, ?, 'New');";
+    my $sql = "
+        INSERT INTO `puzzle` (
+            `name`,
+            `round_id`,
+            `puzzle_uri`,
+            `drive_uri`,
+            `slack_channel_id`,
+            `slack_channel_name`,
+            `slack_channel_link`,
+            `status`
+        ) VALUES (
+            ?,
+            (SELECT id FROM `round` WHERE `round`.`name` = ?),
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            'New'
+        );
+    ";
     my $c =
       $dbh->do( $sql, undef, $id, $round, $puzzle_uri, $drive_uri,
         $slack_channel_id, $slack_channel_name, $slack_channel_link );
@@ -95,7 +122,11 @@ sub _add_puzzle_db {
         debug_log( "_add_puzzle_db: dbh->do returned $c\n", 2 );
         _send_data_version();
         debug_log(
-            "_add_puzzle_db: dbh->do returned success for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name slack_channel_link=$slack_channel_link\n",
+            "_add_puzzle_db: dbh->do returned success for query $sql"
+              . " with parameters"
+              . " id=$id, round=$round, puzzle_uri=$puzzle_uri"
+              . " drive_uri=$drive_uri slack_channel_name=$slack_channel_name"
+              . " slack_channel_link=$slack_channel_link\n",
             4
         );
         return (1);
@@ -104,7 +135,10 @@ sub _add_puzzle_db {
         debug_log(
             "_add_puzzle_db: dbh->do returned error: "
               . $dbh->errstr
-              . " for query $sql with parameters id=$id, round=$round, puzzle_uri=$puzzle_uri drive_uri=$drive_uri slack_channel_name=$slack_channel_name, slack_channel_link=$slack_channel_link\n",
+              . " for query $sql with parameters id=$id, round=$round,"
+              . " puzzle_uri=$puzzle_uri drive_uri=$drive_uri"
+              . " slack_channel_name=$slack_channel_name,"
+              . " slack_channel_link=$slack_channel_link\n",
             0
         );
 
@@ -164,7 +198,8 @@ sub add_puzzle {
 
     $channel_link = $channel->{channel_link};
 
-    # Initially populate the drive uri with a script that will look it up and do a redirect
+    # Initially populate the drive uri with a script
+    # that will look it up and do a redirect
     my $drive_uri = "$PB::Config::PB_BIN_URI/doc.pl?pid=$id";
 
     my $retvalue =
@@ -177,19 +212,40 @@ sub add_puzzle {
     }
 
     # set channel topic
-    # slack_set_channel_topic($channel_id, $id, $round, $puzzle_uri, "https://drive.google.com/drive/u/2/folders/$round_drive_id");
+    # slack_set_channel_topic(
+    #     $channel_id,
+    #     $id,
+    #     $round,
+    #     $puzzle_uri,
+    #     "https://drive.google.com/drive/u/2/folders/$round_drive_id",
+    # );
 
     # Announce puzzle in general slack
-    # slack_say_something ("slackannouncebot",$PB::Config::ANNOUNCE_CHANNEL,"NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Doc: https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl?pid=$id \n Slack Channel: <#$channel_id>");
+    # slack_say_something(
+    #     "slackannouncebot",
+    #     $PB::Config::ANNOUNCE_CHANNEL,
+    #     "NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n"
+    #       . " Round: $round \n Google Doc:"
+    #       . " https://$PB::Config::PB_DOMAIN_NAME/puzzleboss/bin/doc.pl"
+    #       . "?pid=$id \n"
+    #       . " Slack Channel: <#$channel_id>",
+    # );
 
     discord_announce_new($id);
 
     # Announce puzzle in giphy slack with giphy
     # commenting out because this is dumb
-    # slack_say_something ("slackannouncebot","giphy","NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n Round: $round \n Google Docs Folder: $round_uri \n Giphy: \n");
-    # slack_say_something ("slackannouncebot","giphy",$id,"--giphy");
+    # slack_say_something(
+    #     "slackannouncebot",
+    #     "giphy",
+    #     "NEW PUZZLE *$id* ADDED! \n Puzzle URL: $puzzle_uri \n"
+    #       . " Round: $round \n"
+    #       . " Google Docs Folder: $round_uri \n Giphy: \n",
+    # );
+    # slack_say_something("slackannouncebot", "giphy", $id, "--giphy");
 
-    return 0;    # success
+    # success
+    return 0;
 }
 
 sub puzzle_solved {
@@ -202,12 +258,20 @@ sub puzzle_solved {
     foreach my $solver (@cursolvers) {
         assign_solver_puzzle( "", $solver );
     }
-    my $theanswer = $puzzref->{"answer"};
-
-    my $message = "PUZZLE $idin HAS BEEN SOLVED! (ANSWER: $theanswer) \n Way to go team! :doge:";
-
-    # slack_say_something ("slackannouncebot", $PB::Config::SLACK_CHANNEL, $message);
-    # slack_say_something ("slackannouncebot", $puzzref->{"slack_channel_name"}, $message);
+    # my $theanswer = $puzzref->{"answer"};
+    # my $message =
+    #     "PUZZLE $idin HAS BEEN SOLVED! (ANSWER: $theanswer) \n"
+    #   . " Way to go team! :doge:";
+    # slack_say_something(
+    #     "slackannouncebot",
+    #     $PB::Config::SLACK_CHANNEL,
+    #     $message,
+    # );
+    # slack_say_something(
+    #     "slackannouncebot",
+    #     $puzzref->{"slack_channel_name"},
+    #     $message,
+    # );
     discord_announce_solve($idin);
 }
 
@@ -256,7 +320,8 @@ sub _get_puzzle_db {
     my $sth;
     my $always_return_array = 0;
 
- #This fixes problem with type error when there is exactly one puzzle in the DB.
+    # This fixes problem with type error when
+    # there is exactly one puzzle in the DB.
     if ( $idin eq '*' ) {
         $always_return_array = 1;
         $sth                 = $dbh->prepare($sql);
@@ -300,7 +365,8 @@ sub update_puzzle_part {
         my $puzzref = get_puzzle($id);
         my $answer  = $puzzref->{"answer"};
         debug_log(
-            "update_puzzle_part for status solved: PART=$part VAL=$val ANS=$answer\n",
+            "update_puzzle_part for status solved:"
+              . " PART=$part VAL=$val ANS=$answer\n",
             5
         );
         if ( $answer ne undef ) {
@@ -309,7 +375,9 @@ sub update_puzzle_part {
         }
         else {
             debug_log(
-                "whoa whoa whoa. can't mark as solved. no answer defined.", 1 );
+                "whoa whoa whoa. can't mark as solved. no answer defined.",
+                1,
+            );
             return 255;
         }
     }
@@ -319,8 +387,10 @@ sub update_puzzle_part {
     if ( $part eq "xyzloc" ) {
         my $puzzref    = get_puzzle($id);
         my $channel_id = $puzzref->{'slack_channel_id'};
-        discord_say_something( $channel_id,
-            "ATTENTION: puzzle $id is being worked on at $val" );
+        discord_say_something(
+            $channel_id,
+            "ATTENTION: puzzle $id is being worked on at $val",
+        );
     }
 
     if ( $part eq "status" && $val eq "Needs eyes" ) {
@@ -328,8 +398,19 @@ sub update_puzzle_part {
         my $eyespuzzle_name = $eyespuzzref->{"name"};
         discord_announce_attention($eyespuzzle_name);
 
-        # slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$eyespuzzle_name* NEEDS EYES! \n Puzzle URL: $eyespuzzle_uri \n Google Doc: $eyespuzzle_googdoc \n Slack Channel: <#$eyespuzzle_slackchannelid>");
-        # slack_say_something ("slackannouncebot",$eyespuzzref->{"slack_channel_name"}, "Puzzle *$eyespuzzle_name* NEEDS EYES");
+        # slack_say_something(
+        #     "slackannouncebot",
+        #     $PB::Config::SLACK_CHANNEL,
+        #     "Puzzle *$eyespuzzle_name* NEEDS EYES! \n"
+        #       . " Puzzle URL: $eyespuzzle_uri \n"
+        #       . " Google Doc: $eyespuzzle_googdoc \n"
+        #       . " Slack Channel: <#$eyespuzzle_slackchannelid>",
+        # );
+        # slack_say_something(
+        #     "slackannouncebot",
+        #     $eyespuzzref->{"slack_channel_name"},
+        #     "Puzzle *$eyespuzzle_name* NEEDS EYES",
+        # );
     }
 
     if ( $part eq "status" && $val eq "Critical" ) {
@@ -337,8 +418,19 @@ sub update_puzzle_part {
         my $critpuzzle_name = $critpuzzref->{"name"};
         discord_announce_attention($critpuzzle_name);
 
-        # slack_say_something ("slackannouncebot",$PB::Config::SLACK_CHANNEL, "Puzzle *$critpuzzle_name* IS CRITICAL! \n Puzzle URL: $critpuzzle_uri \n Google Doc: $critpuzzle_googdoc \n Slack Channel: <#$critpuzzle_slackchannelid>");
-        # slack_say_something ("slackannouncebot",$critpuzzref->{"slack_channel_name"}, "Puzzle *$critpuzzle_name* is CRITICAL");
+        # slack_say_something(
+        #     "slackannouncebot",
+        #     $PB::Config::SLACK_CHANNEL,
+        #     "Puzzle *$critpuzzle_name* IS CRITICAL! \n"
+        #       . " Puzzle URL: $critpuzzle_uri \n"
+        #       . " Google Doc: $critpuzzle_googdoc \n"
+        #       . " Slack Channel: <#$critpuzzle_slackchannelid>",
+        # );
+        # slack_say_something(
+        #     "slackannouncebot",
+        #     $critpuzzref->{"slack_channel_name"},
+        #     "Puzzle *$critpuzzle_name* is CRITICAL",
+        # );
     }
 
     if ( $part eq "status" && $val eq "Unnecessary" ) {
@@ -346,7 +438,11 @@ sub update_puzzle_part {
         my $unnecessarypuzzle_name = $unnecessarypuzzref->{"name"};
         discord_announce_attention($unnecessarypuzzle_name);
 
-        # slack_say_something ("slackannouncebot",$unnecessarypuzzref->{"slack_channel_name"}, "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY");
+        # slack_say_something(
+        #     "slackannouncebot",
+        #     $unnecessarypuzzref->{"slack_channel_name"},
+        #     "Puzzle *$unnecessarypuzzle_name* is UNNECESSARY",
+        # );
     }
 
     if ( $part eq "status" && $val eq "WTF" ) {
@@ -388,17 +484,19 @@ sub _update_puzzle_part_db {
 
     if ( defined($c) ) {
         debug_log(
-            "_update_puzzle_part_db: id=$id part=$part val=$val dbh->do returned $c\n",
-            2
+            "_update_puzzle_part_db: id=$id part=$part"
+              . " val=$val dbh->do returned $c\n",
+            2,
         );
         _send_data_version();
         return (1);
     }
     else {
         debug_log(
-            "_update_puzzle_part_db: id=$id part=$part val=$val dbh->do returned error: "
+            "_update_puzzle_part_db: id=$id part=$part"
+              . " val=$val dbh->do returned error: "
               . $dbh->errstr . "\n",
-            0
+            0,
         );
         if ( $dbh->errstr =~ m/deadlock/i ) {
             sleep 5;
@@ -411,7 +509,10 @@ sub _update_puzzle_part_db {
 sub get_puzzle_activity {
     my $pid = shift;
 
-    my $sql = 'SELECT solver.name as solver, activity.time as time, activity.source as activity FROM solver, activity WHERE solver.id = activity.solver_id AND activity.puzzle_id = '
+    my $sql =
+        'SELECT solver.name as solver, activity.time as time,'
+      . ' activity.source as activity FROM solver, activity'
+      . ' WHERE solver.id = activity.solver_id AND activity.puzzle_id = '
       . $pid
       . ' ORDER BY activity.time DESC';
 
@@ -438,7 +539,7 @@ sub get_puzzle_info {
     $sth->execute() or die $dbh->errstr;
 
     debug_log(
-        "get_puzzle_info:  fetching line of puzzle_view table for puzzid $pid\n",
+        "get_puzzle_info: fetching line of puzzle_view table for puzzid $pid\n",
         4
     );
 
@@ -513,7 +614,11 @@ sub add_round {
         return $rval;
     }
 
-    # slack_say_something ("puzzannouncebot",$PB::Config::SLACK_CHANNEL,"New Round Added! $new_round");
+    # slack_say_something(
+    #     "puzzannouncebot",
+    #     $PB::Config::SLACK_CHANNEL,
+    #     "New Round Added! $new_round",
+    # );
     discord_announce_round($new_round);
 
     return 0;    # success
@@ -527,7 +632,8 @@ sub get_round {
     my $sth;
     my $always_return_array = 0;
 
-    # This fixes problem with type error when there is exactly one round in the DB.
+    # This fixes problem with type error when
+    # there is exactly one round in the DB.
     if ( $idin eq '*' ) {
         $always_return_array = 1;
         $sth                 = $dbh->prepare($sql);
@@ -567,7 +673,8 @@ sub update_round_part {
 
     if ( defined($c) ) {
         debug_log(
-            "_update_round_part_db: id=$id part=$part val=$val dbh->do returned $c\n",
+            "_update_round_part_db: id=$id part=$part"
+              . " val=$val dbh->do returned $c\n",
             2
         );
         _send_data_version();
@@ -575,7 +682,8 @@ sub update_round_part {
     }
     else {
         debug_log(
-            "_update_round_part_db: id=$id part=$part val=$val dbh->do returned error: "
+            "_update_round_part_db: id=$id part=$part"
+              . " val=$val dbh->do returned error: "
               . $dbh->errstr . "\n",
             0
         );
@@ -613,7 +721,8 @@ sub _get_solver_db {
     my $sql = 'SELECT * FROM `solver_view`';
     my $sth;
 
- #This fixes problem with type error when there is exactly one solver in the DB.
+    # This fixes problem with type error when
+    # there is exactly one solver in the DB.
     my $always_return_array = 0;
     if ( $idin eq '*' ) {
         $always_return_array = 1;
@@ -684,7 +793,8 @@ sub ldap_add_user {
 
     # bind to a directory with dn and password
     my $mesg = $ldap->bind(
-        "cn=$PB::Config::REGISTER_LDAP_ADMIN_USER,$PB::Config::REGISTER_LDAP_DC",
+        "cn=$PB::Config::REGISTER_LDAP_ADMIN_USER,"
+          . "$PB::Config::REGISTER_LDAP_DC",
         password => $PB::Config::REGISTER_LDAP_ADMIN_PASS
     );
 
@@ -729,7 +839,8 @@ sub ldap_change_password {
 
     # bind to a directory with dn and password
     my $mesg = $ldap->bind(
-        "cn=$PB::Config::REGISTER_LDAP_ADMIN_USER,$PB::Config::REGISTER_LDAP_DC",
+        "cn=$PB::Config::REGISTER_LDAP_ADMIN_USER,"
+          . "$PB::Config::REGISTER_LDAP_DC",
         password => $PB::Config::REGISTER_LDAP_ADMIN_PASS
     );
 
@@ -758,7 +869,13 @@ sub google_add_user {
     print STDERR "Running AddDomainUser.py from $PB::Config::PB_GOOGLE_PATH\n";
 
     # Prepare command
-    my $cmd = "./AddDomainUser.py --firstname '$firstname' --lastname '$lastname' --username '$username' --password '$password' --domain '$domain' |";
+    my $cmd =
+        "./AddDomainUser.py"
+      . " --firstname '$firstname'"
+      . " --lastname '$lastname'"
+      . " --username '$username'"
+      . " --password '$password'"
+      . " --domain '$domain' |";
     my $cmdout = "";
 
     # Execute command
@@ -794,7 +911,11 @@ sub google_change_password {
       "Running ChangeDomainUserPassword.py from $PB::Config::PB_GOOGLE_PATH\n";
 
     # Prepare command
-    my $cmd = "./ChangeDomainUserPassword.py --username '$username' --password '$password' --domain '$domain' |";
+    my $cmd =
+        "./ChangeDomainUserPassword.py"
+      . " --username '$username'"
+      . " --password '$password'"
+      . " --domain '$domain' |";
     my $cmdout = "";
 
     # Execute command
@@ -850,7 +971,8 @@ sub update_solver_part {
 
     if ( $part eq "puzz" ) {
 
-        # If this action is being taken by the solver herself, log it in the activity table
+        # If this action is being taken by the solver herself,
+        # log it in the activity table
         if ( defined $remote_user && $id eq $remote_user ) {
 
             # apache is the source for interactions via the web UI
@@ -888,7 +1010,19 @@ sub _write_solver_activity {
     my $source   = shift;
     my $type     = shift;
 
-    my $sql = "INSERT INTO `activity` (`puzzle_id`, `solver_id`, `source`, `type`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?),?,?)";
+    my $sql = "
+        INSERT INTO `activity` (
+            `puzzle_id`,
+            `solver_id`,
+            `source`,
+            `type`
+        ) VALUES (
+            (SELECT `id` FROM `puzzle` WHERE `name` LIKE ?),
+            (SELECT `id` FROM `solver` WHERE `name` LIKE ?),
+            ?,
+            ?
+        )
+    ";
     my $c = $dbh->do( $sql, undef, $puzzname, $solver, $source, $type );
     if ( defined($c) ) {
         debug_log( "_write_solver_activity: dbh->do returned $c\n", 2 );
@@ -909,7 +1043,15 @@ sub _assign_solver_puzzle_db {
     my $puzzname = shift;
     my $solver   = shift;
 
-    my $sql = "INSERT INTO `puzzle_solver` (`puzzle_id`, `solver_id`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?))";
+    my $sql = "
+        INSERT INTO `puzzle_solver` (
+            `puzzle_id`,
+            `solver_id`
+        ) VALUES (
+            (SELECT `id` FROM `puzzle` WHERE `name` LIKE ?),
+            (SELECT `id` FROM `solver` WHERE `name` LIKE ?)
+        )
+    ";
     my $c = $dbh->do( $sql, undef, $puzzname, $solver );
     if ( defined($c) ) {
         debug_log( "_assign_solver_puzzle_db: dbh->do returned $c\n", 2 );
@@ -939,7 +1081,15 @@ sub _assign_solver_location_db {
     my $puzzname = shift;
     my $solver   = shift;
 
-    my $sql = "INSERT INTO `puzzle_solver` (`puzzle_id`, `solver_id`) VALUES ((SELECT `id` FROM `puzzle` WHERE `name` LIKE ?), (SELECT `id` FROM `solver` WHERE `name` LIKE ?))";
+    my $sql = "
+        INSERT INTO `puzzle_solver` (
+            `puzzle_id`,
+            `solver_id`
+        ) VALUES (
+            (SELECT `id` FROM `puzzle` WHERE `name` LIKE ?),
+            (SELECT `id` FROM `solver` WHERE `name` LIKE ?)
+        )
+    ";
     my $c = $dbh->do($sql);
     if ( defined($c) ) {
         debug_log( "_get_client_index_db: dbh->do returned $c\n", 2 );
@@ -990,7 +1140,8 @@ sub get_log_diff {
     }
     chomp($curr_pos);
     if ( $curr_pos < $log_pos ) {
-        return "from log position ($log_pos) cannot be greater than current (to) log position ($curr_pos)";
+        return "from log position ($log_pos) cannot be greater than "
+            . "current (to) log position ($curr_pos)";
     }
     return _get_log_diff_db( $log_pos, $curr_pos );
 }
@@ -1001,7 +1152,17 @@ sub _get_log_diff_db {
     my $to_pos   = shift;
     debug_log( "_get_log_diff_db: $from_pos - $to_pos\n", 6 );
 
-    my $sql = "SELECT DISTINCT CONCAT_WS('/', IFNULL(module,''), IFNULL(name,''), IFNULL(part,'')) FROM `log` WHERE log.version>= ? AND log.version <= ?";
+    my $sql = "
+        SELECT
+            DISTINCT CONCAT_WS(
+                '/',
+                IFNULL(module, ''),
+                IFNULL(name, ''),
+                IFNULL(part, '')
+            )
+        FROM `log`
+        WHERE log.version >= ? AND log.version <= ?
+    ";
     my $res = $dbh->selectcol_arrayref( $sql, undef, $from_pos, $to_pos );
     my @changes = @{$res};
     debug_log(
@@ -1030,7 +1191,20 @@ sub _get_full_log_diff_db {
     my $to_pos   = shift;
     debug_log( "_get_log_diff_db: $from_pos - $to_pos\n", 6 );
 
-    my $sql = "SELECT CONCAT_WS('/', IFNULL(module,''), IFNULL(name,''), IFNULL(part,'')) AS entry, user, time FROM `log` WHERE log.version>= ? AND log.version <= ? ORDER BY id";
+    my $sql = "
+        SELECT
+            CONCAT_WS(
+                '/',
+                IFNULL(module, ''),
+                IFNULL(name, ''),
+                IFNULL(part, '')
+            ) AS entry,
+            user,
+            time
+        FROM `log`
+        WHERE log.version >= ? AND log.version <= ?
+        ORDER BY id
+    ";
     my $res = $dbh->selectall_arrayref( $sql, undef, $from_pos, $to_pos );
     my @entries;
     my @messages;
@@ -1089,7 +1263,8 @@ sub _send_data_version {
     # Send to bigjimmy bot
     if ( PB::BigJimmy::send_version($dataversion) <= 0 ) {
         debug_log(
-            "PB::API::_send_data_version() error sending version $dataversion to bigjimmy bot\n",
+            "PB::API::_send_data_version() error sending version"
+              . " $dataversion to bigjimmy bot\n",
             0
         );
         $ret = -1;
@@ -1109,7 +1284,8 @@ sub _send_data_version {
       )
     {
         debug_log(
-            "PB::API::_send_data_version() error sending version $dataversion over meteor\n",
+            "PB::API::_send_data_version() error sending version"
+              . " $dataversion over meteor\n",
             0
         );
         $ret = -1;
@@ -1224,7 +1400,11 @@ sub slack_create_channel_for_puzzle {
         2 );
 
     # invoke API call to create channel
-    my $channels_create_url = "https://slack.com/api/conversations.create?token=$PB::Config::SLACK_API_USER_TOKEN&name=p-$puzzle_name&pretty=1";
+    my $channels_create_url =
+        "https://slack.com/api/conversations.create"
+      . "?token=$PB::Config::SLACK_API_USER_TOKEN"
+      . "&name=p-$puzzle_name"
+      . "&pretty=1";
     my $response;
 
     $response = get($channels_create_url);
@@ -1239,7 +1419,8 @@ sub slack_create_channel_for_puzzle {
     my $json = decode_json($response);
     unless ( $json->{ok} ) {
         debug_log(
-            "Slack API: channels.create failed with error: $json->{error}\n");
+            "Slack API: channels.create failed with error: $json->{error}\n"
+        );
     }
 
     my $channel_id;
@@ -1260,7 +1441,9 @@ sub discord_create_channel_for_puzzle {
     my $google_docs_folder = shift;
 
     debug_log(
-        "discord_create_channel_for_puzzle: puzzle_name=$puzzle_name, round_name=$round_name, puzzle_uri=$puzzle_uri, google_docs_folder=$google_docs_folder\n",
+        "discord_create_channel_for_puzzle: puzzle_name=$puzzle_name,"
+          . " round_name=$round_name, puzzle_uri=$puzzle_uri,"
+          . " google_docs_folder=$google_docs_folder\n",
         2
     );
 
@@ -1268,7 +1451,9 @@ sub discord_create_channel_for_puzzle {
 
     print STDERR "Running puzzcord api create\n";
 
-    my $topic = "\nPuzzle: $puzzle_name \nRound: $round_name \nPuzzle URL: $puzzle_uri \nGoogle Docs Folder: $google_docs_folder";
+    my $topic =
+        "\nPuzzle: $puzzle_name \nRound: $round_name "
+      . "\nPuzzle URL: $puzzle_uri \nGoogle Docs Folder: $google_docs_folder";
 
     my $cmd = "./api create_json $puzzle_name '$topic' |";
     debug_log("discord_create_channel_for_puzzle: running: $cmd");
@@ -1319,11 +1504,18 @@ sub slack_set_channel_topic {
     my $google_docs_folder = shift;
 
     my $topic_url_param = uri_escape(
-        "Puzzle: $puzzle_name / Round: $round_name\nPuzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder"
+        "Puzzle: $puzzle_name / Round: $round_name\n"
+          . "Puzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder"
     );
-    my $channels_set_topic_url = "https://slack.com/api/conversations.setTopic?token=$PB::Config::SLACK_API_USER_TOKEN&channel=$channel_id&topic=$topic_url_param&pretty=1";
+    my $channels_set_topic_url =
+        "https://slack.com/api/conversations.setTopic"
+      . "?token=$PB::Config::SLACK_API_USER_TOKEN"
+      . "&channel=$channel_id"
+      . "&topic=$topic_url_param"
+      . "&pretty=1";
     debug_log(
-        "setting channel topic for channel id: $channel_id via url param: $topic_url_param",
+        "setting channel topic for channel id: $channel_id"
+          . " via url param: $topic_url_param",
         2
     );
     get($channels_set_topic_url);
