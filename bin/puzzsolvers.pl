@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use lib qw(.);
+
 BEGIN {
     require 'pblib.cfg';
 }
@@ -13,23 +14,24 @@ use PB::API;
 use CGI qw(:standard:);
 use CGI qw(param);
 
-my $debugp="false";
-if($PB::Config::PB_DEV_VERSION ne "") {
-    $debugp="true";
+my $debugp = "false";
+if ($PB::Config::PB_DEV_VERSION ne "") {
+    $debugp = "true";
 }
 
 my $hidesolved = "";
 
-if (param('hidesolved')){
-	$hidesolved="checked";
+if (param('hidesolved')) {
+    $hidesolved = "checked";
 }
 
 my $showrounds = "";
-if (param('showrounds')){
-	$showrounds="checked";
+if (param('showrounds')) {
+    $showrounds = "checked";
 }
 
-my $title = "PB Solver-o-matic$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
+my $title =
+"PB Solver-o-matic$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 
 my $html = <<"EOF";
 Content-type: text/html

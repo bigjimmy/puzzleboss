@@ -13,7 +13,6 @@ use CGI ':standard';
 use PB::API;
 use PB::Config;
 
-
 my $html_start = <<"EOF";
 Content-type: text/html
 
@@ -28,37 +27,40 @@ EOF
 print $html_start;
 my $pid = 0;
 
-if (param('pid')){
-	$pid = param('pid');
-}else{
-	print "<body>No Puzzle-ID parameter supplied</body></html>";
-	exit;
+if (param('pid')) {
+    $pid = param('pid');
+} else {
+    print "<body>No Puzzle-ID parameter supplied</body></html>";
+    exit;
 }
 
 print "<body>";
 
 my $activityrows_ref = PB::API::get_puzzle_activity($pid);
-my @activityrows = @$activityrows_ref;
-my $puzzlerow_ref = PB::API::get_puzzle_info($pid);
-my %puzzlerow = %$puzzlerow_ref;
+my @activityrows     = @$activityrows_ref;
+my $puzzlerow_ref    = PB::API::get_puzzle_info($pid);
+my %puzzlerow        = %$puzzlerow_ref;
 
+print "Google Docs Link: <a href='"
+  . $puzzlerow{'drive_uri'}
+  . "'>here</a><br>";
 
-print "Google Docs Link: <a href='".$puzzlerow{'drive_uri'}."'>here</a><br>"; 
-
-if (@activityrows < 1){
-print "No activity for puzzle or error fetching</body></html>";
-exit;
+if (@activityrows < 1) {
+    print "No activity for puzzle or error fetching</body></html>";
+    exit;
 }
 
 print "Recent Activity History for puzzle: $puzzlerow{'name'}<br>\n";
 
-print "<table border=1><tr><th>Time</th><th>Solver</th><th>Activity</th></tr>\n";
+print
+  "<table border=1><tr><th>Time</th><th>Solver</th><th>Activity</th></tr>\n";
 foreach my $rowref (@activityrows) {
-my %row = %$rowref;
+    my %row = %$rowref;
 
-#Exclude "BigJimmy" robot activity 
-next if $row{'solver'} eq "BigJimmy";
-print "<tr><td>$row{'time'}</td><td>$row{'solver'}</td><td>$row{'activity'}</td></tr>\n";
+    #Exclude "BigJimmy" robot activity
+    next if $row{'solver'} eq "BigJimmy";
+    print
+"<tr><td>$row{'time'}</td><td>$row{'solver'}</td><td>$row{'activity'}</td></tr>\n";
 }
 print "</table>";
 

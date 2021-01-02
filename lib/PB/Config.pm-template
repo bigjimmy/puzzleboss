@@ -9,194 +9,204 @@ use strict;
 ##############################################################################
 # You probably need to edit part of this section every year and then push to DB
 ##############################################################################
-our $PB_HUNT = "MH2525";
-our $PB_USER = "BigJimmy"; 
-our $PB_PASS = "password";
+our $PB_HUNT        = "MH2525";
+our $PB_USER        = "BigJimmy";
+our $PB_PASS        = "password";
 our $PB_DOMAIN_NAME = "www.domainname.org";
-our $TEAM_NAME = "My Team Name";
-
+our $TEAM_NAME      = "My Team Name";
 
 ##############################################################################
 # You may not need to edit this section every year
 ##############################################################################
 our $SLACK_CHANNEL = "pbslackchannel";
-our $BIGJIMMY_IP = "127.0.0.1"; # IP for bigjimmy (can access pbrest without auth)
+our $BIGJIMMY_IP =
+  "127.0.0.1";    # IP for bigjimmy (can access pbrest without auth)
 our $REGISTER_LDAP_ADMIN_USER = "admin";
 our $REGISTER_LDAP_ADMIN_PASS = "secret";
-our $PB_DATA_DB_HOST = "localhost";
-our $PB_DATA_DB_PORT = "3306";
-our $PB_DATA_DB_USER = lc($PB_USER);
-our $PB_DATA_DB_PASS = $PB_PASS;
-our $METEOR_HTTP_HOST = "series-of-tubes.$PB_DOMAIN_NAME";
-our $METEOR_CONTROL_HOST = "series-of-tubes-internal.$PB_DOMAIN_NAME";
-our $BIGJIMMY_CONTROL_HOST = "series-of-tubes-internal.$PB_DOMAIN_NAME";
-our $BIGJIMMY_CONTROL_PORT = "8080";
-our $INSTALL_PATH = "/canadia";
-our $GOOGLE_ADMIN_USER = 'BigJimmy@stormynight.org';
-our $GOOGLE_CLIENT_ID = "blahblahblah.apps.googleusercontent.com";
-our $GOOGLE_CLIENT_SECRET = "blahblahblahsecretblah";
-our $BIGJIMMY_SLACK_TOKEN = "DISABLED";
-our $SLACK_API_USER_TOKEN = "DISABLED";
-our $SLACK_API_URL = "https://hooks.slack.com/services/SEKRIT";
-our $ANSWERSALLCAPS = 1;
-
+our $PB_DATA_DB_HOST          = "localhost";
+our $PB_DATA_DB_PORT          = "3306";
+our $PB_DATA_DB_USER          = lc($PB_USER);
+our $PB_DATA_DB_PASS          = $PB_PASS;
+our $METEOR_HTTP_HOST         = "series-of-tubes.$PB_DOMAIN_NAME";
+our $METEOR_CONTROL_HOST      = "series-of-tubes-internal.$PB_DOMAIN_NAME";
+our $BIGJIMMY_CONTROL_HOST    = "series-of-tubes-internal.$PB_DOMAIN_NAME";
+our $BIGJIMMY_CONTROL_PORT    = "8080";
+our $INSTALL_PATH             = "/canadia";
+our $GOOGLE_ADMIN_USER        = 'BigJimmy@stormynight.org';
+our $GOOGLE_CLIENT_ID         = "blahblahblah.apps.googleusercontent.com";
+our $GOOGLE_CLIENT_SECRET     = "blahblahblahsecretblah";
+our $BIGJIMMY_SLACK_TOKEN     = "DISABLED";
+our $SLACK_API_USER_TOKEN     = "DISABLED";
+our $SLACK_API_URL            = "https://hooks.slack.com/services/SEKRIT";
+our $ANSWERSALLCAPS           = 1;
 
 ##############################################################################
 # You do not need to edit this section unless you need to debug
 ##############################################################################
-our $DEBUG = 1;
+our $DEBUG       = 1;
 our $TWIKI_DEBUG = 1;
-our $JS_DEBUG = 1;
-
+our $JS_DEBUG    = 1;
 
 ##############################################################################
 # You should not normally need to edit anything below this line unless you
 # have a very non-standard configuration.
 ##############################################################################
 our $PB_DEV_VERSION = "";
-if(exists($ENV{'PB_DEV_VERSION'})) {
+if (exists($ENV{'PB_DEV_VERSION'})) {
     $PB_DEV_VERSION = $ENV{'PB_DEV_VERSION'};
 } else {
-    if($0 =~ m/puzzleboss(\-.+?)\// ||
-       (exists($ENV{'REQUEST_URI'}) && ($ENV{'REQUEST_URI'} =~ m/puzzleboss(\-.+?)\//)) ||
-       (exists($ENV{'SCRIPT_NAME'}) && ($ENV{'SCRIPT_NAME'} =~ m/puzzleboss(\-.+?)\//)) ||
-       (exists($ENV{'SCRIPT_FILENAME'}) && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzleboss(\-.+?)\//)) ||
-       (exists($ENV{'SCRIPT_URL'}) && ($ENV{'SCRIPT_URL'} =~ m/puzzleboss(\-.+?)\//)) 
-	) {
-	$PB_DEV_VERSION = $1;
-    }:w
+    if (
+        $0 =~ m/puzzleboss(\-.+?)\//
+        || (exists($ENV{'REQUEST_URI'})
+            && ($ENV{'REQUEST_URI'} =~ m/puzzleboss(\-.+?)\//))
+        || (exists($ENV{'SCRIPT_NAME'})
+            && ($ENV{'SCRIPT_NAME'} =~ m/puzzleboss(\-.+?)\//))
+        || (exists($ENV{'SCRIPT_FILENAME'})
+            && ($ENV{'SCRIPT_FILENAME'} =~ m/puzzleboss(\-.+?)\//))
+        || (exists($ENV{'SCRIPT_URL'})
+            && ($ENV{'SCRIPT_URL'} =~ m/puzzleboss(\-.+?)\//))
+      )
+    {
+        $PB_DEV_VERSION = $1;
+    }
 
 }
 
-
-our $TWIKI_WEB = $PB_HUNT;
-our $TWIKI_USER = $PB_USER;
+our $TWIKI_WEB       = $PB_HUNT;
+our $TWIKI_USER      = $PB_USER;
 our $TWIKI_USER_PASS = $PB_PASS;
-our $TWIKI_HOST = "$PB_DOMAIN_NAME";
+our $TWIKI_HOST      = "$PB_DOMAIN_NAME";
 
-our $METEOR_CONTROL_PORT = "4671";
+our $METEOR_CONTROL_PORT    = "4671";
 our $METEOR_VERSION_CHANNEL = "version$PB_DEV_VERSION";
-our $METEOR_JS_URI = "https://$METEOR_HTTP_HOST/meteor.js";
+our $METEOR_JS_URI          = "https://$METEOR_HTTP_HOST/meteor.js";
+
 #our $METEOR_JS_URI = "http://$METEOR_HTTP_HOST:4670/meteor.js";
 
 our $BIGJIMMY_CONTROL_PATH = "bigjimmy$PB_DEV_VERSION";
 our $BIGJIMMY_CONTROL_USER = lc($PB_USER);
 our $BIGJIMMY_CONTROL_PASS = $PB_PASS;
-our $BIGJIMMY_BOT_CONTROL_URI = "http://".$BIGJIMMY_CONTROL_HOST.":".$BIGJIMMY_CONTROL_PORT."/".$BIGJIMMY_CONTROL_PATH;
+our $BIGJIMMY_BOT_CONTROL_URI =
+    "http://"
+  . $BIGJIMMY_CONTROL_HOST . ":"
+  . $BIGJIMMY_CONTROL_PORT . "/"
+  . $BIGJIMMY_CONTROL_PATH;
 
-our $PB_DATA_WRITE_FILES = 0;
-our $PB_DATA_WRITE_DB = 1;
+our $PB_DATA_WRITE_FILES      = 0;
+our $PB_DATA_WRITE_DB         = 1;
 our $PB_DATA_READ_DB_OR_FILES = "DB";
-our $PB_DATA_DB_NAME = "puzzleboss$PB_DEV_VERSION";
+our $PB_DATA_DB_NAME          = "puzzleboss$PB_DEV_VERSION";
 
 our $REGISTER_LDAP_HOST = "ldap.$PB_DOMAIN_NAME";
-our $REGISTER_LDAP_DC = join(',', map {"dc=$_"} split(/\./, $PB_DOMAIN_NAME));
+our $REGISTER_LDAP_DC = join(',', map { "dc=$_" } split(/\./, $PB_DOMAIN_NAME));
 our $REGISTER_LDAP_DOMAIN = "$PB_DOMAIN_NAME";
-our $REGISTER_LDAP_O = $TEAM_NAME;
-our $REGISTER_EMAIL_FROM = $TWIKI_USER.'@'.$TWIKI_HOST;
+our $REGISTER_LDAP_O      = $TEAM_NAME;
+our $REGISTER_EMAIL_FROM  = $TWIKI_USER . '@' . $TWIKI_HOST;
 
-our $GOOGLE_DOMAIN = "$PB_DOMAIN_NAME";
+our $GOOGLE_DOMAIN     = "$PB_DOMAIN_NAME";
 our $GOOGLE_ADMIN_PASS = $PB_PASS;
 
 our $PB_DEV_VERSION_POSTPAREN = "";
-if($PB_DEV_VERSION ne "") {
+if ($PB_DEV_VERSION ne "") {
     $PB_DEV_VERSION_POSTPAREN = " ($PB_DEV_VERSION)";
 }
 
-our $REGISTER_PATH = $INSTALL_PATH . "/register";
+our $REGISTER_PATH      = $INSTALL_PATH . "/register";
 our $REGISTER_DATA_PATH = $REGISTER_PATH . "/data";
-our $RESET_PATH = $INSTALL_PATH . "/resetaccount";
-our $RESET_DATA_PATH = $RESET_PATH . "/data";
+our $RESET_PATH         = $INSTALL_PATH . "/resetaccount";
+our $RESET_DATA_PATH    = $RESET_PATH . "/data";
 
 our $TWIKI_PROTOCOL = "https";
-our $TWIKI_URI = "$TWIKI_PROTOCOL://$TWIKI_HOST";
-our $TWIKI_BIN_URI = $TWIKI_URI . "/twiki/bin";
-our $REGISTER_URI = $TWIKI_URI . "/register/index.pl";
-our $RESET_URI = $TWIKI_URI . "/resetaccount/index.pl";
+our $TWIKI_URI      = "$TWIKI_PROTOCOL://$TWIKI_HOST";
+our $TWIKI_BIN_URI  = $TWIKI_URI . "/twiki/bin";
+our $REGISTER_URI   = $TWIKI_URI . "/register/index.pl";
+our $RESET_URI      = $TWIKI_URI . "/resetaccount/index.pl";
 
-our $TWIKI_PATH = $INSTALL_PATH . "/twiki";
+our $TWIKI_PATH      = $INSTALL_PATH . "/twiki";
 our $TWIKI_DATA_PATH = $TWIKI_PATH . "/data";
-our $TWIKI_BIN_PATH = $TWIKI_PATH . "/bin";
+our $TWIKI_BIN_PATH  = $TWIKI_PATH . "/bin";
 
-our $PB_REL = "/puzzleboss" . $PB_DEV_VERSION;
+our $PB_REL  = "/puzzleboss" . $PB_DEV_VERSION;
 our $PB_PATH = $INSTALL_PATH . $PB_REL;
-our $PB_URI = $TWIKI_URI . $PB_REL;
+our $PB_URI  = $TWIKI_URI . $PB_REL;
 
 our $PB_JS_URI = "$PB_URI/js";
 
-our $PB_DATA_REL = "$PB_REL/data";
+our $PB_DATA_REL  = "$PB_REL/data";
 our $PB_DATA_PATH = "$PB_PATH/data";
-our $PB_DATA_URI = "$PB_URI/data";
+our $PB_DATA_URI  = "$PB_URI/data";
 
-our $PB_BIN_REL = "$PB_REL/bin";
+our $PB_BIN_REL  = "$PB_REL/bin";
 our $PB_BIN_PATH = "$PB_PATH/bin";
-our $PB_BIN_URI = "$PB_URI/bin";
+our $PB_BIN_URI  = "$PB_URI/bin";
 
-our $PB_ADMIN_TOOLS_REL = "$PB_REL/admin-tools";
+our $PB_ADMIN_TOOLS_REL  = "$PB_REL/admin-tools";
 our $PB_ADMIN_TOOLS_PATH = "$PB_PATH/admin-tools";
-our $PB_ADMIN_TOOLS_URI = "$PB_URI/admin-tools";
+our $PB_ADMIN_TOOLS_URI  = "$PB_URI/admin-tools";
 
-our $PB_CSS_REL = "$PB_REL/css";
+our $PB_CSS_REL  = "$PB_REL/css";
 our $PB_CSS_PATH = "$PB_PATH/css";
-our $PB_CSS_URI = "$PB_URI/css";
+our $PB_CSS_URI  = "$PB_URI/css";
 
-our $PB_IMAGES_REL = "$PB_REL/images";
+our $PB_IMAGES_REL  = "$PB_REL/images";
 our $PB_IMAGES_PATH = "$PB_PATH/images";
-our $PB_IMAGES_URI = "$PB_URI/images";
+our $PB_IMAGES_URI  = "$PB_URI/images";
 
-our $PB_GOOGLE_PATH = "$PB_PATH/newgoogle";
+our $PB_GOOGLE_PATH   = "$PB_PATH/newgoogle";
 our $PB_BIGJIMMY_PATH = "$PB_PATH/bigjimmy";
 
-our $PB_DOJO_REL = "$PB_REL/dojoroot";
+our $PB_DOJO_REL  = "$PB_REL/dojoroot";
 our $PB_DOJO_PATH = "$PB_PATH/dojoroot";
-our $PB_DOJO_URI = "$PB_URI/dojoroot";
+our $PB_DOJO_URI  = "$PB_URI/dojoroot";
 
-our $PB_REST_REL = "$PB_BIN_REL/pbrest.pl";
+our $PB_REST_REL  = "$PB_BIN_REL/pbrest.pl";
 our $PB_REST_PATH = "$PB_BIN_PATH/pbrest.pl";
-our $PB_REST_URI = "$PB_BIN_URI/pbrest.pl";
+our $PB_REST_URI  = "$PB_BIN_URI/pbrest.pl";
 
 ##############################################################################
 # The following are deprecated and should not be used
 ##############################################################################
-our $PBREST_ROOT = $PB_REST_REL;
-our $PBREST_URI = $PB_REST_URI;
-our $DOJO_ROOT = $PB_DOJO_REL;
-our $TWIKI_USERS_FILE = "$TWIKI_DATA_PATH/.htpasswd";
-our $ROUNDS_FILE = "$PB_DATA_PATH/rounds.list";
-our $TEMPLATES_FILE = "$PB_DATA_PATH/templates.list";
-our $PUZZLES_FILE = "$PB_DATA_PATH/puzzles.list";
-our $POOL_FILE = "$PB_DATA_PATH/solvers.pool";
-our $SOLV_MAP_FILE = "$PB_DATA_PATH/solvers-puzz.map";
+our $PBREST_ROOT         = $PB_REST_REL;
+our $PBREST_URI          = $PB_REST_URI;
+our $DOJO_ROOT           = $PB_DOJO_REL;
+our $TWIKI_USERS_FILE    = "$TWIKI_DATA_PATH/.htpasswd";
+our $ROUNDS_FILE         = "$PB_DATA_PATH/rounds.list";
+our $TEMPLATES_FILE      = "$PB_DATA_PATH/templates.list";
+our $PUZZLES_FILE        = "$PB_DATA_PATH/puzzles.list";
+our $POOL_FILE           = "$PB_DATA_PATH/solvers.pool";
+our $SOLV_MAP_FILE       = "$PB_DATA_PATH/solvers-puzz.map";
 our $ANSWER_ATTEMPT_FILE = "$PB_DATA_PATH/answer_attempts.puzz-ans-user";
-our $LOG_FILE = "$PB_DATA_PATH/log.txt";
-our $LOG_INDEX = "$PB_DATA_PATH/logindex.txt";
-our $CLIENT_INDEX = "$PB_DATA_PATH/clientindex.txt";
-our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE = "$PB_GOOGLE_PATH/google-doc-template.odt";
+our $LOG_FILE            = "$PB_DATA_PATH/log.txt";
+our $LOG_INDEX           = "$PB_DATA_PATH/logindex.txt";
+our $CLIENT_INDEX        = "$PB_DATA_PATH/clientindex.txt";
+our $GOOGLE_PUZZLE_DOCUMENT_TEMPLATE =
+  "$PB_GOOGLE_PATH/google-doc-template.odt";
 
 sub export_to_bash {
-    foreach my $entry (keys %{PB::Config::}) { 
-	if(defined(${$PB::Config::{$entry}})) {
-	    my $value = ${$PB::Config::{$entry}};
-	    print "export $entry=\"$value\";\n";
-	}
+    foreach my $entry (keys %{PB::Config::}) {
+        if (defined(${ $PB::Config::{$entry} })) {
+            my $value = ${ $PB::Config::{$entry} };
+            print "export $entry=\"$value\";\n";
+        }
     }
 }
 
 sub export_to_tcsh {
-    foreach my $entry (keys %{PB::Config::}) { 
-	if(defined(${$PB::Config::{$entry}})) {
-	    my $value = ${$PB::Config::{$entry}};
-	    print "setenv $entry \"$value\";\n";
-	}
+    foreach my $entry (keys %{PB::Config::}) {
+        if (defined(${ $PB::Config::{$entry} })) {
+            my $value = ${ $PB::Config::{$entry} };
+            print "setenv $entry \"$value\";\n";
+        }
     }
 }
 
 sub export_to_sql {
-    foreach my $entry (keys %{PB::Config::}) { 
-	if(defined(${$PB::Config::{$entry}})) {
-	    my $value = ${$PB::Config::{$entry}};
-	    print "REPLACE INTO \`config\` (\`key\`,\`val\`) VALUES ('$entry','$value');\n";
-	}
+    foreach my $entry (keys %{PB::Config::}) {
+        if (defined(${ $PB::Config::{$entry} })) {
+            my $value = ${ $PB::Config::{$entry} };
+            print
+"REPLACE INTO \`config\` (\`key\`,\`val\`) VALUES ('$entry','$value');\n";
+        }
     }
 }
 
