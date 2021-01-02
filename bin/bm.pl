@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use lib qw(.);
+
 BEGIN {
     require 'pblib.cfg';
 }

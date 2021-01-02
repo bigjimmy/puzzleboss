@@ -10,5 +10,5 @@ use PB::API;
 my %userlist = PB::API::ldap_get_user_list();
 
 foreach $user (sort keys %userlist) {
-    PB::API::add_solver($user,$userlist{$user});
+    PB::API::add_solver($user, $userlist{$user});
 }

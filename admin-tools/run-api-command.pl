@@ -7,6 +7,6 @@ use lib dirname(abs_path($0));
 use PB::Config;
 use PB::API;
 
-my $evalstr = join(" ",@ARGV);
+my $evalstr = join(" ", @ARGV);
 print STDERR "evaling $evalstr\n";
 eval($evalstr);

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Cwd qw( abs_path );
 use File::Basename qw( dirname );
-use lib dirname( abs_path($0) );
+use lib dirname(abs_path($0));
 
 use Scalar::Util qw(tainted looks_like_number);
 
@@ -39,7 +39,7 @@ sub debug_log {
     my $message = shift;
     my $level = shift || 0;
 
-    print STDERR $message if ( $PB::Config::DEBUG > $level );
+    print STDERR $message if ($PB::Config::DEBUG > $level);
 }
 
 ########
@@ -53,10 +53,10 @@ sub get_puzzle_list {
 
 sub _get_puzzle_list_db {
     my $roundfilter = shift;
-    debug_log( "_get_puzzle_list_db()", 6 );
+    debug_log("_get_puzzle_list_db()", 6);
 
     my $res;
-    if ( defined($roundfilter) ) {
+    if (defined($roundfilter)) {
         my $sql = "
             SELECT `puzzle`.`name` AS 'puzzle_name'
             FROM `puzzle`
@@ -64,9 +64,8 @@ sub _get_puzzle_list_db {
             ON `round`.`id`=`puzzle`.`round_id`
             WHERE `round`.`name` REGEXP ?
         ";
-        $res = $dbh->selectcol_arrayref( $sql, undef, $roundfilter );
-    }
-    else {
+        $res = $dbh->selectcol_arrayref($sql, undef, $roundfilter);
+    } else {
         my $sql = "SELECT `name` FROM `puzzle`";
         $res = $dbh->selectcol_arrayref($sql);
     }
@@ -89,7 +88,7 @@ sub _add_puzzle_db {
     );
 
     # convert drive_uri to null (undef) if not set
-    if ( $drive_uri eq '' ) {
+    if ($drive_uri eq '') {
         $drive_uri = undef;
     }
 
@@ -115,11 +114,11 @@ sub _add_puzzle_db {
         );
     ";
     my $c =
-      $dbh->do( $sql, undef, $id, $round, $puzzle_uri, $drive_uri,
-        $slack_channel_id, $slack_channel_name, $slack_channel_link );
+      $dbh->do($sql, undef, $id, $round, $puzzle_uri, $drive_uri,
+        $slack_channel_id, $slack_channel_name, $slack_channel_link);
 
-    if ( defined($c) ) {
-        debug_log( "_add_puzzle_db: dbh->do returned $c\n", 2 );
+    if (defined($c)) {
+        debug_log("_add_puzzle_db: dbh->do returned $c\n", 2);
         _send_data_version();
         debug_log(
             "_add_puzzle_db: dbh->do returned success for query $sql"
@@ -130,8 +129,7 @@ sub _add_puzzle_db {
             4
         );
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_add_puzzle_db: dbh->do returned error: "
               . $dbh->errstr
@@ -143,10 +141,9 @@ sub _add_puzzle_db {
         );
 
         # make the error reporting a bit more descriptive downstream
-        if ( $dbh->errstr =~ /Duplicate/ ) {
+        if ($dbh->errstr =~ /Duplicate/) {
             return (-2);
-        }
-        else {
+        } else {
             return (-1);
         }
     }
@@ -167,7 +164,7 @@ sub add_puzzle {
     $id =~ s/\_//g;
     $id =~ s/\ //g;
 
-    debug_log( "add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2 );
+    debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2);
 
     my $round_drive_id = get_round($round)->{"drive_id"};
     my $channel_name   = lc $id;
@@ -177,13 +174,12 @@ sub add_puzzle {
     # create channel so we have the id to insert
     # my $channel = slack_create_channel_for_puzzle($id);
     my $channel =
-      discord_create_channel_for_puzzle( $channel_name, $round, $puzzle_uri,
-        "https://drive.google.com/drive/u/2/folders/$round_drive_id" );
+      discord_create_channel_for_puzzle($channel_name, $round, $puzzle_uri,
+        "https://drive.google.com/drive/u/2/folders/$round_drive_id");
 
-    if ( defined( $channel->{channel_id} ) ) {
+    if (defined($channel->{channel_id})) {
         $channel_id = $channel->{channel_id};
-    }
-    else {
+    } else {
         debug_log(
             "add_puzzle:  puzzle never got chat channel id! ABORTING ADD");
         return (-200);
@@ -191,7 +187,7 @@ sub add_puzzle {
     $channel_id =~ s/\n//g;
     $channel_id =~ s/\W//g;
 
-    if ( $channel_id < 0 ) {
+    if ($channel_id < 0) {
         debug_log("add_puzzle: puzzle never got a channel_id");
         return (-200);
     }
@@ -203,12 +199,12 @@ sub add_puzzle {
     my $drive_uri = "$PB::Config::PB_BIN_URI/doc.pl?pid=$id";
 
     my $retvalue =
-      _add_puzzle_db( $id, $round, $puzzle_uri, $drive_uri, $channel_id,
-        $channel_name, $channel_link );
+      _add_puzzle_db($id, $round, $puzzle_uri, $drive_uri, $channel_id,
+        $channel_name, $channel_link);
 
-    if ( $retvalue <= 0 ) {
-        debug_log( "add_puzzle: couldn't add to db!\n", 0 );
-        return ( -100 + $retvalue );
+    if ($retvalue <= 0) {
+        debug_log("add_puzzle: couldn't add to db!\n", 0);
+        return (-100 + $retvalue);
     }
 
     # set channel topic
@@ -250,14 +246,15 @@ sub add_puzzle {
 
 sub puzzle_solved {
     my $idin = shift;
-    debug_log( "puzzle_solved():  $idin has been solved\n", 5 );
+    debug_log("puzzle_solved():  $idin has been solved\n", 5);
 
     # We want to send solvers working on this puzzle to the pool.
     my $puzzref = get_puzzle($idin);
-    my @cursolvers = split( ",", $puzzref->{"cursolvers"} );
+    my @cursolvers = split(",", $puzzref->{"cursolvers"});
     foreach my $solver (@cursolvers) {
-        assign_solver_puzzle( "", $solver );
+        assign_solver_puzzle("", $solver);
     }
+
     # my $theanswer = $puzzref->{"answer"};
     # my $message =
     #     "PUZZLE $idin HAS BEEN SOLVED! (ANSWER: $theanswer) \n"
@@ -279,14 +276,14 @@ sub delete_puzzle {
     my $idin = shift;
     chomp $idin;
 
-    debug_log( "delete_puzzle: $idin\n", 6 );
+    debug_log("delete_puzzle: $idin\n", 6);
 
     my $puzzref = get_puzzle($idin);
 
     # remove solvers from puzzle before you delete it
-    my @cursolvers = split( ",", $puzzref->{"cursolvers"} );
+    my @cursolvers = split(",", $puzzref->{"cursolvers"});
     foreach my $solver (@cursolvers) {
-        assign_solver_puzzle( "", $solver );
+        assign_solver_puzzle("", $solver);
     }
 
     return _delete_puzzle_db($idin);
@@ -294,7 +291,7 @@ sub delete_puzzle {
 
 sub _delete_puzzle_db {
     my $idin = shift;
-    debug_log( "_delete_puzzle_db: $idin\n", 6 );
+    debug_log("_delete_puzzle_db: $idin\n", 6);
 
     my $sql = 'DELETE FROM `puzzle` WHERE id=' . $idin;
     my $sth;
@@ -307,7 +304,7 @@ sub get_puzzle {
     my $idin = shift;
     chomp $idin;
 
-    debug_log( "get_puzzle: $idin\n", 6 );
+    debug_log("get_puzzle: $idin\n", 6);
 
     return _get_puzzle_db($idin);
 }
@@ -322,29 +319,27 @@ sub _get_puzzle_db {
 
     # This fixes problem with type error when
     # there is exactly one puzzle in the DB.
-    if ( $idin eq '*' ) {
+    if ($idin eq '*') {
         $always_return_array = 1;
         $sth                 = $dbh->prepare($sql);
         $sth->execute() or die $dbh->errstr;
-    }
-    else {
+    } else {
         $sql .= ' WHERE (`name` REGEXP ?)';
         $sth = $dbh->prepare($sql);
-        $sth->execute( '^' . $idin . '$' );
+        $sth->execute('^' . $idin . '$');
     }
     my @rows;
-    while ( my $res = $sth->fetchrow_hashref() ) {
-        foreach my $key ( keys %{$res} ) {
-            if ( !defined( $res->{$key} ) ) {
+    while (my $res = $sth->fetchrow_hashref()) {
+        foreach my $key (keys %{$res}) {
+            if (!defined($res->{$key})) {
                 $res->{$key} = "";
             }
         }
         push @rows, $res;
     }
-    if ( $always_return_array > 0 || @rows > 1 ) {
+    if ($always_return_array > 0 || @rows > 1) {
         return \@rows;
-    }
-    else {
+    } else {
         return \%{ $rows[0] };
     }
 }
@@ -359,7 +354,7 @@ sub update_puzzle_part {
     # Don't actually enter status change to "solved" without answer
     # pb page edited will still say "solved" but at least it won't propagate
     # and everyone else will know the puzz still isn't really solved
-    if ( $part eq "status" && $val eq "Solved" ) {
+    if ($part eq "status" && $val eq "Solved") {
 
         # is there an answer?
         my $puzzref = get_puzzle($id);
@@ -369,31 +364,27 @@ sub update_puzzle_part {
               . " PART=$part VAL=$val ANS=$answer\n",
             5
         );
-        if ( $answer ne undef ) {
-            debug_log( "ok answer is defined.  we can mark as solved.", 5 );
+        if ($answer ne undef) {
+            debug_log("ok answer is defined.  we can mark as solved.", 5);
             puzzle_solved($id);
-        }
-        else {
+        } else {
             debug_log(
-                "whoa whoa whoa. can't mark as solved. no answer defined.",
-                1,
-            );
+                "whoa whoa whoa. can't mark as solved. no answer defined.", 1,);
             return 255;
         }
     }
 
-    my $rval = _update_puzzle_part_db( $id, $part, $val );
+    my $rval = _update_puzzle_part_db($id, $part, $val);
 
-    if ( $part eq "xyzloc" ) {
+    if ($part eq "xyzloc") {
         my $puzzref    = get_puzzle($id);
         my $channel_id = $puzzref->{'slack_channel_id'};
-        discord_say_something(
-            $channel_id,
+        discord_say_something($channel_id,
             "ATTENTION: puzzle $id is being worked on at $val",
         );
     }
 
-    if ( $part eq "status" && $val eq "Needs eyes" ) {
+    if ($part eq "status" && $val eq "Needs eyes") {
         my $eyespuzzref     = get_puzzle($id);
         my $eyespuzzle_name = $eyespuzzref->{"name"};
         discord_announce_attention($eyespuzzle_name);
@@ -413,7 +404,7 @@ sub update_puzzle_part {
         # );
     }
 
-    if ( $part eq "status" && $val eq "Critical" ) {
+    if ($part eq "status" && $val eq "Critical") {
         my $critpuzzref     = get_puzzle($id);
         my $critpuzzle_name = $critpuzzref->{"name"};
         discord_announce_attention($critpuzzle_name);
@@ -433,7 +424,7 @@ sub update_puzzle_part {
         # );
     }
 
-    if ( $part eq "status" && $val eq "Unnecessary" ) {
+    if ($part eq "status" && $val eq "Unnecessary") {
         my $unnecessarypuzzref     = get_puzzle($id);
         my $unnecessarypuzzle_name = $unnecessarypuzzref->{"name"};
         discord_announce_attention($unnecessarypuzzle_name);
@@ -445,24 +436,24 @@ sub update_puzzle_part {
         # );
     }
 
-    if ( $part eq "status" && $val eq "WTF" ) {
+    if ($part eq "status" && $val eq "WTF") {
         my $wtfpuzzref     = get_puzzle($id);
         my $wtfpuzzle_name = $wtfpuzzref->{"name"};
         discord_announce_attention($wtfpuzzle_name);
     }
 
     # If an answer is submitted, automatically mark the puzzle as solved
-    if ( $part eq "answer" && $val ne "" ) {
+    if ($part eq "answer" && $val ne "") {
 
         # am I solved status?
         my $puzzref = get_puzzle($id);
-        if ( $puzzref->{"status"} ne "Solved" ) {
+        if ($puzzref->{"status"} ne "Solved") {
             puzzle_solved($id);
-            my $rval = _update_puzzle_part_db( $id, "status", "Solved" );
+            my $rval = _update_puzzle_part_db($id, "status", "Solved");
         }
     }
 
-    if ( looks_like_number($rval) && $rval < 0 ) {
+    if (looks_like_number($rval) && $rval < 0) {
         return $rval;
     }
 }
@@ -478,11 +469,11 @@ sub _update_puzzle_part_db {
         'UPDATE `puzzle_view` SET `'
       . $part
       . '` = ? WHERE `name` LIKE ? LIMIT 1';
-    debug_log( "_update_puzzle_part_db: SQL: $sql\n", 2 );
+    debug_log("_update_puzzle_part_db: SQL: $sql\n", 2);
 
-    my $c = $dbh->do( $sql, undef, $val, $id );
+    my $c = $dbh->do($sql, undef, $val, $id);
 
-    if ( defined($c) ) {
+    if (defined($c)) {
         debug_log(
             "_update_puzzle_part_db: id=$id part=$part"
               . " val=$val dbh->do returned $c\n",
@@ -490,17 +481,16 @@ sub _update_puzzle_part_db {
         );
         _send_data_version();
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_update_puzzle_part_db: id=$id part=$part"
               . " val=$val dbh->do returned error: "
               . $dbh->errstr . "\n",
             0,
         );
-        if ( $dbh->errstr =~ m/deadlock/i ) {
+        if ($dbh->errstr =~ m/deadlock/i) {
             sleep 5;
-            return _update_puzzle_part_db( $id, $part, $val, $retries );
+            return _update_puzzle_part_db($id, $part, $val, $retries);
         }
         return (-1);
     }
@@ -520,11 +510,11 @@ sub get_puzzle_activity {
     $sth->execute() or die $dbh->errstr;
     my @rows;
 
-    while ( my $row = $sth->fetchrow_hashref ) {
+    while (my $row = $sth->fetchrow_hashref) {
         push @rows, $row;
         debug_log(
             "get_puzzle_activity: fetched line of activity for puzzid $pid\n",
-            4 );
+            4);
     }
 
     return \@rows;
@@ -553,16 +543,16 @@ sub get_puzzle_info {
 #######
 
 sub get_round_list {
-    debug_log( "get_round_list\n", 6 );
+    debug_log("get_round_list\n", 6);
     return _get_round_list_db();
 }
 
 sub _get_round_list_db {
-    debug_log( "_get_round_list_db\n", 6 );
+    debug_log("_get_round_list_db\n", 6);
     my $sql = "SELECT name FROM `round`";
-    debug_log( "SQL: $sql\n", 6 );
+    debug_log("SQL: $sql\n", 6);
     my $res = $dbh->selectcol_arrayref($sql);
-    debug_log( "_get_round_list SQL result: $res\n", 6 );
+    debug_log("_get_round_list SQL result: $res\n", 6);
     return @{$res};
 }
 
@@ -570,17 +560,15 @@ sub _add_round_db {
     my $new_round = shift;
 
     my $sql = "INSERT INTO `round` (`name`) VALUES (?);";
-    my $c = $dbh->do( $sql, undef, $new_round );
+    my $c = $dbh->do($sql, undef, $new_round);
 
-    if ( defined($c) ) {
-        debug_log( "_add_round_db: dbh->do returned $c\n", 2 );
+    if (defined($c)) {
+        debug_log("_add_round_db: dbh->do returned $c\n", 2);
         _send_data_version();
         return (1);
-    }
-    else {
+    } else {
         debug_log(
-            "_add_round_db: dbh->do returned error: " . $dbh->errstr . "\n",
-            0 );
+            "_add_round_db: dbh->do returned error: " . $dbh->errstr . "\n", 0);
         return (-1);
     }
 }
@@ -596,10 +584,9 @@ sub add_round {
     $new_round =~ s/\ //g;
 
     # untaint new_round
-    if ( $new_round =~ /^([[:alnum:]]+)$/ ) {
+    if ($new_round =~ /^([[:alnum:]]+)$/) {
         $new_round = $1;
-    }
-    else {
+    } else {
         debug_log(
             "add_round: new_round did not pass security checks ($new_round)\n",
             1
@@ -610,7 +597,7 @@ sub add_round {
     my $gfuri = "";
 
     my $rval = _add_round_db($new_round);
-    if ( $rval < 0 ) {
+    if ($rval < 0) {
         return $rval;
     }
 
@@ -634,29 +621,27 @@ sub get_round {
 
     # This fixes problem with type error when
     # there is exactly one round in the DB.
-    if ( $idin eq '*' ) {
+    if ($idin eq '*') {
         $always_return_array = 1;
         $sth                 = $dbh->prepare($sql);
         $sth->execute() or die $dbh->errstr;
-    }
-    else {
+    } else {
         $sql .= ' WHERE (`name` REGEXP ?)';
         $sth = $dbh->prepare($sql);
-        $sth->execute( '^' . $idin . '$' );
+        $sth->execute('^' . $idin . '$');
     }
     my @rows;
-    while ( my $res = $sth->fetchrow_hashref() ) {
-        foreach my $key ( keys %{$res} ) {
-            if ( !defined( $res->{$key} ) ) {
+    while (my $res = $sth->fetchrow_hashref()) {
+        foreach my $key (keys %{$res}) {
+            if (!defined($res->{$key})) {
                 $res->{$key} = "";
             }
         }
         push @rows, $res;
     }
-    if ( $always_return_array > 0 || @rows > 1 ) {
+    if ($always_return_array > 0 || @rows > 1) {
         return \@rows;
-    }
-    else {
+    } else {
         return \%{ $rows[0] };
     }
 }
@@ -669,9 +654,9 @@ sub update_round_part {
     # TODO: fix SQL injection attack vector through $part
     my $sql =
       'UPDATE `round` SET `' . $part . '` = ? WHERE `name` LIKE ? LIMIT 1';
-    my $c = $dbh->do( $sql, undef, $val, $id );
+    my $c = $dbh->do($sql, undef, $val, $id);
 
-    if ( defined($c) ) {
+    if (defined($c)) {
         debug_log(
             "_update_round_part_db: id=$id part=$part"
               . " val=$val dbh->do returned $c\n",
@@ -679,8 +664,7 @@ sub update_round_part {
         );
         _send_data_version();
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_update_round_part_db: id=$id part=$part"
               . " val=$val dbh->do returned error: "
@@ -709,7 +693,7 @@ sub get_solver {
     my $idin = shift;
     chomp $idin;
 
-    debug_log( "get_solver: $idin\n", 6 );
+    debug_log("get_solver: $idin\n", 6);
 
     return _get_solver_db($idin);
 }
@@ -724,29 +708,27 @@ sub _get_solver_db {
     # This fixes problem with type error when
     # there is exactly one solver in the DB.
     my $always_return_array = 0;
-    if ( $idin eq '*' ) {
+    if ($idin eq '*') {
         $always_return_array = 1;
         $sth                 = $dbh->prepare($sql);
         $sth->execute() or die $dbh->errstr;
-    }
-    else {
+    } else {
         $sql .= ' WHERE (`name` REGEXP ?)';
         $sth = $dbh->prepare($sql);
-        $sth->execute( '^' . $idin . '$' );
+        $sth->execute('^' . $idin . '$');
     }
     my @rows;
-    while ( my $res = $sth->fetchrow_hashref() ) {
-        foreach my $key ( keys %{$res} ) {
-            if ( !defined( $res->{$key} ) ) {
+    while (my $res = $sth->fetchrow_hashref()) {
+        foreach my $key (keys %{$res}) {
+            if (!defined($res->{$key})) {
                 $res->{$key} = "";
             }
         }
         push @rows, $res;
     }
-    if ( @rows > 1 || $always_return_array ) {
+    if (@rows > 1 || $always_return_array) {
         return \@rows;
-    }
-    else {
+    } else {
         return \%{ $rows[0] };
     }
 }
@@ -755,9 +737,9 @@ sub add_solver {
     my $idin     = $_[0];
     my $fullname = $_[1];
 
-    debug_log( "add_solver: username:$idin fullname:$fullname\n", 6 );
+    debug_log("add_solver: username:$idin fullname:$fullname\n", 6);
 
-    return _add_solver_db( $idin, $fullname );
+    return _add_solver_db($idin, $fullname);
 }
 
 sub _add_solver_db {
@@ -766,18 +748,17 @@ sub _add_solver_db {
 
     my $sql =
       "INSERT INTO `solver` (`name`, `fullname`) VALUES ('$id', '$fullname');";
-    debug_log( "_add_solver_db: sql: $sql\n", 3 );
-    my $c = $dbh->do( $sql, undef, $id );
+    debug_log("_add_solver_db: sql: $sql\n", 3);
+    my $c = $dbh->do($sql, undef, $id);
 
-    if ( defined($c) ) {
-        debug_log( "_add_solver_db: dbh->do returned $c\n", 2 );
+    if (defined($c)) {
+        debug_log("_add_solver_db: dbh->do returned $c\n", 2);
         _send_data_version();
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_add_solver_db: dbh->do returned error: " . $dbh->errstr . "\n",
-            0 );
+            0);
         return (-1);
     }
 }
@@ -815,8 +796,8 @@ sub ldap_add_user {
 
     );
 
-    if ( $result->code() != 0
-        && !( $result->error_desc() =~ m/Already exists/ ) )
+    if ($result->code() != 0
+        && !($result->error_desc() =~ m/Already exists/))
     {
         return -1;
     }
@@ -851,7 +832,7 @@ sub ldap_change_password {
         }
     );
 
-    if ( $result->code() != 0 ) {
+    if ($result->code() != 0) {
         return -1;
     }
     return 0;
@@ -879,22 +860,22 @@ sub google_add_user {
     my $cmdout = "";
 
     # Execute command
-    if ( open ADDPUZZSSPS, $cmd ) {
+    if (open ADDPUZZSSPS, $cmd) {
 
         # success, check output
         while (<ADDPUZZSSPS>) {
             $cmdout .= $_;
         }
-    }
-    else {
+    } else {
+
         # failure
-        debug_log( "_google_add_user: could not open command\n", 1 );
+        debug_log("_google_add_user: could not open command\n", 1);
         return -100;
     }
     close ADDPUZZSSPS;
-    if ( ( $? >> 8 ) != 0 ) {
-        debug_log( "_google_add_user: exit value " . ( $? >> 8 ) . "\n", 1 );
-        return ( $? >> 8 );
+    if (($? >> 8) != 0) {
+        debug_log("_google_add_user: exit value " . ($? >> 8) . "\n", 1);
+        return ($? >> 8);
     }
 
     return (0);
@@ -919,30 +900,29 @@ sub google_change_password {
     my $cmdout = "";
 
     # Execute command
-    if ( open ADDPUZZSSPS, $cmd ) {
+    if (open ADDPUZZSSPS, $cmd) {
 
         # success, check output
         while (<ADDPUZZSSPS>) {
             $cmdout .= $_;
         }
-    }
-    else {
+    } else {
+
         # failure
-        debug_log( "google_change_password: could not open command\n", 1 );
+        debug_log("google_change_password: could not open command\n", 1);
         return -100;
     }
     close ADDPUZZSSPS;
-    if ( ( $? >> 8 ) != 0 ) {
-        debug_log( "google_change_password: exit value " . ( $? >> 8 ) . "\n",
-            1 );
-        return ( $? >> 8 );
+    if (($? >> 8) != 0) {
+        debug_log("google_change_password: exit value " . ($? >> 8) . "\n", 1);
+        return ($? >> 8);
     }
 
     return (0);
 }
 
 sub ldap_get_user_list {
-    debug_log( "ldap_get_user_list() using LDAP\n", 2 );
+    debug_log("ldap_get_user_list() using LDAP\n", 2);
 
     my $ldap = Net::LDAP->new("ldap.wind-up-birds.org") or die "$@";
     my $mesg = $ldap->search(
@@ -954,8 +934,8 @@ sub ldap_get_user_list {
     my @entries  = $mesg->entries;
     my %userhash = ();
     foreach my $e (@entries) {
-        my $uid      = ( $e->get_value('uid') );
-        my $fullname = ( $e->get_value('displayName') );
+        my $uid      = ($e->get_value('uid'));
+        my $fullname = ($e->get_value('displayName'));
         $userhash{$uid} = $fullname;
     }
 
@@ -969,18 +949,18 @@ sub update_solver_part {
 
     my $remote_user = $ENV{'REMOTE_USER'};
 
-    if ( $part eq "puzz" ) {
+    if ($part eq "puzz") {
 
         # If this action is being taken by the solver herself,
         # log it in the activity table
-        if ( defined $remote_user && $id eq $remote_user ) {
+        if (defined $remote_user && $id eq $remote_user) {
 
             # apache is the source for interactions via the web UI
-            _write_solver_activity( $val, $id, "apache", "interact" );
+            _write_solver_activity($val, $id, "apache", "interact");
         }
-        return assign_solver_puzzle( $val, $id );
-    }
-    else {
+        return assign_solver_puzzle($val, $id);
+    } else {
+
         # I don't know what you are.
         return -7;
     }
@@ -990,15 +970,15 @@ sub assign_solver_puzzle {
     my $puzzname = shift;
     my $solver   = shift;
 
-    my $rval = _assign_solver_puzzle_db( $puzzname, $solver );
-    if ( $rval < 0 ) {
+    my $rval = _assign_solver_puzzle_db($puzzname, $solver);
+    if ($rval < 0) {
         return $rval;
     }
 
     # If this puzzle is NEW, we should change it to being worked
     my $puzzle = get_puzzle($puzzname);
-    if ( $puzzle->{"status"} eq "New" ) {
-        update_puzzle_part( $puzzname, "status", "Being worked" );
+    if ($puzzle->{"status"} eq "New") {
+        update_puzzle_part($puzzname, "status", "Being worked");
     }
 
     return $rval;
@@ -1023,12 +1003,11 @@ sub _write_solver_activity {
             ?
         )
     ";
-    my $c = $dbh->do( $sql, undef, $puzzname, $solver, $source, $type );
-    if ( defined($c) ) {
-        debug_log( "_write_solver_activity: dbh->do returned $c\n", 2 );
+    my $c = $dbh->do($sql, undef, $puzzname, $solver, $source, $type);
+    if (defined($c)) {
+        debug_log("_write_solver_activity: dbh->do returned $c\n", 2);
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_write_solver_activity: dbh->do returned error: "
               . $dbh->errstr . "\n",
@@ -1052,13 +1031,12 @@ sub _assign_solver_puzzle_db {
             (SELECT `id` FROM `solver` WHERE `name` LIKE ?)
         )
     ";
-    my $c = $dbh->do( $sql, undef, $puzzname, $solver );
-    if ( defined($c) ) {
-        debug_log( "_assign_solver_puzzle_db: dbh->do returned $c\n", 2 );
+    my $c = $dbh->do($sql, undef, $puzzname, $solver);
+    if (defined($c)) {
+        debug_log("_assign_solver_puzzle_db: dbh->do returned $c\n", 2);
         _send_data_version();
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_assign_solver_puzzle_db: dbh->do returned error: "
               . $dbh->errstr . "\n",
@@ -1071,8 +1049,8 @@ sub _assign_solver_puzzle_db {
 sub assign_solver_location {
     my $puzzname = shift;
     my $solver   = shift;
-    my $rval     = _assign_solver_location_db( $puzzname, $solver );
-    if ( $rval < 0 ) {
+    my $rval     = _assign_solver_location_db($puzzname, $solver);
+    if ($rval < 0) {
         return $rval;
     }
 }
@@ -1091,12 +1069,11 @@ sub _assign_solver_location_db {
         )
     ";
     my $c = $dbh->do($sql);
-    if ( defined($c) ) {
-        debug_log( "_get_client_index_db: dbh->do returned $c\n", 2 );
+    if (defined($c)) {
+        debug_log("_get_client_index_db: dbh->do returned $c\n", 2);
         _send_data_version();
         return (1);
-    }
-    else {
+    } else {
         debug_log(
             "_get_client_index_db: dbh->do returned error: "
               . $dbh->errstr . "\n",
@@ -1115,15 +1092,14 @@ sub get_log_index {
 }
 
 sub _get_log_index_db {
-    debug_log( "_get_log_index_db\n", 6 );
+    debug_log("_get_log_index_db\n", 6);
     my $sql     = "SELECT MAX(version) FROM `log`";
     my $res     = $dbh->selectcol_arrayref($sql);
     my $version = -1;
-    if ( defined($res) ) {
-        if ( $res->[0] eq 'null' ) {
+    if (defined($res)) {
+        if ($res->[0] eq 'null') {
             $version = "";
-        }
-        else {
+        } else {
             $version = $res->[0];
         }
     }
@@ -1133,24 +1109,24 @@ sub _get_log_index_db {
 # get_log_diff only return first part (before :)
 sub get_log_diff {
     my $log_pos = shift;
-    debug_log( "get_log_diff: $log_pos\n", 6 );
+    debug_log("get_log_diff: $log_pos\n", 6);
     my $curr_pos = shift || get_log_index();
-    if ( !defined($curr_pos) ) {
+    if (!defined($curr_pos)) {
         $curr_pos = 0;
     }
     chomp($curr_pos);
-    if ( $curr_pos < $log_pos ) {
+    if ($curr_pos < $log_pos) {
         return "from log position ($log_pos) cannot be greater than "
-            . "current (to) log position ($curr_pos)";
+          . "current (to) log position ($curr_pos)";
     }
-    return _get_log_diff_db( $log_pos, $curr_pos );
+    return _get_log_diff_db($log_pos, $curr_pos);
 }
 
 sub _get_log_diff_db {
     my $cur_pos  = shift;
     my $from_pos = $cur_pos + 1;
     my $to_pos   = shift;
-    debug_log( "_get_log_diff_db: $from_pos - $to_pos\n", 6 );
+    debug_log("_get_log_diff_db: $from_pos - $to_pos\n", 6);
 
     my $sql = "
         SELECT
@@ -1163,10 +1139,10 @@ sub _get_log_diff_db {
         FROM `log`
         WHERE log.version >= ? AND log.version <= ?
     ";
-    my $res = $dbh->selectcol_arrayref( $sql, undef, $from_pos, $to_pos );
+    my $res = $dbh->selectcol_arrayref($sql, undef, $from_pos, $to_pos);
     my @changes = @{$res};
-    debug_log(
-        "_get_log_diff_db: have changes: " . join( ',', @changes ) . "\n", 2 );
+    debug_log("_get_log_diff_db: have changes: " . join(',', @changes) . "\n",
+        2);
 
     my %reentry_vehicle = (
         from => $from_pos,
@@ -1174,22 +1150,22 @@ sub _get_log_diff_db {
         diff => \@changes
     );
 
-    return ( \%reentry_vehicle );
+    return (\%reentry_vehicle);
 }
 
 sub get_full_log_diff {
     my $log_pos = shift;
-    debug_log( "get_full_log_diff: $log_pos\n", 6 );
+    debug_log("get_full_log_diff: $log_pos\n", 6);
     my $curr_pos = shift || get_log_index();
     chomp($curr_pos);
-    return _get_full_log_diff_db( $log_pos, $curr_pos );
+    return _get_full_log_diff_db($log_pos, $curr_pos);
 }
 
 sub _get_full_log_diff_db {
     my $cur_pos  = shift;
     my $from_pos = $cur_pos + 1;
     my $to_pos   = shift;
-    debug_log( "_get_log_diff_db: $from_pos - $to_pos\n", 6 );
+    debug_log("_get_log_diff_db: $from_pos - $to_pos\n", 6);
 
     my $sql = "
         SELECT
@@ -1205,10 +1181,10 @@ sub _get_full_log_diff_db {
         WHERE log.version >= ? AND log.version <= ?
         ORDER BY id
     ";
-    my $res = $dbh->selectall_arrayref( $sql, undef, $from_pos, $to_pos );
+    my $res = $dbh->selectall_arrayref($sql, undef, $from_pos, $to_pos);
     my @entries;
     my @messages;
-    foreach my $row ( @{$res} ) {
+    foreach my $row (@{$res}) {
         my $entry = $row->{entry};
         push @entries, $entry;
         my $time = $row->{time};
@@ -1223,7 +1199,7 @@ sub _get_full_log_diff_db {
         messages => \@messages,
     );
 
-    return ( \%reentry_vehicle );
+    return (\%reentry_vehicle);
 }
 
 ####################
@@ -1231,12 +1207,12 @@ sub _get_full_log_diff_db {
 ####################
 
 sub _get_client_index_db {
-    debug_log( "get_client_index\n", 6 );
+    debug_log("get_client_index\n", 6);
     my $index = 0;
 
     my $sql = "INSERT INTO `clientindex` (`id`) VALUES (NULL)";
     my $c   = $dbh->do($sql);
-    if ( !defined($c) ) {
+    if (!defined($c)) {
         debug_log(
             "_get_client_index_db: dbh->do returned error: "
               . $dbh->errstr . "\n",
@@ -1244,7 +1220,7 @@ sub _get_client_index_db {
         );
         return (-1);
     }
-    $index = $dbh->last_insert_id( undef, undef, undef, undef );
+    $index = $dbh->last_insert_id(undef, undef, undef, undef);
 
     return ($index);
 }
@@ -1261,7 +1237,7 @@ sub _send_data_version {
     my $ret         = 1;
 
     # Send to bigjimmy bot
-    if ( PB::BigJimmy::send_version($dataversion) <= 0 ) {
+    if (PB::BigJimmy::send_version($dataversion) <= 0) {
         debug_log(
             "PB::API::_send_data_version() error sending version"
               . " $dataversion to bigjimmy bot\n",
@@ -1277,11 +1253,8 @@ sub _send_data_version {
           . " to meteor\n",
         4
     );
-    if (
-        PB::Meteor::message(
-            $PB::Config::METEOR_VERSION_CHANNEL, $dataversion
-        ) <= 0
-      )
+    if (PB::Meteor::message($PB::Config::METEOR_VERSION_CHANNEL, $dataversion)
+        <= 0)
     {
         debug_log(
             "PB::API::_send_data_version() error sending version"
@@ -1310,23 +1283,22 @@ sub slack_say_something {
     my $cmdout = "";
 
     # Execute command
-    if ( open SLACKSAY, $cmd ) {
+    if (open SLACKSAY, $cmd) {
 
         # success, check output
         while (<SLACKSAY>) {
             $cmdout .= $_;
         }
-    }
-    else {
+    } else {
+
         # failure
-        debug_log( "_slack_say_something: could not open command\n", 1 );
+        debug_log("_slack_say_something: could not open command\n", 1);
         return -100;
     }
     close SLACKSAY;
-    if ( ( $? >> 8 ) != 0 ) {
-        debug_log( "_slack_say_something: exit value " . ( $? >> 8 ) . "\n",
-            1 );
-        return ( $? >> 8 );
+    if (($? >> 8) != 0) {
+        debug_log("_slack_say_something: exit value " . ($? >> 8) . "\n", 1);
+        return ($? >> 8);
     }
 
     return (0);
@@ -1334,28 +1306,28 @@ sub slack_say_something {
 
 sub discord_announce_round {
     my $id = shift;
-    return discord_announce_impl( '_round', $id );
+    return discord_announce_impl('_round', $id);
 }
 
 sub discord_announce_new {
     my $id = shift;
-    return discord_announce_impl( '_new', $id );
+    return discord_announce_impl('_new', $id);
 }
 
 sub discord_announce_solve {
     my $id = shift;
-    return discord_announce_impl( '_solve', $id );
+    return discord_announce_impl('_solve', $id);
 }
 
 sub discord_announce_attention {
     my $id = shift;
-    return discord_announce_impl( '_attention', $id );
+    return discord_announce_impl('_attention', $id);
 }
 
 sub discord_say_something {
     my $id      = shift;
     my $message = shift;
-    return discord_announce_impl( 'message', $id, $message );
+    return discord_announce_impl('message', $id, $message);
 }
 
 # Tell Puzzcord API an announcement command
@@ -1367,27 +1339,27 @@ sub discord_announce_impl {
     chdir $PB::Config::DISCORD_API_PATH;
 
     my $cmd = "./api $command $id $param |";
-    debug_log( "_discord_announce$command: running: $cmd\n", 2 );
+    debug_log("_discord_announce$command: running: $cmd\n", 2);
 
     my $cmdout = "";
 
-    if ( open DISCORDSAY, $cmd ) {
+    if (open DISCORDSAY, $cmd) {
 
         # success
         while (<DISCORDSAY>) {
             $cmdout .= $_;
         }
-    }
-    else {
+    } else {
+
         # failure
-        debug_log( "_discord_announce$command: could not open command\n", 1 );
+        debug_log("_discord_announce$command: could not open command\n", 1);
         return -100;
     }
     close DISCORDSAY;
-    if ( ( $? >> 8 ) != 0 ) {
-        debug_log(
-            "_discord_announce$command: exit value " . ( $? >> 8 ) . "\n", 1 );
-        return ( $? >> 8 );
+    if (($? >> 8) != 0) {
+        debug_log("_discord_announce$command: exit value " . ($? >> 8) . "\n",
+            1);
+        return ($? >> 8);
     }
 
     return (0);
@@ -1396,8 +1368,7 @@ sub discord_announce_impl {
 sub slack_create_channel_for_puzzle {
     my $puzzle_name = lc shift;
 
-    debug_log( "slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n",
-        2 );
+    debug_log("slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n", 2);
 
     # invoke API call to create channel
     my $channels_create_url =
@@ -1408,19 +1379,18 @@ sub slack_create_channel_for_puzzle {
     my $response;
 
     $response = get($channels_create_url);
-    debug_log( "slack channel creation url: $channels_create_url\n", 2 );
-    debug_log( "slack response: $response\n",                        2 );
+    debug_log("slack channel creation url: $channels_create_url\n", 2);
+    debug_log("slack response: $response\n",                        2);
 
-    unless ( defined($response) ) {
+    unless (defined($response)) {
         debug_log("get request to $channels_create_url failed\n");
     }
 
     # extract channel id
     my $json = decode_json($response);
-    unless ( $json->{ok} ) {
+    unless ($json->{ok}) {
         debug_log(
-            "Slack API: channels.create failed with error: $json->{error}\n"
-        );
+            "Slack API: channels.create failed with error: $json->{error}\n");
     }
 
     my $channel_id;
@@ -1459,32 +1429,32 @@ sub discord_create_channel_for_puzzle {
     debug_log("discord_create_channel_for_puzzle: running: $cmd");
     my $cmdout = "";
 
-    if ( open DISCORDSAY, $cmd ) {
+    if (open DISCORDSAY, $cmd) {
 
         # success
         while (<DISCORDSAY>) {
             $cmdout .= $_;
         }
-    }
-    else {
+    } else {
+
         # failure
         debug_log(
-            "_discord_create_channel_for_puzzle: could not open command\n", 1 );
+            "_discord_create_channel_for_puzzle: could not open command\n", 1);
         return -100;
     }
     close DISCORDSAY;
-    if ( ( $? >> 8 ) != 0 ) {
+    if (($? >> 8) != 0) {
         debug_log(
             "_discord_create_channel_for_puzzle: exit value "
-              . ( $? >> 8 ) . "\n",
+              . ($? >> 8) . "\n",
             1
         );
-        return ( -1 * ( $? >> 8 ) );
+        return (-1 * ($? >> 8));
     }
-    debug_log( "api create returned our puzzle id: $cmdout", 3 );
+    debug_log("api create returned our puzzle id: $cmdout", 3);
 
     my $json = decode_json($cmdout);
-    unless ( $json->{id} ) {
+    unless ($json->{id}) {
         debug_log("DISCORD API FAILED TO CREATE CHANNEL!");
     }
 
@@ -1503,10 +1473,9 @@ sub slack_set_channel_topic {
     my $puzzle_uri         = shift;
     my $google_docs_folder = shift;
 
-    my $topic_url_param = uri_escape(
-        "Puzzle: $puzzle_name / Round: $round_name\n"
-          . "Puzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder"
-    );
+    my $topic_url_param =
+      uri_escape("Puzzle: $puzzle_name / Round: $round_name\n"
+          . "Puzzle URL: $puzzle_uri\nGoogle Docs Folder: $google_docs_folder");
     my $channels_set_topic_url =
         "https://slack.com/api/conversations.setTopic"
       . "?token=$PB::Config::SLACK_API_USER_TOKEN"

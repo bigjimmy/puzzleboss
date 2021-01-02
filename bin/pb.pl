@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use lib qw(.);
+
 BEGIN {
     require 'pblib.cfg';
 }
@@ -13,30 +14,32 @@ use PB::API;
 use CGI qw(:standard:);
 use CGI qw(param);
 
-my $debugp="false";
-if(($PB::Config::PB_DEV_VERSION ne "") || ($PB::Config::DEBUG > 0)) {
-    $debugp="true";
+my $debugp = "false";
+if (($PB::Config::PB_DEV_VERSION ne "") || ($PB::Config::DEBUG > 0)) {
+    $debugp = "true";
 }
 
 my $hidesolved = "";
 
-if (param('hidesolved')){
-	$hidesolved="checked";
+if (param('hidesolved')) {
+    $hidesolved = "checked";
 }
 
 my $showrounds = "";
-if (param('showrounds')){
-	$showrounds="checked";
+if (param('showrounds')) {
+    $showrounds = "checked";
 }
 
 my $editable;
 my $title;
-if (param('edit')){
-	$editable = "true";
-	$title = "PuzzleBoss (ADMIN)$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
-}else{
-	$editable = "false";
-	$title = "Puzzleboss$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
+if (param('edit')) {
+    $editable = "true";
+    $title =
+"PuzzleBoss (ADMIN)$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
+} else {
+    $editable = "false";
+    $title =
+"Puzzleboss$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 }
 
 my $html = <<"EOF";
@@ -86,8 +89,8 @@ Content-type: text/html
 
 EOF
 
-if ($editable eq "true"){
-$html .= <<"EOF"	
+if ($editable eq "true") {
+    $html .= <<"EOF"
 <!-- new round -->
 <button dojoType="dijit.form.Button" onclick="dijit.byId('createnewrounddialog').show()">Create New Round</button>
 <div dojoType="dijit.Dialog" id="createnewrounddialog" title="Enter new round information" execute="my_pbmrc.pb_create_round(arguments[0].newroundid);">
@@ -133,8 +136,8 @@ To add a new puzzle:
 
 EOF
 
-}else{
-$html .= "</body></html>\n";
+} else {
+    $html .= "</body></html>\n";
 }
 
 print $html;

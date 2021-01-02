@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use lib qw(.);
+
 BEGIN {
     require 'pblib.cfg';
 }
@@ -13,27 +14,28 @@ use CGI qw(:standard:);
 use CGI qw(param);
 use URI::Escape;
 
-my $debugp="false";
-if($PB::Config::PB_DEV_VERSION ne "") {
-    $debugp="true";
+my $debugp = "false";
+if ($PB::Config::PB_DEV_VERSION ne "") {
+    $debugp = "true";
 }
 
 my $hidesolved = "";
 
-if (param('hidesolved')){
-        $hidesolved="checked";
+if (param('hidesolved')) {
+    $hidesolved = "checked";
 }
 
 my $showrounds = "";
-if (param('showrounds')){
-        $showrounds="checked";
+if (param('showrounds')) {
+    $showrounds = "checked";
 }
 
 my $editable;
-my $title = "Hunt Overview$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
+my $title =
+  "Hunt Overview$PB::Config::PB_DEV_VERSION_POSTPAREN : $PB::Config::TEAM_NAME";
 
 my $remote_user = $ENV{'REMOTE_USER'};
-my $selfuri = uri_escape($PB::Config::PB_BIN_URI."/overview.pl");
+my $selfuri     = uri_escape($PB::Config::PB_BIN_URI . "/overview.pl");
 
 my $html = <<"EOF";
 Content-type: text/html
@@ -106,7 +108,5 @@ Content-type: text/html
 
 EOF
 
-    print $html;
-
-
+print $html;
 
