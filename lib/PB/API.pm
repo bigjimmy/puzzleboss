@@ -1336,9 +1336,9 @@ sub discord_announce_impl {
     my $id      = shift;
     my $param   = shift || '';
 
-    chdir $PB::Config::DISCORD_API_PATH;
+    chdir $PB::Config::PB_BIN_PATH;
 
-    my $cmd = "./api $command $id $param |";
+    my $cmd = "./puzzcord.sh $command $id $param |";
     debug_log("_discord_announce$command: running: $cmd\n", 2);
 
     my $cmdout = "";
@@ -1417,7 +1417,7 @@ sub discord_create_channel_for_puzzle {
         2
     );
 
-    chdir $PB::Config::DISCORD_API_PATH;
+    chdir $PB::Config::PB_BIN_PATH;
 
     print STDERR "Running puzzcord api create\n";
 
@@ -1425,7 +1425,7 @@ sub discord_create_channel_for_puzzle {
         "\nPuzzle: $puzzle_name \nRound: $round_name "
       . "\nPuzzle URL: $puzzle_uri \nGoogle Docs Folder: $google_docs_folder";
 
-    my $cmd = "./api create_json $puzzle_name '$topic' |";
+    my $cmd = "./puzzcord.sh create_json $puzzle_name '$topic' |";
     debug_log("discord_create_channel_for_puzzle: running: $cmd");
     my $cmdout = "";
 
