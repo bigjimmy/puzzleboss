@@ -860,19 +860,19 @@ sub google_add_user {
     my $cmdout = "";
 
     # Execute command
-    if (open ADDPUZZSSPS, $cmd) {
+    if (open(my $ADDPUZZSSPS, "<", $cmd)) {
 
         # success, check output
-        while (<ADDPUZZSSPS>) {
+        while (<$ADDPUZZSSPS>) {
             $cmdout .= $_;
         }
+        close $ADDPUZZSSPS;
     } else {
 
         # failure
         debug_log("_google_add_user: could not open command\n", 1);
         return -100;
     }
-    close ADDPUZZSSPS;
     if (($? >> 8) != 0) {
         debug_log("_google_add_user: exit value " . ($? >> 8) . "\n", 1);
         return ($? >> 8);
@@ -900,19 +900,19 @@ sub google_change_password {
     my $cmdout = "";
 
     # Execute command
-    if (open ADDPUZZSSPS, $cmd) {
+    if (open(my $ADDPUZZSSPS, "<", $cmd)) {
 
         # success, check output
-        while (<ADDPUZZSSPS>) {
+        while (<$ADDPUZZSSPS>) {
             $cmdout .= $_;
         }
+        close $ADDPUZZSSPS;
     } else {
 
         # failure
         debug_log("google_change_password: could not open command\n", 1);
         return -100;
     }
-    close ADDPUZZSSPS;
     if (($? >> 8) != 0) {
         debug_log("google_change_password: exit value " . ($? >> 8) . "\n", 1);
         return ($? >> 8);
@@ -1283,19 +1283,19 @@ sub slack_say_something {
     my $cmdout = "";
 
     # Execute command
-    if (open SLACKSAY, $cmd) {
+    if (open(my $SLACKSAY, "<", $cmd)) {
 
         # success, check output
-        while (<SLACKSAY>) {
+        while (<$SLACKSAY>) {
             $cmdout .= $_;
         }
+        close $SLACKSAY;
     } else {
 
         # failure
         debug_log("_slack_say_something: could not open command\n", 1);
         return -100;
     }
-    close SLACKSAY;
     if (($? >> 8) != 0) {
         debug_log("_slack_say_something: exit value " . ($? >> 8) . "\n", 1);
         return ($? >> 8);
@@ -1343,19 +1343,18 @@ sub discord_announce_impl {
 
     my $cmdout = "";
 
-    if (open DISCORDSAY, $cmd) {
-
+    if (open(my $DISCORDSAY, "<", $cmd)) {
         # success
-        while (<DISCORDSAY>) {
+        while (<$DISCORDSAY>) {
             $cmdout .= $_;
         }
+        close $DISCORDSAY;
     } else {
 
         # failure
         debug_log("_discord_announce$command: could not open command\n", 1);
         return -100;
     }
-    close DISCORDSAY;
     if (($? >> 8) != 0) {
         debug_log("_discord_announce$command: exit value " . ($? >> 8) . "\n",
             1);
@@ -1429,12 +1428,13 @@ sub discord_create_channel_for_puzzle {
     debug_log("discord_create_channel_for_puzzle: running: $cmd");
     my $cmdout = "";
 
-    if (open DISCORDSAY, $cmd) {
+    if (open(my $DISCORDSAY, "<", $cmd)) {
 
         # success
-        while (<DISCORDSAY>) {
+        while (<$DISCORDSAY>) {
             $cmdout .= $_;
         }
+        close $DISCORDSAY;
     } else {
 
         # failure
@@ -1442,7 +1442,6 @@ sub discord_create_channel_for_puzzle {
             "_discord_create_channel_for_puzzle: could not open command\n", 1);
         return -100;
     }
-    close DISCORDSAY;
     if (($? >> 8) != 0) {
         debug_log(
             "_discord_create_channel_for_puzzle: exit value "
