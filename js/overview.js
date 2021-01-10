@@ -169,17 +169,24 @@ define([
 	        links_span.appendChild(puzz_link);
 
 
-		// add slack link
-		var slack_uri = encodeURI(puzzstore.getValue(item,"slack_channel_link"));
-                var slack_link = domconstruct.create("a",{id: "pi_links_slack_"+name, class: "pi_slack_link", target: "_slack", innerHTML: "<img class=\"pi_icon\" src=\"../images/slack.png\" title=\"Slack\" alt=\"slack\">"});
-                if(slack_uri != "") {
-                    slack_link.href = slack_uri;
-                } else {
-                    domclass.add(slack_link,"missing_link");
-                }
-                links_span.appendChild(slack_link);
-
-	        puzzinfo.appendChild(links_span);
+    // add Discord link
+    var discord_uri = encodeURI(puzzstore.getValue(item, "slack_channel_link"));
+    var discord_link = domconstruct.create(
+      "a",
+      {
+        id: "pi_links_discord_" + name,
+        class: "pi_discord_link",
+        target: "_discord",
+        innerHTML: "<img class=\"pi_icon\" src=\"../images/discord.png\" title=\"Discord\" alt=\"Discord\">"
+      }
+    );
+    if (discord_uri != "") {
+      discord_link.href = discord_uri;
+    } else {
+      domclass.add(discord_link, "missing_link");
+    }
+    links_span.appendChild(discord_link);
+    puzzinfo.appendChild(links_span);
 
 		//the answer 
 	        var answer_span = domconstruct.create("span", {id: "pi_answer_span_"+name, class: "pi_answer", innerHTML: puzzstore.getValue(item,"answer")});
