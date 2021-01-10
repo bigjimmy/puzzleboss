@@ -860,13 +860,13 @@ sub google_add_user {
     my $cmdout = "";
 
     # Execute command
-    if (open(my $ADDPUZZSSPS, "<", $cmd)) {
+    if (open ADDPUZZSSPS, $cmd) {
 
         # success, check output
-        while (<$ADDPUZZSSPS>) {
+        while (<ADDPUZZSSPS>) {
             $cmdout .= $_;
         }
-        close $ADDPUZZSSPS;
+        close ADDPUZZSSPS;
     } else {
 
         # failure
@@ -1283,13 +1283,13 @@ sub slack_say_something {
     my $cmdout = "";
 
     # Execute command
-    if (open(my $SLACKSAY, "<", $cmd)) {
+    if (open SLACKSAY, $cmd) {
 
         # success, check output
-        while (<$SLACKSAY>) {
+        while (<SLACKSAY>) {
             $cmdout .= $_;
         }
-        close $SLACKSAY;
+        close SLACKSAY;
     } else {
 
         # failure
@@ -1339,20 +1339,20 @@ sub discord_announce_impl {
     chdir $PB::Config::PB_BIN_PATH;
 
     my $cmd = "./puzzcord.sh $command $id $param |";
-    debug_log("_discord_announce$command: running: $cmd\n", 2);
+    debug_log("_discord_announce$command: running: $cmd from: $PB::Config::PB_BIN_PATH\n", 0);
 
     my $cmdout = "";
 
-    if (open(my $DISCORDSAY, "<", $cmd)) {
+    if (open DISCORDSAY, $cmd) {
         # success
-        while (<$DISCORDSAY>) {
+        while (<DISCORDSAY>) {
             $cmdout .= $_;
         }
-        close $DISCORDSAY;
+        close DISCORDSAY;
     } else {
 
         # failure
-        debug_log("_discord_announce$command: could not open command\n", 1);
+        debug_log("_discord_announce$command: could not open command\n", 0);
         return -100;
     }
     if (($? >> 8) != 0) {
@@ -1367,7 +1367,7 @@ sub discord_announce_impl {
 sub slack_create_channel_for_puzzle {
     my $puzzle_name = lc shift;
 
-    debug_log("slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n", 2);
+    debug_log("slack_create_channel_for_puzzle: puzzle_name=$puzzle_name\n", 1);
 
     # invoke API call to create channel
     my $channels_create_url =
@@ -1425,16 +1425,16 @@ sub discord_create_channel_for_puzzle {
       . "\nPuzzle URL: $puzzle_uri \nGoogle Docs Folder: $google_docs_folder";
 
     my $cmd = "./puzzcord.sh create_json $puzzle_name '$topic' |";
-    debug_log("discord_create_channel_for_puzzle: running: $cmd");
+    debug_log("discord_create_channel_for_puzzle: running: $cmd from within: $PB::Config::PB_BIN_PATH");
     my $cmdout = "";
 
-    if (open(my $DISCORDSAY, "<", $cmd)) {
+    if (open DISCORDSAY, $cmd) {
 
         # success
-        while (<$DISCORDSAY>) {
+        while (<DISCORDSAY>) {
             $cmdout .= $_;
         }
-        close $DISCORDSAY;
+        close DISCORDSAY;
     } else {
 
         # failure
