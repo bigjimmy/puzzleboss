@@ -49,3 +49,9 @@ ssh -t series-of-tubes-internal.wind-up-birds.org "sudo /etc/init.d/bigjimmy sta
 
 #restart apache for good measure
 sudo /etc/init.d/apache2 start
+
+#Purge puzzcord discord stuff
+echo "Purging discord stuff"
+$PB_PATH/bin/puzzcord.sh cleanup no really purge
+
+echo "OK, we are all clear for a new hunt. Re-add solvers from LDAP if we're not enforcing a full account purge"
