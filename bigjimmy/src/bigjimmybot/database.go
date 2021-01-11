@@ -102,7 +102,7 @@ func DbGetLastRevisedPuzzleForSolver(solverId int) (puzzle string, timestamp tim
 }
 
 func DbReportSolverPuzzleActivity(solverFullName string, puzzleName string, modifiedDate string, revisionId int64, activityType string) {
-	_, err := dbCon.Exec("INSERT INTO `activity` (`time`, `solver_id`, `puzzle_id`, `source`, `type`, `source_version`) VALUES (?, (SELECT `id` FROM `solver` WHERE `solver`.`fullname` LIKE ?), (SELECT `id` FROM `puzzle` WHERE `puzzle`.`name` LIKE ?), 'google', ?, ?)", modifiedDate, solverFullName, puzzleName, activityType, revisionId)
+	_, err := dbCon.Exec("INSERT INTO `activity` (`time`, `solver_id`, `puzzle_id`, `source`, `type`, `source_version`) VALUES (?, (SELECT `id` FROM `solver` WHERE `solver`.`name` LIKE ?), (SELECT `id` FROM `puzzle` WHERE `puzzle`.`name` LIKE ?), 'google', ?, ?)", modifiedDate, solverFullName, puzzleName, activityType, revisionId)
 	if err != nil {
 		log.Logf(l4g.ERROR, "ReportSolverPuzzleActivity: INSERT unsuccessful for solverFullName=[%v] puzzleName=[%v] modifiedDate=[%v] revisionId=[%v] activityType=[%v]: %v", solverFullName, puzzleName, modifiedDate, revisionId, activityType, err)
 	}
