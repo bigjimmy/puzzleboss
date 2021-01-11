@@ -177,6 +177,12 @@ sub add_puzzle {
       discord_create_channel_for_puzzle($channel_name, $round, $puzzle_uri,
         "https://drive.google.com/drive/u/2/folders/$round_drive_id");
 
+    if (ref $channel ne ref {}) {
+        debug_log(
+            "add_puzzle:  puzzle never got chat channel id! ABORTING ADD");
+        return (-200);
+    }
+
     if (defined($channel->{channel_id})) {
         $channel_id = $channel->{channel_id};
     } else {
