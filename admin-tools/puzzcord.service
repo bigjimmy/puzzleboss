@@ -1,0 +1,11 @@
+[Unit]
+Description=Puzzcord Puzzleboss-Discord Bot Service Unit File
+After=apache2.service
+
+[Service]
+ExecStart=/canadia/puzzcord/client.py
+WorkingDirectory=/canadia/puzzcord
+
+[Install]
+WantedBy=multi-user.target
+
