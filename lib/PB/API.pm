@@ -166,6 +166,11 @@ sub add_puzzle {
 
     debug_log("add_puzzle: id=$id round=$round puzzle_uri=$puzzle_uri\n", 2);
 
+    my $puzzdupref = get_puzzle($id);
+    if ($puzzdupref->{"name"} eq $id) {
+        return (-102);
+    }
+
     my $round_drive_id = get_round($round)->{"drive_id"};
     my $channel_name   = lc $id;
     my $channel_id     = -1;
