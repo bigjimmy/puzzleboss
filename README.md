@@ -36,4 +36,3 @@ before things will work:
 ---
 If you change Config.pm after initializing the database, you need to load that data into the database:
  * ./admin-tools/set-db-config.sh (copies some data from Config.pm into database)
-
