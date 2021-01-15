@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 use strict;
 use warnings;
@@ -52,6 +52,7 @@ if (   ($puzzid eq "")
     $puzzid =~ s/\_//g;
     $puzzid =~ s/\-//g;
     $puzzid =~ s/\ //g;
+    $puzzid =~ s/MITMysteryHunt2021$//g;
     if ($round eq "Choose Round") {
         print "<b>Please select a round.</b>\n";
     }
