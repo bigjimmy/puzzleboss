@@ -390,9 +390,11 @@ sub update_puzzle_part {
     if ($part eq "xyzloc") {
         my $puzzref    = get_puzzle($id);
         my $channel_id = $puzzref->{'slack_channel_id'};
-        discord_say_something($channel_id,
-            "ATTENTION: puzzle $id is being worked on at $val",
-        );
+        if ($val ne "") {
+            discord_say_something($channel_id,
+                "ATTENTION: puzzle $id is being worked on at $val",
+            );
+        }
     }
 
     if ($part eq "status" && $val eq "Needs eyes") {
