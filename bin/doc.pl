@@ -29,13 +29,13 @@ my %puzzlerow     = %$puzzlerow_ref;
 
 my $doc_link = $puzzlerow{'drive_uri'};
 
-if ($doc_link) {
+if ($doc_link =~ /google/) {
     print "Location: $doc_link\n\n";
     exit;
 } else {
     print "Content-type: text/html\n\n";
     print
-"<!doctype html><html><body>No doc link found for puzzle id $pid</body></html>";
+"<!doctype html><html><body>No proper doc link found for puzzle id $pid<br><h2>contact puzzleboss immediately to repair bigjimmy bot</h2></body></html>";
     exit;
 }
 
